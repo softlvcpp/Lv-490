@@ -1,0 +1,66 @@
+/* Did not compile this specific example */
+#include "LoggerDLL.h"
+
+/* NoLogs = 0, Prod = 1, Debug = 2, Trace = 3 */
+
+filelog::FileLogger prodLogger{ "serverlog_prod.log", filelog::LogLevel::Prod };
+filelog::FileLogger debugLogger{ "serverlog_debug.log", filelog::LogLevel::Debug };
+filelog::FileLogger traceLogger{ "serverlog_trace.log", filelog::LogLevel::Trace };
+
+filelog::StaticFileLogMessage logProd{ };
+filelog::StaticFileLogMessage logDebug{ };
+filelog::StaticFileLogMessage logTrace{ };
+
+void initMessagers()
+{
+	logProd = filelog::StaticFileLogMessage{ prodLogger }; 
+	logDebug = filelog::StaticFileLogMessage{ debugLogger }; 
+	logTrace= filelog::StaticFileLogMessage{ traceLogger }; 
+}
+
+void joinStaticLoggers()
+{
+	prodLogger.join();
+	debugLogger.join();
+	traceLogger.join();
+}
+
+int main()
+{
+	// First way   -----------------------------------------
+	{
+		filelog::FileLogger logger{ "serverlog.txt", filelog::LogLevel::Debug, 16ull * 1024 * 1024 * 1024 };	
+		for(size_t i = 0; i < 1000; ++i)
+		{	// Macros are neccessary for us to be able to capture function signature
+			SLOG_PROD(logger) << "logging production message";
+			SLOG_DEBUG(logger) << "logging debug message";
+			SLOG_TRACE(logger) << "filtering out and not logging trace message";
+		}
+	// Not calling join might lead to some messages not being written
+	// because logger will just clear it's queue and join it's thread when destructor is called
+	}
+
+	// Second way	-----------------------------------------
+	initMessagers();
+	for(size_t i = 0; i < 1000; ++i)
+	{	// Sending when destroying message
+		LOGMSG(logProd) << "logging production message";
+		LOGMSG(logDebug) << "logging debug message";
+		LOGMSG(logTrace) << "logging trace message";
+	}
+	joinStaticLoggers();
+	// Calling join leads to logger ignoring all incoming messages and writing all remaining into the file
+
+	// Third way    -----------------------------------------
+	{
+		filelog::FileLogger logger{ "serverlog.txt", filelog::LogLevel::Trace, 16ull * 1024 * 1024 * 1024 };
+		auto msg { SLOG_PROD(logger) };
+		/* ... */
+		msg << "info";
+		/* ... */
+		msg << "some more";
+		/* ... */
+		msg << "final words" << SLOG_ENDL; // Send manually or just let it send on destructor call
+	}
+}
+
