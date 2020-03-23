@@ -171,13 +171,6 @@ bool Server::InitService()
 	return true;
 }
 
-void Server::Main()
-{
-	while (true)
-	{
-	}
-}
-
 bool Server::Install()
 {
 	wchar_t exe_file_path[MAX_PATH];
@@ -467,3 +460,9 @@ Server::~Server()
 {
 }
 
+void Server::Main()
+{
+	while (true)
+	{
+	}
+}

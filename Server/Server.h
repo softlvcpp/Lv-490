@@ -7,7 +7,6 @@
 #include <mutex>
 #include <condition_variable>
 /* 
- * This class is to be used as Windows Service
  * The class is implemented Singleton for two reasons :
  * 1) You can not have two instances of the same service running simultaneously
  * 2) Different implementation is impossible(no)
