@@ -1,11 +1,15 @@
 #pragma once
-#include <Windows.h>
 #include <string>
 #include <iostream>
 #include <memory>
 #include <fstream>
 #include <mutex>
 #include <condition_variable>
+
+#include <Windows.h>
+
+#include "../Utility/Logger/LoggerDLL.h"
+
 /* 
  * The class is implemented Singleton for two reasons :
  * 1) You can not have two instances of the same service running simultaneously
@@ -13,6 +17,8 @@
  */
 class Server
 {
+private:
+
 private:
 	std::unique_ptr<wchar_t> m_name;
 	SERVICE_STATUS m_service_status{};
