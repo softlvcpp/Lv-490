@@ -16,8 +16,8 @@ namespace filelog
 		inline StaticFileLogMessage()
 			: targetLogger{ (FileLogger&)log490::DummyLogger::instance()}, messageLevel{ filelog::LogLevel::NoLogs }
 		{ }
-		inline StaticFileLogMessage(FileLogger& targetLogger)
-			: targetLogger{ targetLogger }, messageLevel{ targetLogger.getRTLevel() }
+		inline StaticFileLogMessage(FileLogger& targetLogger, filelog::LogLevel level)
+			: targetLogger{ targetLogger }, messageLevel{ level }
 		{ }	
 		inline FilteredFileLogMessage makeMessage(CompileTimeLogData data)
 		{	

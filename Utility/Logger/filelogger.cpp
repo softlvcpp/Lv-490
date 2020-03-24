@@ -30,8 +30,7 @@ namespace filelog
         }
  
         std::string initialFileName = createNarrowFileName();
-        outputStream.open(initialFileName.c_str());
-        if (!outputStream.is_open())
+        if (!openFile(initialFileName.c_str()))
         {
             setInterrupted();
             //throw FailedToOpenFileException((std::string{ "Failed to create file, file path: " } + initialFileName.c_str()).c_str());
@@ -65,10 +64,7 @@ namespace filelog
         {
             using namespace std::string_literals;
             outputStream.close();
-            //auto t = time(0);
-            //outputStream.open("log_s" + std::to_string(t) + ".txt");
-            outputStream.open(createNarrowFileName());
-            if (outputStream.is_open() == false)
+            if(openFile(createNarrowFileName().c_str()) == false)
                 return false;
             currentFileSize = static_cast<size_t>(buff.length());
         }
@@ -215,6 +211,12 @@ namespace filelog
         return filenamePathTemplate_Narrow + "__"
                 + timeSuffix
                 + fileExtension_Narrow;
+    }
+
+    bool FileLogger::openFile(const char* fileName)
+    {
+        outputStream.open(fileName, std::ios::app);
+        return outputStream.is_open();
     }
 
     void FileLogger::setInterrupted()

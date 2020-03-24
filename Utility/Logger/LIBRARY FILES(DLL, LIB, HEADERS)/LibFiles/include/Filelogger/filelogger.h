@@ -111,6 +111,7 @@ namespace filelog
         std::wstring createWideFileName();
         std::string createNarrowFileName();
 
+        bool openFile(const char* fileName);
         void setInterrupted();
         void setJoined();
         bool streamLogMessage(LogData& data);
