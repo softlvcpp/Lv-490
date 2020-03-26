@@ -1,0 +1,2 @@
+#define XMLPARSER_API __declspec(dllexport)
+#define XMLPARSER_API __declspec(dllimport)
