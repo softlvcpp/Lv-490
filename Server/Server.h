@@ -65,6 +65,6 @@ private:
 	bool Restart();
 
 
-	void InitLogger();
+	bool InitLogger();
 };
 

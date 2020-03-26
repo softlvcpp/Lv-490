@@ -5,10 +5,7 @@
 
 
 
-Server::Server() : m_name{ _wcsdup(L"TCPServer_LV490") }
-{
-	
-}
+Server::Server() : m_name{ _wcsdup(L"TCPServer_LV490") }{}
 
 bool Server::Run(int argc, char** argv)
 {
@@ -78,7 +75,11 @@ void Server::ServiceMain(int argc, char** argv)
 	if (s_instance == nullptr)
 	{
 		s_instance = std::shared_ptr<Server>(new Server);
-		s_instance->InitLogger();
+		
+		if (!s_instance->InitLogger())
+		{
+			return;
+		}
 	}
 	s_instance->m_service_status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
 	s_instance->m_service_status.dwCurrentState = SERVICE_START_PENDING;
@@ -448,19 +449,31 @@ bool Server::Restart()
 	return true;
 }
 
-void Server::InitLogger()
+bool Server::InitLogger()
 {
 	std::string log_file_path = "C:/Users/";
 	char user_name[USERNAME_LEN];
 	unsigned long len = USERNAME_LEN;
-	GetUserNameA(user_name, &len); 
+	if (!GetUserNameA(user_name, &len))
+	{
+		LOG_T << "Unable to get current users username.";
+		return false;
+	}
 	log_file_path += user_name;
 	log_file_path += "/";
 	log_file_path += m_log_directory_name;
 	log_file_path += "/";
-	CreateDirectoryA(log_file_path.c_str(), nullptr);
+	if (!CreateDirectoryA(log_file_path.c_str(), nullptr))
+	{
+		if (GetLastError() == ERROR_PATH_NOT_FOUND)
+		{
+			LOG_T << "Unable to create directory. Incorrect path.";
+			return false;
+		}
+	}
 	log_file_path += m_log_file_name;
 	m_logger = std::unique_ptr<filelog::FileLogger>(new filelog::FileLogger(log_file_path.c_str(), filelog::LogLevel::Trace));
+	return true;
 }
 
 Server& Server::get_instance()
