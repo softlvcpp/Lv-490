@@ -30,6 +30,7 @@ int  main(int argc, char** argv)
 		return 1;
 	}
 
+
 	return_result = WSAStartup(MAKEWORD(2, 2), &wsa_data);
 	if (return_result != 0) {
 		std::cout << "Could not initialize socket";
@@ -57,6 +58,7 @@ int  main(int argc, char** argv)
 			WSACleanup();
 			return 1;
 		}
+
 
 		return_result = connect(connect_socket, ptr->ai_addr, (int)ptr->ai_addrlen);
 		if (return_result == SOCKET_ERROR) {
@@ -91,18 +93,7 @@ int  main(int argc, char** argv)
 		return 1;
 	}
 
-	do {
-
-		return_result = recv(connect_socket, recvbuf, receive_buffer_length, 0);
-		if (result > 0)
-			printf("Bytes received: %d\n", result);
-		else if (result == 0)
-			printf("Connection closed\n");
-		else
-			printf("recv failed with error: %d\n", WSAGetLastError());
-
-	} while (result > 0);
-
+	
 	// cleanup
 	closesocket(connect_socket);
 	WSACleanup();
