@@ -6,6 +6,8 @@
 #include <mutex>
 #include <condition_variable>
 
+#include "SocketHandler.h"
+
 #include <Windows.h>
 
 #include "../Utility/Logger/LoggerDLL.h"
@@ -37,6 +39,7 @@ private:
 	HANDLE m_service_stop_event{ INVALID_HANDLE_VALUE };
 
 	static std::shared_ptr<Server> s_instance;
+
 public:
 	static bool Run(int argc, char** argv);
 	static Server& get_instance();

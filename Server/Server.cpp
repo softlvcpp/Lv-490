@@ -455,8 +455,7 @@ bool Server::InitLogger()
 	char user_name[USERNAME_LEN];
 	unsigned long len = USERNAME_LEN;
 	if (!GetUserNameA(user_name, &len))
-	{
-		LOG_T << "Unable to get current users username.";
+	{		
 		return false;
 	}
 	log_file_path += user_name;
@@ -466,8 +465,7 @@ bool Server::InitLogger()
 	if (!CreateDirectoryA(log_file_path.c_str(), nullptr))
 	{
 		if (GetLastError() == ERROR_PATH_NOT_FOUND)
-		{
-			LOG_T << "Unable to create directory. Incorrect path.";
+		{			
 			return false;
 		}
 	}
@@ -491,10 +489,14 @@ Server::~Server()
 }
 
 void Server::Main()
-{
-	while (true)
-	{
-	}
+{	
+	ThreadPool thread_pool(std::thread::hardware_concurrency());
+	SocketHandler socket_handler(m_log_file_name, m_log_directory_name);
+
+	socket_handler.AddCommand(new AddSocketConnection);
+	socket_handler.AddCommand(new StartConnection);
+
+	socket_handler.Run(&thread_pool);
 }
 
 void Server::set_name(std::wstring name)
