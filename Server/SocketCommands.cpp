@@ -2,11 +2,11 @@
 
 bool AddSocketConnection::Execute(SocketState& socket_state)//return bool
 {
-	WSAData wsaData;//config sockets
-	if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
-	{
-		//log: "Time Server: Error at WSAStartup()\n"
-	}
+	//WSAData wsaData;//config sockets
+	//if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
+	//{
+	//	//log: "Server: Error at WSAStartup()\n"
+	//}
 
 	// create new socket, use the Internet address family (AF_INET), streaming sockets (SOCK_STREAM), and the TCP/IP protocol (IPPROTO_TCP).
 	SOCKET new_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -14,7 +14,7 @@ bool AddSocketConnection::Execute(SocketState& socket_state)//return bool
 	// check for errors to ensure that the new_socket is a valid socket.	
 	if (INVALID_SOCKET == new_socket)
 	{
-		//log: "Time Server: Error at socket(): " + WSAGetLastError();
+		socket_state.log_msg = "Server: Error at socket(): " + WSAGetLastError();
 		WSACleanup();//clean configuration
 		return false;
 	}
@@ -31,7 +31,7 @@ bool AddSocketConnection::Execute(SocketState& socket_state)//return bool
 	//bind the socket for client's requests
 	if (SOCKET_ERROR == bind(new_socket, (SOCKADDR*)&serverService, sizeof(serverService)))
 	{
-		//log: "Server: Error at bind(): " + WSAGetLastError()
+		socket_state.log_msg = "Server: Error at bind(): " + WSAGetLastError();
 		closesocket(new_socket);
 		WSACleanup();
 		return false;
@@ -42,18 +42,11 @@ bool AddSocketConnection::Execute(SocketState& socket_state)//return bool
 	// from other clients). This sets the backlog parameter.
 	if (SOCKET_ERROR == listen(new_socket, SOMAXCONN))
 	{
-		//log: "Server: Error at listen(): " + WSAGetLastError()
+		socket_state.log_msg = "Server: Error at listen(): " + WSAGetLastError();
 		closesocket(new_socket);
 		WSACleanup();
 		return false;
 	}
-
-	////set the socket to be in non-blocking mode.
-	//unsigned long flag = 1;
-	//if (ioctlsocket(new_socket, FIONBIO, &flag) != 0)
-	//{
-	//	//log: "Server: Error at ioctlsocket(): " + WSAGetLastError()
-	//}
 
 	SocketState new_socket_state;
 	new_socket_state.id = new_socket;
@@ -65,7 +58,7 @@ bool AddSocketConnection::Execute(SocketState& socket_state)//return bool
 bool RemoveSocket::Execute(SocketState& socket_state)
 {
 	closesocket(socket_state.id);	
-	socket_state.state = -1;
+	socket_state.state = LISTEN;
 	return true;
 }
 
@@ -77,12 +70,9 @@ bool AcceptConnection::Execute(SocketState& socket_state)
 	SOCKET accepted_socket = accept(server_socket, (struct sockaddr*) & client, &client_length);
 	if (INVALID_SOCKET == accepted_socket)
 	{
-		//log: "Server: Error at accept(): " + WSAGetLastError()
 		return false;
 	}
 
-	//log: "Server: Client " + inet_ntoa(from.sin_addr) + ":" + ntohs(from.sin_port) + " is connected.";
-		
 	//tcp_keepalive KeepAlive;
 	//DWORD dJunk;
 
@@ -118,11 +108,9 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 
 		if (SOCKET_ERROR == bytes_received)
 		{
-			//log: "Server: Error at recv(): " + WSAGetLastError();		
-			//RemoveSocket remove_socket;
-			//remove_socket.Execute(socket_state);
 			return false;
 		}
+
 		if (bytes_received == 0)
 		{
 			RemoveSocket remove_socket;
@@ -134,14 +122,11 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 			//потім потрібно буде парсити цю стрічку, але на даному етапі просто вивід в консоль є
 			test_output << "Server: Recieved: " << bytes_received << " bytes of \"" << socket_state.buffer << "\" message.\n";
 
-			if (bytes_received > 0)
+			if (socket_state.buffer == "exit")
 			{
-				if (socket_state.buffer == "exit")
-				{
-					RemoveSocket remove_socket;
-					remove_socket.Execute(socket_state);
-					return true;
-				}
+				RemoveSocket remove_socket;
+				remove_socket.Execute(socket_state);
+				return true;
 			}
 		}
 	}

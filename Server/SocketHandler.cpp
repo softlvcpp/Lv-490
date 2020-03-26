@@ -42,10 +42,13 @@ bool SocketHandler::Run(ThreadPool* thread_pool)
 		WSAData wsaData;//config sockets
 		if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
 		{
-			//log: "Server: Error at WSAStartup()\n"
+			LOG_T << "Server: Error at WSAStartup()";
 		}
 		iter->InitThreadPool(thread_pool);
-		iter->Execute(m_socket_state);
+		if(iter->Execute(m_socket_state) == false)
+		{
+			LOG_T << m_socket_state.log_msg.c_str();
+		}
 	}
 	return true;
 }

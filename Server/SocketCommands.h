@@ -22,13 +22,18 @@ typedef struct
 	SOCKET id;			//socket handle
 	int	state;			//receiving? 0 - not accepted
 	std::string buffer;
+	std::string log_msg;
 } SocketState;
 
 constexpr int PORT = 8080;//default port
 constexpr int BUFFER_SIZE = 512;//default buffer size
-constexpr int LISTEN = 0;
-constexpr int ACCEPTED = 1;
-constexpr int RECEIVE = 2;
+
+enum
+{
+	LISTEN,
+	ACCEPTED,
+	RECEIVE
+};
 
 class Command
 {
@@ -57,7 +62,7 @@ public:
 class AcceptConnection : public Command
 {
 public:
-	AcceptConnection(SOCKET serv_socket):server_socket(serv_socket) {};
+	AcceptConnection(SOCKET server_socket):server_socket(server_socket) {};
 	bool Execute(SocketState& socket_state);
 private:
 	SOCKET server_socket;
