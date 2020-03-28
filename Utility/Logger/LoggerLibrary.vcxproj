@@ -155,7 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Essentials\ConcPriorityQueue.h" />
+    <ClInclude Include="Essentials\ConcurrentMultiQueue.h" />
     <ClInclude Include="Essentials\ExportConfig.h" />
     <ClInclude Include="Essentials\LogFundamentals.h" />
     <ClInclude Include="Essentials\RuntimeFilter.h" />
@@ -165,8 +165,10 @@
     <ClInclude Include="LoggerDLL.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ConcurrentMultiQueue.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="filelogger.cpp" />
+    <ClCompile Include="filelogger_UtilMethods.cpp" />
     <ClCompile Include="LogFundamentals.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

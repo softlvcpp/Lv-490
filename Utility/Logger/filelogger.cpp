@@ -1,105 +1,156 @@
 #include "Other/pch.h"
 #include "Filelogger/filelogger.h"
 
-#ifndef INCLUDE_CHECK
 #include <filesystem>
-#else
-#include <experimental/filesystem>
-#include <iomanip>
-#endif
-#include <regex>
 #include <cassert>
 #include <iostream>
+
+namespace fs = std::filesystem;
 
 namespace filelog
 {
 
-    FailedToOpenFileException::FailedToOpenFileException(const char * desc) : std::runtime_error(desc) { }
-
-    FileLogger::FileLogger(const char* fTemplate, LogLevel lvl, size_t fileSize)
+#pragma region Constructors/Destructor
+    // --------------------------------------------------------------
+    // Constructors/Destructor
+    FileLogger::FileLogger()
     {
+        setRTLevel(LogLevel::NoLogs);
+        maxFileSize = 0;
+        currentFileSize = 0;
+        setJoined();
+    }
+
+    FileLogger::FileLogger(const char* filePathTemplate, LogLevel lvl, size_t fileSize)
+        : FileLogger(filePathTemplate, false, lvl, fileSize)
+	{ }
+
+    FileLogger::FileLogger(const char* fTemplate, bool useExactName, LogLevel lvl, size_t fileSize)
+    {
+        try
+        {
+            init(fTemplate, useExactName, lvl, fileSize);
+        }
+        catch (std::exception & e)
+        {
+            interruptedException = e;
+            setInterrupted();
+        }
+    }
+
+	FileLogger::~FileLogger()
+    {
+        stop(false);
+    }
+
+#pragma endregion Constructors/Destructor
+
+#pragma region Init/Cleanup
+    // --------------------------------------------------------------
+    // Init/cleanup methods 
+    void FileLogger::init(const char* fTemplate, bool useExactName, LogLevel lvl, size_t fileSize)
+    {
+        if (fileSize < (log490::Utils::FixedMessageBuffer::bufferSize + 1))
+            fileSize = log490::Utils::FixedMessageBuffer::bufferSize + 1;
+
         setRTLevel(lvl);
         maxFileSize = fileSize;
         currentFileSize = 0;
 
+        // Checks if passed a proper path
         if (!validateFilenameTemplate(fTemplate))
         {
             setInterrupted();
-            //throw FailedToOpenFileException("Invalid file template, invalid path format or path does not exist");
             return;
         }
- 
-        std::string initialFileName = createNarrowFileName();
-        if (!openFile(initialFileName.c_str()))
+
+        std::ios_base::iostate exceptionMask = outputStream.exceptions() | std::ios::failbit;
+        outputStream.exceptions(exceptionMask);
+        if (!openFile(fTemplate, useExactName))
         {
             setInterrupted();
-            //throw FailedToOpenFileException((std::string{ "Failed to create file, file path: " } + initialFileName.c_str()).c_str());
             return;
         }
+        currentFileSize += fs::file_size(currentFileName);
 
         interrupted.store(false);
-
+        joined.store(true);
         fLoggerStop.store(false);
         fOnJoinWriteRemaining.store(false);
-        consumerStreamer = std::thread{ &FileLogger::threadEntry, this };
+        fileStreamThread = std::thread{ &FileLogger::threadEntry, this };
+        while (!interrupted && joined); // Spin lock with max ~10ms wait
     }
 
-
-	FileLogger::~FileLogger()
+    void FileLogger::stop(bool writeRemaining)
     {
+        fOnJoinWriteRemaining.store(writeRemaining);
         fLoggerStop.store(true);
-        fOnJoinWriteRemaining.store(false);
+
         messageQueue.cancelWaits();
-        if(consumerStreamer.joinable())
-            this->consumerStreamer.join();
-        this->outputStream.close();
+        if (fileStreamThread.joinable())
+            this->fileStreamThread.join();
+        if (outputStream.is_open())
+            this->outputStream.close();
+
+        setJoined();
+    }
+#pragma endregion Init/Cleanup
+
+#pragma region Public methods
+    // --------------------------------------------------------------
+    // Public methods
+
+    bool FileLogger::restart(const char* filePathTemplate, bool useExactName, LogLevel lvl, size_t fileSize, bool fjoin)
+    {
+        stop(fjoin);
+        init(filePathTemplate, useExactName, lvl, fileSize);
+        return !isInterrupted();
     }
 
+    bool FileLogger::isInterrupted() const
+    {
+        return interrupted.load();
+    }
+
+    const std::exception& FileLogger::getException()
+    {
+        return interruptedException;
+    }
+
+    bool FileLogger::isJoined() const
+    {
+        return joined.load();
+    }
+
+    const char* FileLogger::getCurrentFilename() const
+    {
+        std::scoped_lock lock{ filenameAccessMutex };
+        return currentFileName.c_str();;
+    }
+
+#pragma endregion Public methods
+
+#pragma region Private methods
+    // --------------------------------------------------------------
+    // Private methods
     bool FileLogger::streamLogMessage(LogData& data)
     {
         auto& buff = data.message()->messageBuffer;
 
-        this->currentFileSize += static_cast<size_t>(buff.length() * CHAR_TYPE_SIZE);
+        auto bytesToWrite = static_cast<size_t>(buff.length() * CHAR_TYPE_SIZE);
+        this->currentFileSize += bytesToWrite;
         if (currentFileSize >= maxFileSize)
-        {
-            using namespace std::string_literals;
+        {     
             outputStream.close();
-            if(openFile(createNarrowFileName().c_str()) == false)
+
+            if (!openFile(currentFileName.c_str(), false, bytesToWrite))
                 return false;
-            currentFileSize = static_cast<size_t>(buff.length());
+          
+            currentFileSize = fs::file_size(currentFileName) + bytesToWrite;
         }
 
         outputStream.write(buff.c_str(), buff.length());
         outputStream.write(FLOG_STR(\n), 1);
-        return true;
-    }
-
-    bool FileLogger::validateFilenameTemplate(const std::string& temp)
-    {
-        #ifndef INCLUDE_CHECK
-        namespace fs = std::filesystem;
-        #else
-        namespace fs = std::experimental::filesystem;
-        #endif
-
-        fs::path p{ temp };
-        auto folder = p.parent_path();
-
-        //static std::regex thisFolder{ "./" };
-        //static std::regex parentFolder{ "../" };
-        static std::regex parentFolder{ R"(^((\.\/)|(\.\.\/))*?$)" };
-  
-        if(
-            (*folder.c_str() != L'\0' && !fs::exists(folder) &&         
-                !(std::regex_match(folder.string(), parentFolder))) 
-            || !p.has_extension())
-            return false;
-
-        fileExtension_Narrow = p.extension().string();
-        folder_Narrow = folder.string();
-
-        p.replace_extension();
-        filenamePathTemplate_Narrow = p.string();
         return true;
     }
 
@@ -117,24 +168,7 @@ namespace filelog
 
     void FileLogger::join()
     {
-        fOnJoinWriteRemaining.store(true);
-        fLoggerStop.store(true);
-        messageQueue.cancelWaits();
-        if (consumerStreamer.joinable())
-            this->consumerStreamer.join();
-        outputStream.close();
-
-        setJoined();
-    }
-
-    bool FileLogger::isInterrupted() const
-    {
-        return interrupted.load();
-    }
-
-    bool LOGGER_API FileLogger::isJoined() const
-    {
-        return joined.load();
+        stop(true);
     }
 
     void FileLogger::logWriteLoop()
@@ -142,7 +176,8 @@ namespace filelog
         while (!this->fLoggerStop)
         {
             LogData msg;
-            if (messageQueue.waitPopMove(msg))
+            if (messageQueue.waitPop(msg))
+            //if (messageQueue.waitPopMove(msg))
             {
                 if(!streamLogMessage(msg))
                 {
@@ -157,7 +192,8 @@ namespace filelog
         {
             auto queueSnapshot = std::move(messageQueue);
             LogData msg;
-            while (queueSnapshot.tryPopMove(msg)) // will return false if empty
+            while (queueSnapshot.tryPop(msg))
+            //while (queueSnapshot.tryPopMove(msg)) // will return false if empty
             {
                 bool succesful = streamLogMessage(msg);
                 msg.message().reset(nullptr);
@@ -176,46 +212,41 @@ namespace filelog
 	{
         try
         {
+            this->interrupted.store(false);
+            this->joined.store(false);
             logWriteLoop();
         }
-        catch (...)
+        catch (std::exception & e)          // Should not throw any errors if done right
         {
-            assert(false);
+            interruptedException = e;
             setInterrupted();
+            assert(false);
         }
 	}
 
-    std::wstring FileLogger::createWideFileName()
-    {
-        time_t timeEnc = time(0);
-        tm timeStruct;
-        log490::Utils::getUTCTime(timeStruct, timeEnc);
+    bool FileLogger::openFile(const char* fileName, bool useExact, size_t neccessarySpace, std::ios::openmode mode)
+    {        
+        if (useExact)
+        {
+            if (fs::exists(fileName))   
+            {
+                std::string lastModified;
+                if (getLastModifiedMatchesTemplate(lastModified))                       // Try to find last modified file
+                    setFilename((fileFull(lastModified.c_str(), neccessarySpace)) ?     // If found then continue it(path/name_DATE-TIME_COUNT.extension
+                        filenameRegexCheck().c_str() :
+                        lastModified.c_str());
+                else
+                    setFilename((fileFull(fileName, neccessarySpace)) ?                 // Else write in file of format path/name.extension
+                        filenameRegexCheck().c_str() :
+                        fileName);
+            }
+            else
+                setFilename(fileName);                                                  
+        }
+        else
+            setFilename(filenameRegexCheck().c_str());                                  // Create new file
 
-        using namespace std::string_literals;
-        return filenamePathTemplate_Wide + L"__"
-            + std::to_wstring(timeStruct.tm_mday) + std::to_wstring(timeStruct.tm_mon) + std::to_wstring(timeStruct.tm_year + 1900)
-            + std::to_wstring(timeStruct.tm_hour) + L"-" + std::to_wstring(timeStruct.tm_min) + L"-" + std::to_wstring(timeStruct.tm_sec)
-            + fileExtension_Wide;
-    }
-
-    std::string FileLogger::createNarrowFileName()
-    {
-        time_t timeEnc = time(0);
-        tm timeStruct;
-        log490::Utils::getUTCTime(timeStruct, timeEnc);
-
-        char timeSuffix[DATETIME_FORMAT_CHAR_COUNT + 1];
-        strftime(timeSuffix, DATETIME_FORMAT_CHAR_COUNT, "%d%m%Y %H-%M-%S", &timeStruct);
-
-        using namespace std::string_literals;
-        return filenamePathTemplate_Narrow + "__"
-                + timeSuffix
-                + fileExtension_Narrow;
-    }
-
-    bool FileLogger::openFile(const char* fileName)
-    {
-        outputStream.open(fileName, std::ios::app);
+        outputStream.open(currentFileName, mode);
         return outputStream.is_open();
     }
 
@@ -229,13 +260,16 @@ namespace filelog
     void FileLogger::setJoined()
     {
         joined.store(true);
+        currentFileName = "";
     }
 
+#pragma endregion Private methods
+
+#pragma region FileLogMessage and filtering
 
     FileLogMessage::FileLogMessage(FileLogger& output) 
-        : log490::LogMessage(output), timePosition(0)
-    {
-    }
+        : log490::LogMessage(output), timePosition(0) 
+    { }
 
     FileLogMessage::FileLogMessage(FileLogger& output, LogLevel level, log490::signature_t signature, log490::line_t line)
         : LogMessage(output, level, signature, line)
@@ -265,7 +299,7 @@ namespace filelog
     }
 
     void FileLogMessage::initPrefix()
-    {
+    {                                                               // threadID-DATE TIME-[LEVEL]-[FUNCTION]
         mLogData.message()->messageStream << mLogData.threadID()    // Thread id
             << "-";
         timePosition = mLogData.message()->messageBuffer.length();
@@ -291,19 +325,6 @@ namespace filelog
         assert(lastPos == mLogData.message()->messageBuffer.length());
     }
 
-
-    LogMessage& operator<<(LogMessage& left, FileMsgEndl&& right)
-    {
-        right.flush(left);
-        return left;
-    }
-
-    LogMessage& operator<<(LogMessage& left, FileMsgEndl& right)
-    {
-        right.flush(left);
-        return left;
-    }
-
     FilteredFileLogMessage::FilteredFileLogMessage(FileLogger& output, LogLevel level, log490::signature_t signature, log490::line_t line)
         : msg(output)
     {
@@ -315,32 +336,20 @@ namespace filelog
     }
 
     FilteredFileLogMessage::FilteredFileLogMessage(FilteredFileLogMessage&& source) noexcept
-        : msg(std::move(source.msg))
-    {
-        if (msg.hasMessage())
-        {
-            RuntimeLogFilter::setIndex(&msg.getData().message()->messageStream);
-        }
-    }
+        : RuntimeLogFilter(source), msg(std::move(source.msg))
+    { }
 
     FilteredFileLogMessage& FilteredFileLogMessage::operator=(FilteredFileLogMessage&& right) noexcept
     {
         if (this != &right)
         {
+            RuntimeLogFilter::operator=(std::move(right));
             msg = std::move(right.msg);
-            RuntimeLogFilter::setIndex(&msg.getData().message()->messageStream);
         }
         return *this;
     }
 
-    FilteredFileLogMessage& FilteredFileLogMessage::operator<<(const FileMsgEndl& mendl)
-    {
-        mendl.flush(msg);
-        setIndex(nullptr);
-        return *this;
-    }
-
-    FilteredFileLogMessage& FilteredFileLogMessage::operator<<(FileMsgEndl&& mendl)
+    FilteredFileLogMessage& FilteredFileLogMessage::operator<<(MsgEndl mendl)
     {
         mendl.flush(msg);
         setIndex(nullptr);
@@ -354,17 +363,9 @@ namespace filelog
 
     bool LogDataLess::operator()(const LogData& left, const LogData& right)
     {
-        return difftime(left.msgTime(), right.msgTime()) > 0;
+        return ((left.msgHighResTime() - right.msgHighResTime()).count() < 0ull);
+        //return difftime(left.msgTime(), right.msgTime()) > 0;  
     }
 
-    void FileMsgEndl::flush(LogMessage& msg) const
-    {
-        throw std::runtime_error("Only FileLogMessage objects are supported");
-    }
-
-    void FileMsgEndl::flush(FileLogMessage& msg) const
-    {
-        MsgEndl::flush(msg);
-    }
-
+#pragma endregion FileLogMessage and filtering
 }

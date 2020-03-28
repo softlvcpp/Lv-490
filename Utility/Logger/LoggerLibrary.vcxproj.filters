@@ -27,9 +27,6 @@
     <ClInclude Include="Filelogger\filelogger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Essentials\ConcPriorityQueue.h">
-      <Filter>Header Files\BasesAndUtils</Filter>
-    </ClInclude>
     <ClInclude Include="Essentials\LogFundamentals.h">
       <Filter>Header Files\BasesAndUtils</Filter>
     </ClInclude>
@@ -43,7 +40,10 @@
       <Filter>Header Files\BasesAndUtils</Filter>
     </ClInclude>
     <ClInclude Include="Filelogger\FileLogAdapters.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\BasesAndUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="Essentials\ConcurrentMultiQueue.h">
+      <Filter>Header Files\BasesAndUtils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -60,6 +60,12 @@
       <Filter>Source Files\BaseAndUtils</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
+      <Filter>Source Files\BaseAndUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="filelogger_UtilMethods.cpp">
+      <Filter>Source Files\BaseAndUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="ConcurrentMultiQueue.cpp">
       <Filter>Source Files\BaseAndUtils</Filter>
     </ClCompile>
   </ItemGroup>
