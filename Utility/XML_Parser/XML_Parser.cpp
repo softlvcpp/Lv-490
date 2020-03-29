@@ -112,7 +112,7 @@ bool CXMLParser::XMLParser::ReadConfigs(const string& file_path) noexcept
 #define CLIENT_CPU_VENDOR "CPUVendor"
 #define CLIENT_CPU_SPEED "CPUSpeed"
 
-void CXMLParser::XMLParser::WriteSystemInformation(string& xml_str, ClientSysInfo& obj) const noexcept
+void CXMLParser::XMLParser::WriteSystemInformation(string& xml_str, ClientInfo& obj) const noexcept
 {
     XMLDocument xmlDoc;
     //root
@@ -124,20 +124,20 @@ void CXMLParser::XMLParser::WriteSystemInformation(string& xml_str, ClientSysInf
     //MAC
     XMLElement* pMAC = xmlDoc.NewElement(CLIENT_MACADRESS);//root->client->MacAddress
 
-    pMAC->SetText(obj.getMacAddress.c_str());
+    pMAC->SetText(obj.MacAddress.c_str());
     pClient->InsertFirstChild(pMAC);
     //IP
     XMLElement* pIPAddress = xmlDoc.NewElement(CLIENT_IPADRESS);//root->client->IPAddress
-    pIPAddress->SetText(obj.get_IPAddress().c_str());
+    pIPAddress->SetText(obj.IPAddress.c_str());
     pClient->InsertFirstChild(pIPAddress);
 
     //SystemInfo
     XMLElement* pSystemInformation = xmlDoc.NewElement(CLIENT_SYSTEMINFORMATION);//root->client->SystemInformation
 
-    vector<string> HardDisk_type_list = obj.get_HardDisk_type_list();
-    vector<int> HardDisk_TotalSize = obj.get_HardDisk_TotalSize();
-    vector<int> HardDisk_Used = obj.get_HardDisk_Used();
-    vector<int> HardDisk_Free = obj.get_HardDisk_Free();
+    vector<string> HardDisk_type_list = obj.HardDisk_type_list;
+    vector<int> HardDisk_TotalSize = obj.HardDisk_TotalSize;
+    vector<int> HardDisk_Used = obj.HardDisk_Used;
+    vector<int> HardDisk_Free = obj.HardDisk_Free;
 
     //HardDisk loop
     XMLElement* pHardDisk;
@@ -164,19 +164,19 @@ void CXMLParser::XMLParser::WriteSystemInformation(string& xml_str, ClientSysInf
     }
     //RAM
     XMLElement* pTotalRAM = xmlDoc.NewElement(CLIENT_TOTALRAM);//root->client->SystemInformation->TotalRAM
-    pTotalRAM->SetText(obj.get_TotalRAM());
+    pTotalRAM->SetText(obj.TotalRAM);
     pSystemInformation->InsertEndChild(pTotalRAM);
     //CPU
     XMLElement* CPU = xmlDoc.NewElement(CLIENT_CPU);//root->client->SystemInformation->CPU
 
     XMLElement* CPUNumbers = xmlDoc.NewElement(CLIENT_CPU_NUMBERS);//root->client->SystemInformation->CPU
-    CPUNumbers->SetText(obj.get_CPUNumbers());
+    CPUNumbers->SetText(obj.CPUNumbers);
     CPU->InsertEndChild(CPUNumbers);
     XMLElement* CPUVendor = xmlDoc.NewElement(CLIENT_CPU_VENDOR);//root->client->SystemInformation->CPU
-    CPUVendor->SetText(obj.get_CPUVendor().c_str());
+    CPUVendor->SetText(obj.CPUVendor.c_str());
     CPU->InsertEndChild(CPUVendor);
     XMLElement* CPUSpeed = xmlDoc.NewElement(CLIENT_CPU_SPEED);//root->client->SystemInformation->CPU
-    CPUSpeed->SetText(obj.get_CPUSpeed());
+    CPUSpeed->SetText(obj.CPUSpeed);
     CPU->InsertEndChild(CPUSpeed);
 
     //end
@@ -251,8 +251,6 @@ bool CXMLParser::XMLParser::PrepareToDBManager(string& xml_str)noexcept
 
     return true;//all is good
 }
-
-
 
 // This is an example of an exported variable
 XMLPARSER_API int nXMLParser=0;

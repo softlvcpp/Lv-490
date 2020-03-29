@@ -16,7 +16,6 @@
 #include<string>
 #include<vector>//ClientSysInfo
 #include"tinyxml2.h"
-#include"../../Client/ClientSysInfo.h"//dependency in method WriteSystemInformation()
 using namespace std;
 using namespace filesystem;
 using namespace tinyxml2;
@@ -24,6 +23,21 @@ using namespace tinyxml2;
 class XMLPARSER_API CXMLParser {
 public:
 
+    struct ClientInfo
+    {
+        string OS;
+        string MacAddress;
+        string IPAddress;
+        int TotalRAM;
+        int CPUNumbers;
+        string CPUVendor;
+        int CPUSpeed;
+        vector<string> HardDisk_type_list;
+        vector<string> HardDisk_MediaType;
+        vector<int> HardDisk_TotalSize;
+        vector<int> HardDisk_Used;
+        vector<int> HardDisk_Free;
+    };
     struct OutDocument
     {
         string serverdisplayname = "";
@@ -45,7 +59,7 @@ public:
         XMLParser() = default;     
 
         bool ReadConfigs(const string& file_path)noexcept;//read configuration' file for server
-        void WriteSystemInformation(string& xml_str, ClientSysInfo& obj) const noexcept;//write client's information in external string
+        void WriteSystemInformation(string& xml_str, ClientInfo& obj) const noexcept;//write client's information in external string
         bool PrepareToDBManager(string& xml_str)noexcept;//prepare client's external string to write in DB
 
         OutDocument get_data() const noexcept { return out_doc; }//getter configs for server
