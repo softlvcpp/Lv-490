@@ -1,6 +1,6 @@
 // XML_Parser.cpp : Defines the exported functions for the DLL.
 //
-#pragma once
+//#pragma once
 #include "pch.h"
 #include "framework.h"
 #include "XML_Parser.h"

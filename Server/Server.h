@@ -10,18 +10,17 @@
 
 #include <Windows.h>
 
-#include "../Utility/Logger/LoggerDLL.h"
+//#include "../Utility/Logger/LoggerDLL.h"
 
-#include "../Utility/XML_Parser/XML_Parser.h"
 
 #define USERNAME_LEN 20
 /*
- * The class is implemented Singleton for two reasons :
- * 1) You can not have two instances of the same service running simultaneously
- * 2) Different implementation is impossible(no)
+ * This class is implemented as singletone
+ * The class functions don`t throw exceptions
  */
 class Server
 {
+// File IO members and service commands
 private:
 	std::string m_install_command  { "install" };
 	std::string m_uninstall_command{ "uninstall" };
@@ -32,22 +31,31 @@ private:
 	std::string m_log_file_name{ "serverlog.log" };
 	std::string m_log_directory_name{ "Lv-490_logs" };
 	std::unique_ptr<filelog::FileLogger> m_logger;
-
+	filelog::LogLevel m_log_level;
 	std::unique_ptr<wchar_t> m_name;
+//Windows Service members
+private:
 	SERVICE_STATUS m_service_status{};
 	SERVICE_STATUS_HANDLE m_service_status_handle{};
 	HANDLE m_service_stop_event{ INVALID_HANDLE_VALUE };
 
 	static std::shared_ptr<Server> s_instance;
+// Parser members
 private:
-	XML_Parser parser;
+	CXMLParser::XML_Parser m_parser;
+	std::string m_config_file_name{ "config.xml" };
+	bool ReadConfig();
 
+// Server members
+private:
+	std::string m_server_IP;
+	std::string m_server_listenport;
+	unsigned m_max_threads;
 public:
 	static bool Run(int argc, char** argv);
 	static Server& get_instance();
-	void set_name(std::wstring name);
-	void set_log_file_name(std::string log_file_name);
 	void set_log_dir_name(std::string log_dir_name);
+	void set_config_file_name(std::string file_name);
 
 	~Server();
 

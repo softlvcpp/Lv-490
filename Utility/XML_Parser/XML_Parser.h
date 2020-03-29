@@ -4,6 +4,8 @@
 // that uses this DLL. This way any other project whose source files include this file see
 // XMLPARSER_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
+#ifndef PARSER_DLL
+#define PARSER_DLL
 #ifdef XMLPARSER_EXPORTS
 #define XMLPARSER_API __declspec(dllexport)
 #else
@@ -69,10 +71,10 @@ public:
     {
     public:
         XML_Parser() = default;
-        void Read(const string& file_path);
-        void Write(const string& file_path, ClientSysInfo& obj) const;
+        XMLPARSER_API void Read(const string& file_path);
+        XMLPARSER_API void Write(const string& file_path, ClientSysInfo& obj) const;
 
-        outDocument GetData() const noexcept;
+        XMLPARSER_API outDocument GetData() const noexcept;
     private:
         outDocument out_doc;
 
@@ -90,3 +92,4 @@ public:
 extern XMLPARSER_API int nXMLParser;
 
 XMLPARSER_API int fnXMLParser(void);
+#endif

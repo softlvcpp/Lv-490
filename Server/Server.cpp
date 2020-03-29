@@ -7,6 +7,21 @@
 
 Server::Server() : m_name{ _wcsdup(L"TCPServer_LV490") }{}
 
+bool Server::ReadConfig()
+{
+	m_parser.Read(m_config_file_name);
+	auto server_data = m_parser.GetData();
+	m_log_file_name = server_data.filename;
+	m_server_IP = server_data.ipadress;
+	m_server_listenport = server_data.listenport;
+	m_log_level = static_cast<filelog::LogLevel>(server_data.LogLevel[0] - '0');
+	m_max_threads = std::stoi(server_data.maxworkingthreads);
+
+	std::wstring name(server_data.servername.begin(), server_data.servername.end());
+	m_name.reset(_wcsdup(name.c_str()));
+	return true;
+}
+
 bool Server::Run(int argc, char** argv)
 {
 	SERVICE_TABLE_ENTRY ServiceTable[2];
@@ -14,6 +29,10 @@ bool Server::Run(int argc, char** argv)
 	ServiceTable[0].lpServiceProc = (LPSERVICE_MAIN_FUNCTION)ServiceMain;
 	ServiceTable[1].lpServiceName = nullptr;
 	ServiceTable[1].lpServiceProc = nullptr;
+	if (s_instance->ReadConfig() == false)
+	{
+		return false;
+	}
 	s_instance->InitLogger();
 	if (argc == 2)
 	{
@@ -490,28 +509,21 @@ Server::~Server()
 
 void Server::Main()
 {	
-	ThreadPool thread_pool(std::thread::hardware_concurrency()/*замість цього треба вставити параметри з парсера*/);
+	ThreadPool thread_pool(m_max_threads);
 	SocketHandler socket_handler(m_log_directory_name);
-	
-	//socket_handler.set_configuration(parser); //тут впишеш вказівник, або розумний вказівник на парсер
-
+	socket_handler.set_configuration(&m_parser.GetData());
 	socket_handler.AddCommand(new AddSocketConnection);
 	socket_handler.AddCommand(new StartConnection);
 
 	socket_handler.Run(&thread_pool);
 }
 
-void Server::set_name(std::wstring name)
-{
-	m_name.reset(_wcsdup(name.c_str()));
-}
-
-void Server::set_log_file_name(std::string log_file_name)
-{
-	m_log_file_name = log_file_name;
-}
-
 void Server::set_log_dir_name(std::string log_dir_name)
 {
 	m_log_directory_name = log_dir_name;
+}
+
+void Server::set_config_file_name(std::string file_name)
+{
+	m_config_file_name = file_name;
 }
