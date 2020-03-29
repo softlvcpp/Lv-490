@@ -16,7 +16,7 @@
 #include <iostream>
 #include<filesystem>//is_regular_file
 #include<string>
-#include<vector>//ClientSysInfo
+#include<vector>//ClientInfo
 #include"tinyxml2.h"
 using namespace std;
 using namespace filesystem;
