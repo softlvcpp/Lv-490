@@ -4,6 +4,8 @@
 // that uses this DLL. This way any other project whose source files include this file see
 // XMLPARSER_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
+#ifndef PARSER_DLL
+#define PARSER_DLL
 #ifdef XMLPARSER_EXPORTS
 #define XMLPARSER_API __declspec(dllexport)
 #else
@@ -58,13 +60,13 @@ public:
     public:
         XMLParser() = default;     
 
-        bool ReadConfigs(const string& file_path)noexcept;//read configuration' file for server
-        void WriteSystemInformation(string& xml_str, ClientInfo& obj) const noexcept;//write client's information in external string
-        bool PrepareToDBManager(string& xml_str)noexcept;//prepare client's external string to write in DB
+        XMLPARSER_API bool ReadConfigs(const string& file_path)noexcept;//read configuration' file for server
+        XMLPARSER_API void WriteSystemInformation(string& xml_str, ClientSysInfo& obj) const noexcept;//write client's information in external string
+        XMLPARSER_API bool PrepareToDBManager(string& xml_str)noexcept;//prepare client's external string to write in DB
 
         OutDocument get_data() const noexcept { return out_doc; }//getter configs for server
 
-        string get_macaddress()const noexcept { return mac_address; }//client info
+		string get_macaddress()const noexcept { return mac_address; }//client info
         string get_ipaddress()const noexcept { return ip_address; }//
         int get_totalram()const noexcept { return total_ram; }//
         int get_cpunumbers()const noexcept { return cpu_numbers; }//
@@ -95,3 +97,4 @@ public:
 extern XMLPARSER_API int nXMLParser;
 
 XMLPARSER_API int fnXMLParser(void);
+#endif
