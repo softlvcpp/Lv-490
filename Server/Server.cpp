@@ -490,8 +490,10 @@ Server::~Server()
 
 void Server::Main()
 {	
-	ThreadPool thread_pool(std::thread::hardware_concurrency());
-	SocketHandler socket_handler(m_log_file_name, m_log_directory_name);
+	ThreadPool thread_pool(std::thread::hardware_concurrency()/*замість цього треба вставити параметри з парсера*/);
+	SocketHandler socket_handler(m_log_directory_name);
+	
+	//socket_handler.set_configuration(parser); //тут впишеш вказівник, або розумний вказівник на парсер
 
 	socket_handler.AddCommand(new AddSocketConnection);
 	socket_handler.AddCommand(new StartConnection);

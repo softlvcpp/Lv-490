@@ -24,12 +24,12 @@ bool AddSocketConnection::Execute(SocketState& socket_state)//return bool
 	//AF_INET - Internet address family
 	serverService.sin_family = AF_INET;
 	//the IP address is INADDR_ANY to accept connections on all interfaces.
-	serverService.sin_addr.s_addr = INADDR_ANY;
+	serverService.sin_addr.s_addr = inet_addr(m_server_configuration->ipadress.c_str());
 	//set port
-	serverService.sin_port = htons(PORT);
-
+	serverService.sin_port = htons(std::stoi(m_server_configuration->listenport.c_str()));
+	
 	//bind the socket for client's requests
-	if (SOCKET_ERROR == bind(new_socket, (SOCKADDR*)&serverService, sizeof(serverService)))
+	if (SOCKET_ERROR == ::bind(new_socket, (SOCKADDR*)&serverService, sizeof(serverService)))
 	{
 		socket_state.log_msg = "Server: Error at bind(): " + WSAGetLastError();
 		closesocket(new_socket);
@@ -73,21 +73,7 @@ bool AcceptConnection::Execute(SocketState& socket_state)
 		return false;
 	}
 
-	//tcp_keepalive KeepAlive;
-	//DWORD dJunk;
-
-	//// Use socket level keep alive for about 5 minutes
-	//// Unless this is done Microsoft will not close the socket
-	//// in the event of a cable / VPN disconnection for 2 hours.
-	//KeepAlive.onoff = 1;
-	//KeepAlive.keepalivetime = 6000;
-	//KeepAlive.keepaliveinterval = 6000;
-
-	//if (SOCKET_ERROR == WSAIoctl(accepted_socket, SIO_KEEPALIVE_VALS, &KeepAlive, sizeof(KeepAlive), NULL, 0, &dJunk, NULL, NULL))
-	//{
-	//	std::cout << "error" << "\n";
-	//}
-		
+	
 	socket_state.id = accepted_socket;
 	socket_state.state = ACCEPTED;
 	return true;
@@ -101,10 +87,18 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 
 	while (true)
 	{
-		socket_state.buffer.resize(BUFFER_SIZE);
-		int bytes_received = recv(current_socket, (char*)socket_state.buffer.c_str(), BUFFER_SIZE, 0);
-		size_t msg_end = socket_state.buffer.find('\0');
-		socket_state.buffer.erase(socket_state.buffer.begin() + msg_end, socket_state.buffer.end());
+		//get message size from client
+		int msg_size = 0;
+		int bytes_received = recv(current_socket, (char*)&msg_size, sizeof(int), 0);
+		if (SOCKET_ERROR == bytes_received)
+		{
+			return false;
+		}
+		socket_state.buffer.resize(msg_size + 1);
+		bytes_received = recv(current_socket, (char*)socket_state.buffer.c_str(), BUFFER_SIZE, 0);
+
+		/*size_t msg_end = socket_state.buffer.find('\0');
+		socket_state.buffer.erase(socket_state.buffer.begin() + msg_end, socket_state.buffer.end());*/
 
 		if (SOCKET_ERROR == bytes_received)
 		{
@@ -141,7 +135,7 @@ void StartConnection::DoRecv(SocketState new_conection)
 }
 
 bool StartConnection::Execute(SocketState& socket_state)
-{	
+{		
 	while (true)
 	{
 		SocketState new_conection;
@@ -153,5 +147,29 @@ bool StartConnection::Execute(SocketState& socket_state)
 			m_thread_pool->ExecuteTask(&StartConnection::DoRecv, this, new_conection);
 		}
 	}
+	return true;
+}
+
+bool Command::InitThreadPool(ThreadPool* main_pool)
+{
+	m_thread_pool = std::shared_ptr<ThreadPool>(main_pool); 
+	return true;
+}
+
+bool Command::InitThreadPool(std::shared_ptr<ThreadPool> main_pool)
+{
+	m_thread_pool = main_pool;
+	return true;
+}
+
+bool Command::InitConfiguration(CXMLParser::outDocument* server_configuration)
+{
+	m_server_configuration = std::shared_ptr<CXMLParser::outDocument>(server_configuration);
+	return true;
+}
+
+bool Command::InitConfiguration(std::shared_ptr<CXMLParser::outDocument> server_configuration)
+{
+	m_server_configuration = server_configuration;
 	return true;
 }

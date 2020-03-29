@@ -35,3 +35,9 @@ Server: Recieved: 256 bytes of "111111111111" message.
 Server: Recieved: 256 bytes of "111111111111" message.
 Server: Recieved: 256 bytes of "111111111111" message.
 Server: Recieved: 256 bytes of "exit" message.
+Server: Recieved: 256 bytes of "test2" message.
+Server: Recieved: 256 bytes of "test2" message.
+Server: Recieved: 256 bytes of "test1" message.
+Server: Recieved: 256 bytes of "test1" message.
+Server: Recieved: 256 bytes of "sfdg" message.
+Server: Recieved: 256 bytes of "gfh" message.

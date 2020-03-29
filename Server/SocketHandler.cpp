@@ -4,7 +4,7 @@
 #define LOG_D SLOG_DEBUG(*m_logger)
 #define LOG_P SLOG_PROD(*m_logger)
 
-SocketHandler::SocketHandler(const std::string& file_name, const std::string& directory_name):m_log_file_name(file_name), m_log_directory_name(directory_name)
+SocketHandler::SocketHandler(const std::string& directory_name): m_log_directory_name(directory_name)
 {	
 	InitLoger();	
 	WSAData wsaData;//config sockets
@@ -45,11 +45,43 @@ bool SocketHandler::Run(ThreadPool* thread_pool)
 			LOG_T << "Server: Error at WSAStartup()";
 		}
 		iter->InitThreadPool(thread_pool);
+		iter->InitConfiguration(m_server_configuration);
 		if(iter->Execute(m_socket_state) == false)
 		{
 			LOG_T << m_socket_state.log_msg.c_str();
 		}
 	}
+	return true;
+}
+
+bool SocketHandler::Run(std::shared_ptr<ThreadPool> thread_pool)
+{
+	for (auto iter : m_commands)
+	{
+		WSAData wsaData;//config sockets
+		if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
+		{
+			LOG_T << "Server: Error at WSAStartup()";
+		}
+		iter->InitThreadPool(thread_pool);
+		iter->InitConfiguration(m_server_configuration);
+		if (iter->Execute(m_socket_state) == false)
+		{
+			LOG_T << m_socket_state.log_msg.c_str();
+		}
+	}
+	return true;
+}
+
+bool SocketHandler::set_configuration(CXMLParser::outDocument* server_configuration)
+{
+	m_server_configuration = std::shared_ptr<CXMLParser::outDocument>(server_configuration);
+	return true;
+}
+
+bool SocketHandler::set_configuration(std::shared_ptr<CXMLParser::outDocument> server_configuration)
+{
+	m_server_configuration = server_configuration;
 	return true;
 }
 
@@ -73,7 +105,25 @@ bool SocketHandler::InitLoger()
 			return false;
 		}
 	}
-	log_file_path += m_log_file_name;
-	m_logger = std::unique_ptr<filelog::FileLogger>(new filelog::FileLogger(log_file_path.c_str(), filelog::LogLevel::Trace));
+	log_file_path += m_server_configuration->filename;
+	filelog::LogLevel log_level = filelog::LogLevel::NoLogs;
+	switch (std::stoi(m_server_configuration->LogLevel))
+	{
+	case 0:
+		log_level = filelog::LogLevel::NoLogs;
+		break;
+	case 1:
+		log_level = filelog::LogLevel::Prod;
+		break;
+	case 2:
+		log_level = filelog::LogLevel::Debug;
+		break;
+	case 3:
+		log_level = filelog::LogLevel::Trace;
+		break;
+	default:
+		break;
+	}
+	m_logger = std::unique_ptr<filelog::FileLogger>(new filelog::FileLogger(log_file_path.c_str(), log_level));
 	return true;
 }
