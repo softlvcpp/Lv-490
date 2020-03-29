@@ -82,7 +82,7 @@ void Client::updateTime()
 	qDebug() << settings.get_IP();
 	qDebug() << settings.get_TimeInterval()<<" s";
 	tmr->setInterval(settings.get_TimeInterval() * 1000); // Задаем интервал таймера
-
+	client_info2.Update();
 	if (socket.connect(settings.get_IP(), settings.get_port())) {
 
 	//	L_TRACE << "Client connected to server.";
