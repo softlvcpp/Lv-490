@@ -4,6 +4,7 @@
 #include "pch.h"
 #include "framework.h"
 #include "XML_Parser.h"
+#include"tinyxml2.h"
 
 //defines for Read()
 #define CONFIG_ROOT "root"
@@ -25,26 +26,26 @@
 #define CONFIG_MAXWORKINGTHREAD "maxworkingthreads"
 
 
-void CXMLParser::XML_Parser::Read(const string& file_path)//bool
+bool CXMLParser::XMLParser::ReadConfigs(const string& file_path) noexcept
 {
     if (!is_regular_file(file_path)) //logger return throw exception("wrong file path");
-        return;
+        return false;
 
     XMLDocument doc;
 
     if (doc.LoadFile(file_path.c_str()) != 0) //logger return throw exception("can't load xml file");
-        return;
+        return false;
     XMLElement* pRoot;//smart ptr
 
     pRoot = doc.FirstChildElement(CONFIG_ROOT);
     if (pRoot == nullptr)
-        return;//file is empty or another format
+        return false;//file is empty or another format
 
     /*All checks below forced to avoid abort()*/
 
     //<Server>
     XMLElement* Server = pRoot->FirstChildElement(CONFIG_SERVER);
-    if (Server == nullptr) return;//no sense to continue;
+    if (Server == nullptr) return false;//no sense to continue;
 
     if (Server->FirstChildElement(CONFIG_SERVERNAME) != nullptr)
         out_doc.servername = Server->FirstChildElement(CONFIG_SERVERNAME)->GetText();
@@ -60,7 +61,7 @@ void CXMLParser::XML_Parser::Read(const string& file_path)//bool
 
     //<communicationsetings>
     XMLElement* Settings = pRoot->FirstChildElement(CONFIG_COMMUNICATIONSETTINGS);
-    if (Settings == nullptr) return;//no sense to continue;
+    if (Settings == nullptr) return false;//no sense to continue;
 
     if (Settings->FirstChildElement(CONFIG_BLOCKING) != nullptr)
         out_doc.blocking = Settings->FirstChildElement(CONFIG_BLOCKING)->GetText();
@@ -70,28 +71,30 @@ void CXMLParser::XML_Parser::Read(const string& file_path)//bool
 
     //<loggin>
     XMLElement* Loggin = pRoot->FirstChildElement(CONFIG_LOGGIN);
-    if (Loggin == nullptr) return;//no sense to continue
+    if (Loggin == nullptr) return false;//no sense to continue
 
     if (Loggin->FirstChildElement(CONFIG_FILENAME) != nullptr)
         out_doc.filename = Loggin->FirstChildElement(CONFIG_FILENAME)->GetText();
 
     if (Loggin->FirstChildElement(CONFIG_LOGLEVEL) != nullptr)
-        out_doc.LogLevel = Loggin->FirstChildElement(CONFIG_LOGLEVEL)->GetText();
+        out_doc.loglevel = Loggin->FirstChildElement(CONFIG_LOGLEVEL)->GetText();
 
     if (Loggin->FirstChildElement(CONFIG_FLUSH))
         out_doc.flush = Loggin->FirstChildElement(CONFIG_FLUSH)->GetText();
 
     //<time>
     if (pRoot->FirstChildElement(CONFIG_TIME)->FirstChildElement(CONFIG_PERIOD_TIME) != nullptr)
-        out_doc.Period_time = pRoot->FirstChildElement(CONFIG_TIME)->FirstChildElement(CONFIG_PERIOD_TIME)->GetText();
+        out_doc.period_time = pRoot->FirstChildElement(CONFIG_TIME)->FirstChildElement(CONFIG_PERIOD_TIME)->GetText();
 
     //<treadpool>
     if (pRoot->FirstChildElement(CONFIG_THREADPOOL)->FirstChildElement(CONFIG_MAXWORKINGTHREAD))
         out_doc.maxworkingthreads = pRoot->FirstChildElement(CONFIG_THREADPOOL)->FirstChildElement(CONFIG_MAXWORKINGTHREAD)->GetText();
+
+    return true;//all is good
 }
 
 
-//defines for Write()
+//defines for WriteSystemInformation() and PrepareToDBManager()
 #define CLIENT_ROOT "root"
 #define CLIENT_CLIENT "Client"
 #define CLIENT_MACADRESS "MacAddress"
@@ -109,7 +112,7 @@ void CXMLParser::XML_Parser::Read(const string& file_path)//bool
 #define CLIENT_CPU_VENDOR "CPUVendor"
 #define CLIENT_CPU_SPEED "CPUSpeed"
 
-void CXMLParser::XML_Parser::Write(const string& file_path, ClientSysInfo& obj) const
+void CXMLParser::XMLParser::WriteSystemInformation(string& xml_str, ClientSysInfo& obj) const noexcept
 {
     XMLDocument xmlDoc;
     //root
@@ -121,20 +124,20 @@ void CXMLParser::XML_Parser::Write(const string& file_path, ClientSysInfo& obj) 
     //MAC
     XMLElement* pMAC = xmlDoc.NewElement(CLIENT_MACADRESS);//root->client->MacAddress
 
-    pMAC->SetText(obj.Get_MacAddress().c_str());
+    pMAC->SetText(obj.getMacAddress.c_str());
     pClient->InsertFirstChild(pMAC);
     //IP
     XMLElement* pIPAddress = xmlDoc.NewElement(CLIENT_IPADRESS);//root->client->IPAddress
-    pIPAddress->SetText(obj.Get_IPAddress().c_str());
+    pIPAddress->SetText(obj.get_IPAddress().c_str());
     pClient->InsertFirstChild(pIPAddress);
 
     //SystemInfo
     XMLElement* pSystemInformation = xmlDoc.NewElement(CLIENT_SYSTEMINFORMATION);//root->client->SystemInformation
 
-    vector<string> HardDisk_type_list = obj.Get_HardDisk_type_list();
-    vector<int> HardDisk_TotalSize = obj.Get_HardDisk_TotalSize();
-    vector<int> HardDisk_Used = obj.Get_HardDisk_Used();
-    vector<int> HardDisk_Free = obj.Get_HardDisk_Free();
+    vector<string> HardDisk_type_list = obj.get_HardDisk_type_list();
+    vector<int> HardDisk_TotalSize = obj.get_HardDisk_TotalSize();
+    vector<int> HardDisk_Used = obj.get_HardDisk_Used();
+    vector<int> HardDisk_Free = obj.get_HardDisk_Free();
 
     //HardDisk loop
     XMLElement* pHardDisk;
@@ -161,32 +164,94 @@ void CXMLParser::XML_Parser::Write(const string& file_path, ClientSysInfo& obj) 
     }
     //RAM
     XMLElement* pTotalRAM = xmlDoc.NewElement(CLIENT_TOTALRAM);//root->client->SystemInformation->TotalRAM
-    pTotalRAM->SetText(obj.Get_TotalRAM());
+    pTotalRAM->SetText(obj.get_TotalRAM());
     pSystemInformation->InsertEndChild(pTotalRAM);
     //CPU
     XMLElement* CPU = xmlDoc.NewElement(CLIENT_CPU);//root->client->SystemInformation->CPU
 
     XMLElement* CPUNumbers = xmlDoc.NewElement(CLIENT_CPU_NUMBERS);//root->client->SystemInformation->CPU
-    CPUNumbers->SetText(obj.Get_CPUNumbers());
+    CPUNumbers->SetText(obj.get_CPUNumbers());
     CPU->InsertEndChild(CPUNumbers);
     XMLElement* CPUVendor = xmlDoc.NewElement(CLIENT_CPU_VENDOR);//root->client->SystemInformation->CPU
-    CPUVendor->SetText(obj.Get_CPUVendor().c_str());
+    CPUVendor->SetText(obj.get_CPUVendor().c_str());
     CPU->InsertEndChild(CPUVendor);
     XMLElement* CPUSpeed = xmlDoc.NewElement(CLIENT_CPU_SPEED);//root->client->SystemInformation->CPU
-    CPUSpeed->SetText(obj.Get_CPUSpeed());
+    CPUSpeed->SetText(obj.get_CPUSpeed());
     CPU->InsertEndChild(CPUSpeed);
 
     //end
     pSystemInformation->InsertEndChild(CPU);
     pClient->InsertEndChild(pSystemInformation);
     pRoot->InsertFirstChild(pClient);
-    xmlDoc.SaveFile(file_path.c_str());
+
+
+    XMLPrinter printer;
+    xmlDoc.Accept(&printer);
+    xml_str = printer.CStr();
 }
 
-CXMLParser::outDocument CXMLParser::XML_Parser::GetData() const noexcept
+bool CXMLParser::XMLParser::PrepareToDBManager(string& xml_str)noexcept
 {
-    return this->out_doc;
+    if (xml_str == "")//logger
+        return false;
+
+    XMLDocument doc;
+
+    if (doc.Parse(xml_str.c_str()) != 0) //logger return throw exception("can't load xml file");
+        return false;
+
+    //<root>
+    XMLElement* pRoot;//smart ptr
+
+    pRoot = doc.FirstChildElement(CLIENT_ROOT);
+    if (pRoot == nullptr)
+        return false;//file is empty or another format
+
+    //<Client>
+    XMLElement* pClient = pRoot->FirstChildElement(CLIENT_CLIENT);
+    if (pClient == nullptr) return false;//no sense to continue;
+
+    if (pClient->FirstChildElement(CLIENT_IPADRESS) != nullptr)
+        ip_address = pClient->FirstChildElement(CLIENT_IPADRESS)->GetText();//ip_address
+
+    if (pClient->FirstChildElement(CLIENT_MACADRESS) != nullptr)
+        mac_address = pClient->FirstChildElement(CLIENT_MACADRESS)->GetText();//mac_address
+
+    //<SystemInformation>
+    XMLElement* pSysInfo = pClient->FirstChildElement(CLIENT_SYSTEMINFORMATION);
+    if (pSysInfo == nullptr) return false;//no sense to continue;
+    //<HardDisk> loop
+    XMLElement* pHardDisk = pSysInfo->FirstChildElement(CLIENT_HARDDISK);
+    if (pHardDisk == nullptr) return false;//no sense to continue;
+
+    for (XMLElement* e = pSysInfo->FirstChildElement(CLIENT_HARDDISK); e != nullptr; e = e->NextSiblingElement(CLIENT_HARDDISK))
+    {
+        harddisk_type_list.emplace_back(e->Attribute(CLIENT_DRIVE));
+        harddisk_totalsize.emplace_back(e->FirstChildElement(CLIENT_HARDDISK_TOTALSIZE)->IntText());
+        harddisk_used.emplace_back(e->FirstChildElement(CLIENT_HARDDISK_USED)->IntText());
+        harddisk_free.emplace_back(e->FirstChildElement(CLIENT_HARDDISK_FREE)->IntText());
+    }
+
+    //<totalRAM>
+    if (pSysInfo->FirstChildElement(CLIENT_TOTALRAM) != nullptr)
+        total_ram = pSysInfo->FirstChildElement(CLIENT_TOTALRAM)->IntText();
+
+    //CPU
+    XMLElement* pCPU = pSysInfo->FirstChildElement(CLIENT_CPU);
+    if (pCPU == nullptr) return false;//no sense to continue;
+
+    if (pCPU->FirstChildElement(CLIENT_CPU_NUMBERS) != nullptr)
+        cpu_numbers = pCPU->FirstChildElement(CLIENT_CPU_NUMBERS)->IntText();
+
+    if (pCPU->FirstChildElement(CLIENT_CPU_VENDOR) != nullptr)
+        cpu_vendor = pCPU->FirstChildElement(CLIENT_CPU_VENDOR)->GetText();
+
+    if (pCPU->FirstChildElement(CLIENT_CPU_SPEED))
+        cpu_speed = pCPU->FirstChildElement(CLIENT_CPU_SPEED)->IntText();
+
+    return true;//all is good
 }
+
 
 
 // This is an example of an exported variable

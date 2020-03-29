@@ -16,6 +16,7 @@
 #include<string>
 #include<vector>//ClientSysInfo
 #include"tinyxml2.h"
+#include"../../Client/ClientSysInfo.h"//dependency in method WriteSystemInformation()
 using namespace std;
 using namespace filesystem;
 using namespace tinyxml2;
@@ -23,34 +24,7 @@ using namespace tinyxml2;
 class XMLPARSER_API CXMLParser {
 public:
 
-    class ClientSysInfo
-    {
-        string OS;
-        string MacAddress{ "B4-2E-99-10-AA-2C" };
-        string IPAddress{ "127.0.0.1" };
-        int TotalRAM{ 100 };
-        int CPUNumbers{ 4 };
-        string CPUVendor{ "Intel" };
-        int CPUSpeed{ 100000 };
-        vector<string> HardDisk_type_list{ {"C"},{"D"} };
-        vector<int> HardDisk_TotalSize{ 1000,1000 };
-        vector<int> HardDisk_Used{ 5000,5000 };
-        vector<int> HardDisk_Free{ 1500,1500 };
-    public:
-        string Get_OS() { return OS; }
-        string Get_MacAddress() { return MacAddress; }
-        string Get_IPAddress() { return IPAddress; }
-        int Get_TotalRAM() { return TotalRAM; }
-        int Get_CPUNumbers() { return CPUNumbers; }
-        string  Get_CPUVendor() { return CPUVendor; }
-        int  Get_CPUSpeed() { return CPUSpeed; }
-        vector<string>  Get_HardDisk_type_list() { return HardDisk_type_list; }
-        vector<int>  Get_HardDisk_TotalSize() { return HardDisk_TotalSize; }
-        vector<int>  Get_HardDisk_Used() { return HardDisk_Used; }
-        vector<int>  Get_HardDisk_Free() { return HardDisk_Free; }
-    };
-
-    struct outDocument
+    struct OutDocument
     {
         string serverdisplayname = "";
         string servername = "";
@@ -59,29 +33,46 @@ public:
         string blocking = "";
         string socket_timeout = "";
         string filename = "";
-        string LogLevel = "";
+        string loglevel = "";
         string flush = "";
-        string Period_time = "";
+        string period_time = "";
         string maxworkingthreads = "";
     };
 
-    class XML_Parser
+    class XMLParser
     {
     public:
-        XML_Parser() = default;
-        void Read(const string& file_path);
-        void Write(const string& file_path, ClientSysInfo& obj) const;
+        XMLParser() = default;     
 
-        outDocument GetData() const noexcept;
+        bool ReadConfigs(const string& file_path)noexcept;//read configuration' file for server
+        void WriteSystemInformation(string& xml_str, ClientSysInfo& obj) const noexcept;//write client's information in external string
+        bool PrepareToDBManager(string& xml_str)noexcept;//prepare client's external string to write in DB
+
+        OutDocument get_data() const noexcept { return out_doc; }//getter configs for server
+
+        string get_macaddress()const noexcept { return mac_address; }//client info
+        string get_ipaddress()const noexcept { return ip_address; }//
+        int get_totalram()const noexcept { return total_ram; }//
+        int get_cpunumbers()const noexcept { return cpu_numbers; }//
+        string  get_cpuvendor()const noexcept { return cpu_vendor; }//
+        int  get_cpuspeed()const noexcept { return cpu_speed; }//
+        vector<string>  get_harddisk_type_list()const noexcept { return harddisk_type_list; }//
+        vector<int>  get_harddisk_totalsize() const noexcept { return harddisk_totalsize; }//
+        vector<int>  get_harddisk_used()const noexcept { return harddisk_used; }//
+        vector<int>  get_harddisk_free()const noexcept { return harddisk_free; }//
     private:
-        outDocument out_doc;
+        OutDocument out_doc;//configs for server
 
-    };
-
-    class crypto
-    {
-        bool encrypt();
-        bool decrypt();
+        string mac_address{ "" };//client info
+        string ip_address{ "" };//
+        int total_ram{ 0 };//
+        int cpu_numbers{ 0 };//
+        string cpu_vendor{ "" };//
+        int cpu_speed{ 0 };//
+        vector<string> harddisk_type_list;//
+        vector<int> harddisk_totalsize;//
+        vector<int> harddisk_used;//
+        vector<int> harddisk_free;//
     };
 	CXMLParser(void);
 	// TODO: add your methods here.
