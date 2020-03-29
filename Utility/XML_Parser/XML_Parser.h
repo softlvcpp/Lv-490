@@ -61,7 +61,7 @@ public:
         XMLParser() = default;     
 
         XMLPARSER_API bool ReadConfigs(const string& file_path)noexcept;//read configuration' file for server
-        XMLPARSER_API void WriteSystemInformation(string& xml_str, ClientSysInfo& obj) const noexcept;//write client's information in external string
+        XMLPARSER_API void WriteSystemInformation(string& xml_str, ClientInfo& obj) const noexcept;//write client's information in external string
         XMLPARSER_API bool PrepareToDBManager(string& xml_str)noexcept;//prepare client's external string to write in DB
 
         OutDocument get_data() const noexcept { return out_doc; }//getter configs for server
