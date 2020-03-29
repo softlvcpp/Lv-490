@@ -8,14 +8,16 @@
 #endif
 
 #ifndef SLOG_ENDL
-#define SLOG_ENDL filelog::FileMsgEndl()
+#define SLOG_ENDL filelog::MsgEndl()
 #endif
 
 #include <thread>
 #include <atomic>
 #include <string>
 #include <fstream>
-#include "../Essentials/ConcPriorityQueue.h"
+#include <regex>
+//#include "../Essentials/ConcPriorityQueue.h"
+#include "../Essentials/ConcurrentMultiQueue.h"
 #include "../Essentials/LogFundamentals.h"
 #include "../Essentials/RuntimeFilter.h"
 
@@ -32,17 +34,8 @@ namespace filelog
     using LogLevel = log490::LogLevel;
     using MsgEndl = log490::MsgEndl;
 
-    struct FileMsgEndl;
     class FileLogMessage;
     class FileLogger;
-
-    LOGGER_API LogMessage& operator<<(LogMessage& left, FileMsgEndl&& right);
-    LOGGER_API LogMessage& operator<<(LogMessage& left, FileMsgEndl& right);
-
-    struct FailedToOpenFileException : std::runtime_error
-    {
-        LOGGER_API FailedToOpenFileException(const char* what = "");
-    };
 
     struct LogDataLess
     {
@@ -67,26 +60,37 @@ namespace filelog
         size_t timePosition;
     };
 
-    struct LOGGER_API FileMsgEndl : MsgEndl
-    {
-        virtual void flush(LogMessage&) const override;
-        void flush(FileLogMessage&) const;
-    };
-
     class FileLogger : public Logger
     {
     public:
         using char_type = FLOG_CHAR_TYPE;
-        using stream_type = std::wofstream;                                                             
+        using stream_type = std::wofstream;                                                         
 
         constexpr static LOGGER_API const char* DATETIME_STRING_FORMAT = "%d%m%Y %H-%M-%S";             // Filename datetime suffix format  
         constexpr static LOGGER_API size_t DATETIME_FORMAT_CHAR_COUNT = sizeof("01012000 00-00-00");    // Filename datetime suffix char count
         constexpr static LOGGER_API size_t DEFAULT_FILE_SIZE = 4194304;
         constexpr static LOGGER_API size_t CHAR_TYPE_SIZE = sizeof(char_type);
 
-        /* Creates filelogger object and starts separate filestreaming thread */
+        /*  Creates filelogger object and set's it to joined state. Use when want to deffer start */
+        LOGGER_API FileLogger();
+
+        /* Creates filelogger object and starts separate filestreaming thread.
+           
+           filePathTemplate - specifies file template: filename.txt -> filename_01012000 00-00-00.txt
+           lvl - specifies maximum logging level
+           fileSize - maximum size of the single file
+        */
         LOGGER_API FileLogger(const char* filePathTemplate, LogLevel lvl, size_t fileSize = DEFAULT_FILE_SIZE);
-        //FileLogger(const wchar_t* filePathTemplate, LogLevel lvl, size_t fileSize = DEFAULT_FILE_SIZE);
+
+        /* Creates filelogger object and starts separate filestreaming thread.
+
+          filePathTemplate - specifies file template: filename.txt -> filename_01012000 00-00-00.txt
+          useExactName - specifies if should try to use exact name first. If file with that name exist, 
+          and is too big it will still create new files like this -> filename_01012000 00-00-00.txt
+          lvl - specifies maximum logging level
+          fileSize - maximum size of the single file
+        */
+        LOGGER_API FileLogger(const char* filePathTemplate, bool useExactName, LogLevel lvl, size_t fileSize = DEFAULT_FILE_SIZE);
 
         /* Destroys filelogger, stops streaming loop and joins streaming thread */
         LOGGER_API ~FileLogger() override;
@@ -100,37 +104,74 @@ namespace filelog
         */
         void LOGGER_API join();
 
+        /* Stops and restarts logger, with given arguments.
+           See also: FileLogger(const char* filePathTemplate, bool useExactName, LogLevel lvl, size_t fileSize) */
+        bool LOGGER_API restart(const char* filePathTemplate, bool useExactName, LogLevel lvl, size_t fileSize = DEFAULT_FILE_SIZE, bool join = false);
+
         /* Returns true if logger's loop has exited with exception */
         bool LOGGER_API isInterrupted() const;
 
+        /* Returns exception that logger has encoutered if it was interrupted */
+        LOGGER_API const std::exception& getException();
+
         /* Returns true if join was called succesfully */
         bool LOGGER_API isJoined() const;
+
+        /* Returns currently open file's name */
+        LOGGER_API const char* getCurrentFilename() const;
+
     private:
         void logWriteLoop();
         void threadEntry() noexcept;
-        std::wstring createWideFileName();
         std::string createNarrowFileName();
 
-        bool openFile(const char* fileName);
+        void init(const char* filePathTemplate, bool useExactName, LogLevel lvl, size_t fileSize = DEFAULT_FILE_SIZE);
+        void stop(bool writeRemaining);
+
+        void setFilename(const char* newFileName);
+        bool openFile(const char* fileName, bool useExact = false, size_t neccessarySpace = 0, std::ios::openmode mode = std::ios::out | std::ios::app);
         void setInterrupted();
         void setJoined();
         bool streamLogMessage(LogData& data);
         bool validateFilenameTemplate(const std::string& temp);
+        bool fileFull(const char* fileName, size_t shouldHaveLeft = 0);
+        bool fileMatchesTemplate(const char_type* filename);
+        std::string filenameRegexCheck();
+
+        bool getLastModifiedMatchesTemplate(std::string& resultPath);
     private:
         std::atomic<bool> interrupted;             // [flag] interrupted due to exception
         std::atomic<bool> joined;                  // [flag] thread is properly joined      
         std::atomic<bool> fLoggerStop;             // [flag] thread broke loop and joined
         std::atomic<bool> fOnJoinWriteRemaining;   // [flag] should write all remaining messages on join     
-        std::thread consumerStreamer;
-        log490::ConcurrentPriorityQueue<LogData, std::vector<LogData>, LogDataLess> messageQueue;
+        std::thread fileStreamThread;              // thread that streams incoming messages in parallel
+        //log490::ConcurrentPriorityQueue<LogData, std::vector<LogData>, LogDataLess> messageQueue; // concurrent blocking message queue
+        log490::ConcurrentMultiQueue messageQueue;
 
-        std::string filenamePathTemplate_Narrow;   // filename template in narrow char                          
-        std::string fileExtension_Narrow;          // file extension in const narrow char
-        std::string folder_Narrow;                 // file parent folder in narrow char
+        struct DeconstructedFilename
+        {
+            template<typename T>
+            struct DFStrings
+            {
+                using str = std::basic_string<T>;
+                // Path pieces without DATE-TIME_COUNT suffix
+                str pathWithNoExt;                 // full path without extension
+                str folder;                        // full path without file-name
+                str fileNameWithNoExt;             // filename with no extension
+                str extension;                     // just extension
+                str fullPath;                      // full path, example path/logger.log
+            };
 
-        std::wstring filenamePathTemplate_Wide;    // filename template in wide char       
-        std::wstring fileExtension_Wide;           // file extension in const wide char
-        std::wstring folder_Wide;                  // file parent folder in narrow char
+            DFStrings<char> asString;              // info as ASCII string 
+            DFStrings<wchar_t> asWstring;          // info as UNICODE string
+        } filenameInfo;                            // any neccessary information about file template
+
+        std::string currentFileName;               // currently used file name
+        std::wregex filenameTemplateRegex;         // path_DATE-TIME_COUNT.extension
+        std::regex filenameTNoCounterRegex;        // path_DATE-TIME.extension
+        mutable std::mutex filenameAccessMutex;    // write/read mutex for filename
+
+        std::exception interruptedException;       // exception that is saved when logger is interrupted
 
         stream_type outputStream;                  // log file output stream
         size_t currentFileSize;                    // currently written size
@@ -146,16 +187,20 @@ namespace filelog
         LOGGER_API FilteredFileLogMessage& operator=(FilteredFileLogMessage&&) noexcept;
 
         template <typename T>
-        inline FilteredFileLogMessage& operator<<(const T& data) { return static_cast<FilteredFileLogMessage&>(RuntimeLogFilter::operator<<(data)); }
+        inline FilteredFileLogMessage& operator<<(const T& data);
         template <typename T>
-        inline FilteredFileLogMessage& operator<<(T&& data) { return static_cast<FilteredFileLogMessage&>(RuntimeLogFilter::operator<<(data)); }
-        LOGGER_API FilteredFileLogMessage& operator<<(const FileMsgEndl& endl);
-        LOGGER_API FilteredFileLogMessage& operator<<(FileMsgEndl&& endl);
+        inline FilteredFileLogMessage& operator<<(T&& data);
+        LOGGER_API FilteredFileLogMessage& operator<<(MsgEndl endl);
 
         LOGGER_API FileLogMessage& getMessage();
     private:
         FileLogMessage msg;
     };
+
+    template <typename T>
+    inline FilteredFileLogMessage& FilteredFileLogMessage::operator<<(const T& data) { return static_cast<FilteredFileLogMessage&>(RuntimeLogFilter::operator<<(data)); }
+    template <typename T>
+    inline FilteredFileLogMessage& FilteredFileLogMessage::operator<<(T&& data) { return static_cast<FilteredFileLogMessage&>(RuntimeLogFilter::operator<<(data)); }
 
 }
 

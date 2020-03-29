@@ -18,12 +18,12 @@ namespace log490
 
     std::streamsize Utils::FixedMessageBuffer::length()
     {
-        return pptr() - pbase();
+        return pptr() - pbase(); // offset of the put pointer
     }
 
     std::streamsize Utils::FixedMessageBuffer::capacity()
     {
-        return bufferSize;
+        return bufferSize;       
     }
 
     bool Utils::FixedMessageBuffer::empty()
@@ -210,6 +210,7 @@ namespace log490
         this->msgLine = source.msgLine;
         this->_msgTime = source._msgTime;
         this->_msgUTCTime = source._msgUTCTime;
+        this->_msgHighResTime = source._msgHighResTime;
         this->_threadID = source._threadID;
         this->_message = std::move(source._message);
     }
@@ -223,6 +224,7 @@ namespace log490
             this->msgLine = right.msgLine;
             this->_msgTime = right._msgTime;
             this->_msgUTCTime = right._msgUTCTime;
+            this->_msgHighResTime = right._msgHighResTime;
             this->_threadID = right._threadID;
             this->_message = std::move(right._message);
         }
@@ -237,6 +239,11 @@ namespace log490
     logtime_t& LogData::msgTime()
     {
         return _msgTime;
+    }
+
+    LOGGER_API std::chrono::time_point<highres_t>& LogData::msgHighResTime()
+    {
+        return _msgHighResTime;
     }
 
     logtimestruct_t& LogData::msgUTCTime()
@@ -259,6 +266,11 @@ namespace log490
         return _msgTime;
     }
 
+	const std::chrono::time_point<highres_t>& LogData::msgHighResTime() const
+	{
+        return _msgHighResTime;
+	}
+
     const logtimestruct_t& LogData::msgUTCTime() const
     {
         return _msgUTCTime;
@@ -271,8 +283,9 @@ namespace log490
 
     void LogData::updateTime()
     {
+        _msgHighResTime = std::chrono::high_resolution_clock::now();
         _msgTime = time(0);
-        Utils::getUTCTime(_msgUTCTime, _msgTime);
+        Utils::getUTCTime(_msgUTCTime, _msgTime);  
     }
 
 
@@ -283,7 +296,7 @@ namespace log490
 
     bool Logger::logThisLevel(LogLevel lvl) const
 	{
-		return lvl <= runtimeLevel;
+		return (runtimeLevel != LogLevel::NoLogs) && (lvl != LogLevel::NoLogs) && (lvl <= runtimeLevel);
 	}
 
     Logger::Logger() : runtimeLevel{ LogLevel::NoLogs }
@@ -338,6 +351,15 @@ namespace log490
         {
             msg.getDataRef().updateTime();
             msg.getLogger().sendLogMessage(msg.getDataRef());
+            setFlushed(msg);
+        }
+    }
+
+    void MsgEndl::cancel(LogMessage& msg) const
+    {
+        if (!msg.flushed)
+        {
+            msg.getDataRef().message().reset(nullptr);
             setFlushed(msg);
         }
     }

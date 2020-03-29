@@ -26,8 +26,7 @@
 #include "QtGlobal"
 #define LOGGER_API Q_DECL_EXPORT
 #else
-//#define LOGGER_API Q_DECL_IMPORT
-#define LOGGER_API
+#define LOGGER_API Q_DECL_IMPORT
 #endif
 
 #endif // Export/import defines

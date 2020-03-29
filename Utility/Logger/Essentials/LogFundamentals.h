@@ -28,6 +28,7 @@ namespace log490 {
     using line_t = uint32_t;
     using logtimestruct_t = tm;
     using logtime_t = time_t;
+    using highres_t = std::chrono::steady_clock;
     using signature_t = const char*;
     using logchar_t = wchar_t;
     using stream_t = std::wostream;
@@ -55,15 +56,19 @@ namespace log490 {
             constexpr static LOGGER_API size_t bufferSize = 512 * 1 * sizeof(logchar_t);
 
             LOGGER_API FixedMessageBuffer();
-            LOGGER_API std::streamsize length();//   const { return pptr() - pbase(); }
-            LOGGER_API std::streamsize capacity();// const { return bufferSize; }
-            LOGGER_API bool empty();//             const { return length() == 0; }
-            LOGGER_API bool full();// const { return length() == capacity(); }
+            /* Returns put pointer offset */
+            LOGGER_API std::streamsize length();
+            /* Returns constant bufferSize */
+            LOGGER_API std::streamsize capacity();
+            /* Checks if put pointer is at 0 */
+            LOGGER_API bool empty();
+            /* Checks if put pointer is at pbase + bufferSize */
+            LOGGER_API bool full();
 
-            // Unput one character.
+            /* Unput one character. */
             LOGGER_API int_type sunputc();
 
-            // Peek at last inserted character.
+            /* Peek at last inserted character. */
             LOGGER_API int peek() const;
 
             LOGGER_API const logchar_t* c_str() const;
@@ -78,8 +83,8 @@ namespace log490 {
         struct FixedBuffStream
         {
             FixedBuffStream();
-            FixedMessageBuffer messageBuffer;
-            stream_t messageStream;
+            FixedMessageBuffer messageBuffer;   // fixed size character buffer
+            stream_t messageStream;             // ostream buffer handler
         };
     };
 
@@ -92,26 +97,39 @@ namespace log490 {
 
         LOGGER_API LogData& operator=(LogData&&) noexcept;
 
+        /* Returns stored message id */
         LOGGER_API std::thread::id& threadID();
+        /* Returns stored local time as time_t int */
         LOGGER_API logtime_t& msgTime();
+        /* Returns stored local time in nanosecond */
+        LOGGER_API std::chrono::time_point<highres_t>& msgHighResTime();
+        /* Returns stored utc time as struct */
         LOGGER_API logtimestruct_t& msgUTCTime();
+        /* Returns allocated buffer pointer */
         LOGGER_API uptr_t<Utils::FixedBuffStream>& message();
 
-        LOGGER_API inline const std::thread::id& threadID() const;
-        LOGGER_API inline const logtime_t& msgTime() const;
-        LOGGER_API inline const logtimestruct_t& msgUTCTime() const;
-        LOGGER_API inline const uptr_t<Utils::FixedBuffStream>& message() const;
+        /* Returns stored message id */
+        LOGGER_API const std::thread::id& threadID() const;
+        /* Returns stored local time as time_t int */
+        LOGGER_API const logtime_t& msgTime() const;
+        LOGGER_API const std::chrono::time_point<highres_t>& msgHighResTime() const;
+        /* Returns stored utc time as struct */
+        LOGGER_API const logtimestruct_t& msgUTCTime() const;
+        /* Returns allocated buffer pointer */
+        LOGGER_API const uptr_t<Utils::FixedBuffStream>& message() const;
 
+        /* Updates stored local and utc time */
         LOGGER_API void updateTime();
 
-        LogLevel msgLevel;
-        signature_t callerSignature;
-        line_t msgLine;
+        LogLevel msgLevel;                              // message level 
+        signature_t callerSignature;                    // calling function signature
+        line_t msgLine;                                 // message line
     private:
-        std::thread::id _threadID;
-        logtime_t _msgTime;
-        logtimestruct_t _msgUTCTime;
-        uptr_t<Utils::FixedBuffStream> _message;
+        std::thread::id _threadID;                      // caller function thread id
+        logtime_t _msgTime;                             // message local time
+        logtimestruct_t _msgUTCTime;                    // message utc time
+        std::chrono::time_point<highres_t> _msgHighResTime;
+        uptr_t<Utils::FixedBuffStream> _message;        // message buffer and stream-handler
     };
 
     class LOGGER_API Logger
@@ -121,13 +139,17 @@ namespace log490 {
         virtual ~Logger() { }
         virtual bool sendLogMessage(LogData& data) = 0;
 
+        /* Sets runtime log level(not atomic) */
         virtual void setRTLevel(LogLevel level);
+        /* Returns current runtime log level(not atomic) */
         virtual LogLevel getRTLevel() const;
+        /* Checks if logger accepts this level value */
         virtual bool logThisLevel(LogLevel lvl) const;
     private:
-        LogLevel runtimeLevel;
+        LogLevel runtimeLevel;                          // runtime log level value
     };
 
+    /* Dummy logger that used when you need to temporarily store logger reference */
     class LOGGER_API DummyLogger : Logger
     {
     public:
@@ -140,12 +162,14 @@ namespace log490 {
         static DummyLogger sInstance;
     };
 
+    /* Base class for messages, exists just for polymorpism */
     struct LOGGER_API Message
     {
     public:
         virtual ~Message() { }
     };
 
+    /* Special message type that does nothing to enable  */
     class VoidMessage : public Message
     {
     public:
@@ -158,14 +182,17 @@ namespace log490 {
 
     class LogMessage;
 
+    /* Class that allows you to immidiately send the message before destuction */
     struct LOGGER_API MsgEndl
     {
         virtual ~MsgEndl() {}
         virtual void flush(LogMessage&) const;
+        virtual void cancel(LogMessage&) const;
     protected:
         void setFlushed(LogMessage&) const;
     };
 
+    /* Special class stores anything that is neccessary for  */
     class LogMessage : Message
     {
     public:
@@ -211,76 +238,5 @@ namespace log490 {
 
 }
 
-// Log levels as macros
-
-#ifndef SLOG_NO_DEFAULT_MACROS
-
-#ifndef CTLVL_NOLOGS
-#define CTLVL_NOLOGS 0 
-#endif 
-
-#ifndef CTLVL_PROD
-#define CTLVL_PROD 1 
-#endif
-
-#ifndef CTLVL_DEBUG
-#define CTLVL_DEBUG 2
-#endif 
-
-#ifndef CTLVL_TRACE
-#define CTLVL_TRACE 3
-#endif 
-
-
-// Compile time log level
-#ifndef CTIME_LOG_LEVEL
-#define CTIME_LOG_LEVEL CTLVL_TRACE
-#endif // !CTIME_LOG_LEVEL
-
-#ifndef SLOG_ENDL
-#define SLOG_ENDL log490::MsgEndl{}
-#endif
-
-// Message object that does nothing
-#ifndef VOID_LOG
-#define VOID_LOG log490::VoidMessage::voidMsg
-#endif // !VOID_LOG
-
-// Logger calls by levels
-#ifndef SLOG_LEVEL
-#define SLOG_LEVEL(logger, level) log490::LogMessage{ logger, level, LOG_FUNCTION_MACRO, LOG_LINE_MACRO }
-#endif
-
-#if CTLVL_PROD <= CTIME_LOG_LEVEL
-#ifndef SLOG_PROD
-#define SLOG_PROD(logger) SLOG_LEVEL(logger, static_cast<log490::LogLevel>(CTLVL_PROD))
-#endif
-#else
-#ifndef SLOG_PROD
-#define SLOG_PROD(logger) VOID_LOG
-#endif
-#endif
-
-#if CTLVL_DEBUG <= CTIME_LOG_LEVEL
-#ifndef SLOG_DEBUG
-#define SLOG_DEBUG(logger) SLOG_LEVEL(logger, static_cast<log490::LogLevel>(CTLVL_DEBUG))
-#endif
-#else
-#ifndef SLOG_DEBUG
-#define SLOG_DEBUG(logger) VOID_LOG
-#endif
-#endif
-
-#if CTLVL_TRACE <= CTIME_LOG_LEVEL
-#ifndef SLOG_TRACE
-#define SLOG_TRACE(logger) SLOG_LEVEL(logger, static_cast<log490::LogLevel>(CTLVL_TRACE))
-#endif
-#else
-#ifndef SLOG_TRACE
-#define SLOG_TRACE(logger) VOID_LOG
-#endif
-#endif
-
-#endif // !SLOG_NO_DEFAULT_MACROS
 
 #endif // BASELOGGER_H

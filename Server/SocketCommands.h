@@ -10,8 +10,11 @@
 #include <vector>
 #include <memory>
 #include <fstream>
-//#include <Mstcpip.h>
+#include <Mstcpip.h>
 #include "ThreadPool.h"
+
+#include "..\Utility\Logger\LoggerDLL.h"
+#include "..\Utility\XML_Parser\XML_Parser.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -20,12 +23,11 @@
 typedef struct
 {
 	SOCKET id;			//socket handle
-	int	state;			//receiving? 0 - not accepted
+	int	state;			//receiving? 0 - LISTEN, 1 - ACCEPTED, 2 - RECEIVEING
 	std::string buffer;
 	std::string log_msg;
 } SocketState;
 
-constexpr int PORT = 8080;//default port
 constexpr int BUFFER_SIZE = 512;//default buffer size
 
 enum
@@ -40,9 +42,16 @@ class Command
 public:
 	Command() {};
 	virtual bool Execute(SocketState& socket_state) = 0;
-	bool InitThreadPool(ThreadPool* main_pool) { m_thread_pool = std::shared_ptr<ThreadPool>(main_pool); return true; };
+	
+	bool InitThreadPool(ThreadPool* main_pool);
+	bool InitThreadPool(std::shared_ptr<ThreadPool> main_pool);
+
+	bool InitConfiguration(CXMLParser::outDocument* server_configuration);
+	bool InitConfiguration(std::shared_ptr<CXMLParser::outDocument> server_configuration);
+
 protected:
-	std::shared_ptr<ThreadPool> m_thread_pool;//make_shared не хоче працювати зі ThreadPool
+	std::shared_ptr<ThreadPool> m_thread_pool;
+	std::shared_ptr<CXMLParser::outDocument> m_server_configuration;
 };
 
 class AddSocketConnection : public Command
