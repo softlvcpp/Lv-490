@@ -12,6 +12,8 @@
 
 #include "../Utility/Logger/LoggerDLL.h"
 
+#include "../Utility/XML_Parser/XML_Parser.h"
+
 #define USERNAME_LEN 20
 /*
  * The class is implemented Singleton for two reasons :
@@ -30,15 +32,15 @@ private:
 	std::string m_log_file_name{ "serverlog.log" };
 	std::string m_log_directory_name{ "Lv-490_logs" };
 	std::unique_ptr<filelog::FileLogger> m_logger;
-	
-	//TODO: Initialize(name)(Log_file_name), 
-private:
+
 	std::unique_ptr<wchar_t> m_name;
 	SERVICE_STATUS m_service_status{};
 	SERVICE_STATUS_HANDLE m_service_status_handle{};
 	HANDLE m_service_stop_event{ INVALID_HANDLE_VALUE };
 
 	static std::shared_ptr<Server> s_instance;
+private:
+	XML_Parser parser;
 
 public:
 	static bool Run(int argc, char** argv);

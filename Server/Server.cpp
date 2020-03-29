@@ -490,6 +490,7 @@ Server::~Server()
 
 void Server::Main()
 {	
+
 	ThreadPool thread_pool(std::thread::hardware_concurrency());
 	SocketHandler socket_handler(m_log_file_name, m_log_directory_name);
 
