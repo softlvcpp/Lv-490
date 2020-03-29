@@ -46,12 +46,12 @@ public:
 	bool InitThreadPool(ThreadPool* main_pool);
 	bool InitThreadPool(std::shared_ptr<ThreadPool> main_pool);
 
-	bool InitConfiguration(CXMLParser::outDocument* server_configuration);
-	bool InitConfiguration(std::shared_ptr<CXMLParser::outDocument> server_configuration);
+	bool InitConfiguration(CXMLParser::OutDocument* server_configuration);
+	bool InitConfiguration(std::shared_ptr<CXMLParser::OutDocument> server_configuration);
 
 protected:
 	std::shared_ptr<ThreadPool> m_thread_pool;
-	std::shared_ptr<CXMLParser::outDocument> m_server_configuration;
+	std::shared_ptr<CXMLParser::OutDocument> m_server_configuration;
 };
 
 class AddSocketConnection : public Command

@@ -162,13 +162,13 @@ bool Command::InitThreadPool(std::shared_ptr<ThreadPool> main_pool)
 	return true;
 }
 
-bool Command::InitConfiguration(CXMLParser::outDocument* server_configuration)
+bool Command::InitConfiguration(CXMLParser::OutDocument* server_configuration)
 {
-	m_server_configuration = std::shared_ptr<CXMLParser::outDocument>(server_configuration);
+	m_server_configuration = std::shared_ptr<CXMLParser::OutDocument>(server_configuration);
 	return true;
 }
 
-bool Command::InitConfiguration(std::shared_ptr<CXMLParser::outDocument> server_configuration)
+bool Command::InitConfiguration(std::shared_ptr<CXMLParser::OutDocument> server_configuration)
 {
 	m_server_configuration = server_configuration;
 	return true;

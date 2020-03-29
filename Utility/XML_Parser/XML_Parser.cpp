@@ -16,7 +16,7 @@
 #define CONFIG_COMMUNICATIONSETTINGS "communicationsetings"
 #define CONFIG_BLOCKING "blocking"
 #define CONFIG_SOCKET_TIMEOUT "socket_timeout"
-#define CONFIG_LOGGIN "LOGGIN"
+#define CONFIG_LOGGIN "loggin"
 #define CONFIG_FILENAME "filename"
 #define CONFIG_LOGLEVEL "LogLevel"
 #define CONFIG_FLUSH "flush"

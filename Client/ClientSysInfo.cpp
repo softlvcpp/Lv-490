@@ -5,48 +5,48 @@ ClientSysInfo::ClientSysInfo() {
 }
 
 void  ClientSysInfo::Update() {
-	OS = CalculateOS_name();
+	m_client_info.OS = CalculateOS_name();
 	SYSTEM_INFO systemInfo;
 	GetSystemInfo(&systemInfo);
 	qDebug()<< systemInfo.dwNumberOfProcessors;;
-	if (OS == "windows") {
-		TotalRAM = CalculateRAM_Size();
-		CPUNumbers = CalculateCPU_cores();
-		CPUVendor = CalculateCPU_vendor();
-		CPUSpeed = CalculateCPU_Speed();
-		HardDisk_type_list = Calculatevector_logic_dick();
-		if (HardDisk_type_list.size() != 0) {
-			for (int i = 0; i < HardDisk_type_list.size(); i++) {
-				HardDisk_TotalSize.push_back(Calculatecapacity(HardDisk_type_list[i]));
-				HardDisk_Free.push_back(Calculatefree_space(HardDisk_type_list[i]));
-				HardDisk_Used.push_back(HardDisk_TotalSize[i] - HardDisk_Free[i]);
-				HardDisk_MediaType.push_back(CalculateHardDisk_MediaType(HardDisk_type_list[i]));
+	if (m_client_info.OS == "windows") {
+		m_client_info.TotalRAM = CalculateRAM_Size();
+		m_client_info.CPUNumbers = CalculateCPU_cores();
+		m_client_info.CPUVendor = CalculateCPU_vendor();
+		m_client_info.CPUSpeed = CalculateCPU_Speed();
+		m_client_info.HardDisk_type_list = Calculatevector_logic_dick();
+		if (m_client_info.HardDisk_type_list.size() != 0) {
+			for (int i = 0; i < m_client_info.HardDisk_type_list.size(); i++) {
+				m_client_info.HardDisk_TotalSize.push_back(Calculatecapacity(m_client_info.HardDisk_type_list[i]));
+				m_client_info.HardDisk_Free.push_back(Calculatefree_space(m_client_info.HardDisk_type_list[i]));
+				m_client_info.HardDisk_Used.push_back(m_client_info.HardDisk_TotalSize[i] - m_client_info.HardDisk_Free[i]);
+				m_client_info.HardDisk_MediaType.push_back(CalculateHardDisk_MediaType(m_client_info.HardDisk_type_list[i]));
 			}
 		}
-		MacAddress = getMacAddress().toStdString();
-		IPAddress = CalculateIPAddress().toStdString();
+		m_client_info.MacAddress = getMacAddress().toStdString();
+		m_client_info.IPAddress = CalculateIPAddress().toStdString();
 	}
-	else if (OS == "linux") {} // For the future :)
+	else if (m_client_info.OS == "linux") {} // For the future :)
 	else {
-		//undefined OS;
+		//undefined m_client_info.OS;
 		//TODO logger error
 	}
 }
 
-int ClientSysInfo::get_TotalRAM() { return TotalRAM; }
-string  ClientSysInfo::get_CPUVendor() { return CPUVendor; }
-int  ClientSysInfo::get_CPUSpeed() { return CPUSpeed; }
-vector<string>  ClientSysInfo::get_HardDisk_MediaType() { return HardDisk_MediaType; }
-vector<int>  ClientSysInfo::get_HardDisk_TotalSize() { return HardDisk_TotalSize; }
-vector<int>  ClientSysInfo::get_HardDisk_Used() { return HardDisk_Used; }
-vector<int>  ClientSysInfo::get_HardDisk_Free() { return HardDisk_Free; }
+int ClientSysInfo::get_TotalRAM() { return m_client_info.TotalRAM; }
+string  ClientSysInfo::get_CPUVendor() { return m_client_info.CPUVendor; }
+int  ClientSysInfo::get_CPUSpeed() { return m_client_info.CPUSpeed; }
+vector<string>  ClientSysInfo::get_HardDisk_MediaType() { return m_client_info.HardDisk_MediaType; }
+vector<int>  ClientSysInfo::get_HardDisk_TotalSize() { return m_client_info.HardDisk_TotalSize; }
+vector<int>  ClientSysInfo::get_HardDisk_Used() { return m_client_info.HardDisk_Used; }
+vector<int>  ClientSysInfo::get_HardDisk_Free() { return m_client_info.HardDisk_Free; }
 //bodya
 
-string ClientSysInfo::get_OS() { return OS; }
-string ClientSysInfo::get_MacAddress() { return MacAddress; }
-string ClientSysInfo::get_IPAddress() { return IPAddress; }
-vector<string>  ClientSysInfo::get_HardDisk_type_list() { return HardDisk_type_list; }
-int ClientSysInfo::get_CPUNumbers() { return CPUNumbers; }
+string ClientSysInfo::get_OS() { return m_client_info.OS; }
+string ClientSysInfo::get_MacAddress() { return m_client_info.MacAddress; }
+string ClientSysInfo::get_IPAddress() { return m_client_info.IPAddress; }
+vector<string>  ClientSysInfo::get_HardDisk_type_list() { return m_client_info.HardDisk_type_list; }
+int ClientSysInfo::get_CPUNumbers() { return m_client_info.CPUNumbers; }
 //soketu
 
 
@@ -157,7 +157,7 @@ string ClientSysInfo::CalculateHardDisk_MediaType(string LogicalDisk) { // "C:/"
 	// wstring  str1 = L"\\\\.\\C:"; parameter must be like this 
 	LogicalDisk.insert(0, std::string("\\\\.\\"));
 	LogicalDisk.erase(LogicalDisk.end() - 1);
-	qDebug() << "LogicalDisk driver" << QString(LogicalDisk.c_str());
+	//qDebug() << "LogicalDisk driver" << QString(LogicalDisk.c_str());
 	std::wstring stemp = std::wstring(LogicalDisk.begin(), LogicalDisk.end());
 	LPCWSTR wszDrive = stemp.c_str();
 	HANDLE hDevice = INVALID_HANDLE_VALUE;  // handle to the drive to be examined 

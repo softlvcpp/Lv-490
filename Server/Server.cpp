@@ -9,12 +9,15 @@ Server::Server() : m_name{ _wcsdup(L"TCPServer_LV490") }{}
 
 bool Server::ReadConfig()
 {
-	m_parser.Read(m_config_file_name);
-	auto server_data = m_parser.GetData();
+	if (!m_parser.ReadConfigs(m_config_file_name))
+	{
+		return false;
+	}
+	auto server_data = m_parser.get_data();
 	m_log_file_name = server_data.filename;
 	m_server_IP = server_data.ipadress;
 	m_server_listenport = server_data.listenport;
-	m_log_level = static_cast<filelog::LogLevel>(server_data.LogLevel[0] - '0');
+	m_log_level = static_cast<filelog::LogLevel>(server_data.loglevel[0] - '0');
 	m_max_threads = std::stoi(server_data.maxworkingthreads);
 
 	std::wstring name(server_data.servername.begin(), server_data.servername.end());
@@ -511,7 +514,7 @@ void Server::Main()
 {	
 	ThreadPool thread_pool(m_max_threads);
 	SocketHandler socket_handler(m_log_directory_name);
-	socket_handler.set_configuration(&m_parser.GetData());
+	socket_handler.set_configuration(&m_parser.get_data());
 	socket_handler.AddCommand(new AddSocketConnection);
 	socket_handler.AddCommand(new StartConnection);
 

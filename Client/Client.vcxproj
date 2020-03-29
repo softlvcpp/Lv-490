@@ -43,7 +43,7 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QtInstall>Qt 5.13.1</QtInstall>
+    <QtInstall>msvc2017_64</QtInstall>
     <QtModules>core;gui;network;widgets</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -102,6 +102,14 @@
     <ClInclude Include="ClientSocket.h" />
     <ClInclude Include="ClientSysInfo.h" />
     <QtMoc Include="SettingsWindow.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Utility\Logger\LoggerLibrary.vcxproj">
+      <Project>{caf17f41-7f9d-4fa1-96b8-951a365e979e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Utility\XML_Parser\XML_Parser.vcxproj">
+      <Project>{6eec450d-3371-4426-99d0-d04495a9056d}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

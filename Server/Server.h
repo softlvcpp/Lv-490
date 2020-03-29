@@ -42,7 +42,7 @@ private:
 	static std::shared_ptr<Server> s_instance;
 // Parser members
 private:
-	CXMLParser::XML_Parser m_parser;
+	CXMLParser::XMLParser m_parser;
 	std::string m_config_file_name{ "config.xml" };
 	bool ReadConfig();
 

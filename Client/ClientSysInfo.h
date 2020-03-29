@@ -23,11 +23,13 @@
 #include <tchar.h>
 #include<thread>
 
+#include "../Utility/XML_Parser/XML_Parser.h"
+
 using namespace std;
 namespace fs = std::filesystem;
 class ClientSysInfo
 {
-	string OS;
+	/*string OS;
 	string MacAddress;
 	string IPAddress;
 	int TotalRAM;
@@ -38,8 +40,8 @@ class ClientSysInfo
 	vector<string> HardDisk_MediaType;
 	vector<int> HardDisk_TotalSize;
 	vector<int> HardDisk_Used;
-	vector<int> HardDisk_Free;
-
+	vector<int> HardDisk_Free;*/
+	CXMLParser::ClientInfo m_client_info;
 public:
 	ClientSysInfo();
 	void Update();
@@ -69,5 +71,7 @@ public:
 	string CalculateHardDisk_MediaType(string LogicalDisk);
 	int Calculatefree_space(std::string logic_drive);
 	int Calculatecapacity(std::string logic_drive);
+public: 
+	CXMLParser::ClientInfo get_client_info() const;
 };
 
