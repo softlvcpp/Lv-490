@@ -1,8 +1,7 @@
 #include "ClientSocket.h"
 
-ClientSocket::ClientSocket()
+ClientSocket::ClientSocket():socket(new QTcpSocket())
 {
-	socket = new QTcpSocket();
 }
 
 bool ClientSocket::connect(const QString& host_name, const unsigned int port)
@@ -30,10 +29,9 @@ bool ClientSocket::disconnect()
 bool ClientSocket::send(const std::string message)
 {
 	if (socket->state() == QAbstractSocket::ConnectedState) {
-		socket->write(std::to_string(message.size()).c_str());
-		//socket->waitForBytesWritten(3000);
-		socket->flush();
-		socket->write(message.c_str(), message.size());
+		int message_size = message.size();
+		socket->write(std::to_string(message_size).c_str(),sizeof(int));
+		socket->write(message.c_str(), message_size);
 		return true;
 	}
 	return false;
