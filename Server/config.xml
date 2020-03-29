@@ -1,25 +1,26 @@
+
 <?xml version"1.0" encoding="UTF-8" ?>
 
 <root>
-  <Server>
-    <servername>ServTest</servername>
-    <serverdisplayname>ServTestserver</serverdisplayname>
-    <listenport>25000</listenport>
-    <ipadress>127.0.0.1</ipadress>
-  </Server>
-  <communicationsetings>
-    <blocking>0</blocking>
-    <socket_timeout>5</socket_timeout>
-  </communicationsetings>
-  <loggin>
-    <filename>serverlog.txt</filename>
-    <LogLevel>2</LogLevel>
-    <flush>0</flush>
-  </loggin>
-  <time>
-    <Period_time>30</Period_time>
-  </time>
-  <treadpool>
-    <maxworkingthreads>10</maxworkingthreads>
-  </treadpool>
+	<Server>
+		<servername>TCPServer_Lv490</servername>
+		<serverdisplayname>ServTestserver</serverdisplayname>
+		<listenport>8080</listenport>
+		<ipadress>127.0.0.1</ipadress>
+	</Server>
+	<communicationsetings>
+		<blocking>0</blocking>
+		<socket_timeout>5</socket_timeout>
+	</communicationsetings>
+	<loggin>
+		<filename>serverlog.txt</filename>
+		<LogLevel>3</LogLevel>
+		<flush>0</flush>
+	</loggin>
+	<time>
+		<Period_time>30</Period_time>
+	</time>
+	<threadpool>
+		<maxworkingthreads>10</maxworkingthreads>
+	</threadpool>
 </root>
