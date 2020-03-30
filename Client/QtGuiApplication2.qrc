@@ -1,4 +1,5 @@
 <RCC>
-    <qresource prefix="Client">
-    </qresource>
+  <qresource prefix="Client">
+    <file>hardware-57-1105855.webp</file>
+  </qresource>
 </RCC>
