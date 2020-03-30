@@ -209,10 +209,12 @@ bool CXMLParser::XMLParser::PrepareToDBManager(string& xml_str)noexcept
     if (pClient == nullptr) return false;//no sense to continue;
 
     if (pClient->FirstChildElement(CLIENT_IPADRESS) != nullptr)
-        ip_address = pClient->FirstChildElement(CLIENT_IPADRESS)->GetText();
+        if (pClient->FirstChildElement(CLIENT_IPADRESS)->GetText())
+            ip_address = pClient->FirstChildElement(CLIENT_IPADRESS)->GetText();
 
     if (pClient->FirstChildElement(CLIENT_MACADRESS) != nullptr)
-        mac_address = pClient->FirstChildElement(CLIENT_MACADRESS)->GetText();
+        if (pClient->FirstChildElement(CLIENT_MACADRESS)->GetText() != nullptr)
+            mac_address = pClient->FirstChildElement(CLIENT_MACADRESS)->GetText() != nullptr;
 
     //<SystemInformation>
     XMLElement* pSysInfo = pClient->FirstChildElement(CLIENT_SYSTEMINFORMATION);
@@ -231,20 +233,24 @@ bool CXMLParser::XMLParser::PrepareToDBManager(string& xml_str)noexcept
 
     //<totalRAM>
     if (pSysInfo->FirstChildElement(CLIENT_TOTALRAM) != nullptr)
-        total_ram = pSysInfo->FirstChildElement(CLIENT_TOTALRAM)->IntText();
+        if (pSysInfo->FirstChildElement(CLIENT_TOTALRAM)->IntText())
+            total_ram = pSysInfo->FirstChildElement(CLIENT_TOTALRAM)->IntText();
 
     //CPU
     XMLElement* pCPU = pSysInfo->FirstChildElement(CLIENT_CPU);
     if (pCPU == nullptr) return false;//no sense to continue;
 
     if (pCPU->FirstChildElement(CLIENT_CPU_NUMBERS) != nullptr)
-        cpu_numbers = pCPU->FirstChildElement(CLIENT_CPU_NUMBERS)->IntText();
+        if (pCPU->FirstChildElement(CLIENT_CPU_NUMBERS)->IntText())
+            cpu_numbers = pCPU->FirstChildElement(CLIENT_CPU_NUMBERS)->IntText();
 
     if (pCPU->FirstChildElement(CLIENT_CPU_VENDOR) != nullptr)
-        cpu_vendor = pCPU->FirstChildElement(CLIENT_CPU_VENDOR)->GetText();
+        if (pCPU->FirstChildElement(CLIENT_CPU_VENDOR)->GetText());
+    cpu_vendor = pCPU->FirstChildElement(CLIENT_CPU_VENDOR)->GetText();
 
     if (pCPU->FirstChildElement(CLIENT_CPU_SPEED))
-        cpu_speed = pCPU->FirstChildElement(CLIENT_CPU_SPEED)->IntText();
+        if (pCPU->FirstChildElement(CLIENT_CPU_SPEED)->IntText())
+            cpu_speed = pCPU->FirstChildElement(CLIENT_CPU_SPEED)->IntText();
 
     return true;//all is good
 }
