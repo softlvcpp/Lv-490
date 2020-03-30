@@ -68,7 +68,7 @@ Client::Client(QWidget *parent)
 	qDebug() << "hard disk";
 
 	//ClientSysInfo client_info2;
-	QString text = "OS  " + QString(client_info2.CalculateOS_name().c_str()) + '\n' + "CPU vendor " + QString(client_info2.CalculateCPU_vendor().c_str()) + '\n';
+	QString text = "OS  " + QString(client_info2.CalculateOS().c_str()) + '\n' + "CPU vendor " + QString(client_info2.CalculateCPUVendor().c_str()) + '\n';
 //	ui.label_2->setText(text);
 
 }
@@ -94,12 +94,12 @@ void Client::updateTime()
 	{
 		qDebug() << "Client doesn`t connect to server.";
 		qDebug() << socket.lastError().c_str();
+		L_DEBUG << "Client doesn`t connect to server.";
 		L_TRACE << "Client doesn`t connect to server.";
 		L_TRACE << socket.lastError().c_str();
 		return;
 	}
 
-	//string send_XML_string = "XML string must be here";
 	string send_XML_string;
 	parser.WriteSystemInformation(send_XML_string, client_info2.get_client_info());
 	L_TRACE << "XML string: ";
@@ -152,7 +152,7 @@ void Client::indexComboChanged(int index)
 	int num= ui.comboBox->currentIndex();
 	if (num == 0) {
 
-		QString str = "OS: " + QString(client_info2.CalculateOS_name().c_str()) + '\n';
+		QString str = "OS: " + QString(client_info2.CalculateOS().c_str()) + '\n';
 
 		str += "CPU vendor: " + QString(client_info2.get_CPUVendor().c_str()) + "\n";
 		str += "CPU core number: " + QString::number(client_info2.get_CPUNumbers()) + "\n";
@@ -163,10 +163,10 @@ void Client::indexComboChanged(int index)
 		std::vector<int> free_size = client_info2.get_HardDisk_Free();
 		std::vector<int> total_size = client_info2.get_HardDisk_TotalSize();
 		std::vector<int> used_size = client_info2.get_HardDisk_Used();
-		std::vector<std::string> volume_vector = client_info2.Calculatevector_logic_dick();//= {"C:\\","D:\\","E:\\" };
+		std::vector<std::string> volume_vector = client_info2.CalculatevectorLogicDick();//= {"C:\\","D:\\","E:\\" };
 		for (int i = 0; i < volume_vector.size(); i++) {
 			str += "Hard Disk (" + QString(volume_vector[i].c_str()) + ") " + QString(client_info2.CalculateHardDisk_MediaType(volume_vector[i]).c_str())+ "\n";
-				str += " capacity: " + QString::number(client_info2.Calculatecapacity(volume_vector[i]))+QString("GB \n");
+				str += " capacity: " + QString::number(client_info2.CalculateCapacity(volume_vector[i]))+QString("GB \n");
 				str += " used: " + QString::number(used_size[i]) + QString("GB \n");
 				str += " free: " + QString::number(free_size[i])+ QString("GB \n");
 		}
@@ -183,10 +183,10 @@ void Client::indexComboChanged(int index)
 		std::vector<int> free_size = client_info2.get_HardDisk_Free();
 		std::vector<int> total_size = client_info2.get_HardDisk_TotalSize();
 		std::vector<int> used_size = client_info2.get_HardDisk_Used();
-		std::vector<std::string> volume_vector = client_info2.Calculatevector_logic_dick();//= {"C:\\","D:\\","E:\\" };
+		std::vector<std::string> volume_vector = client_info2.CalculatevectorLogicDick();//= {"C:\\","D:\\","E:\\" };
 		for (int i = 0; i < volume_vector.size(); i++) {
 			str += "Hard Disk (" + QString(volume_vector[i].c_str()) + ") " + QString(client_info2.CalculateHardDisk_MediaType(volume_vector[i]).c_str()) + "\n";
-			str += " capacity: " + QString::number(client_info2.Calculatecapacity(volume_vector[i])) + QString("GB \n");
+			str += " capacity: " + QString::number(client_info2.CalculateCapacity(volume_vector[i])) + QString("GB \n");
 			str += " used: " + QString::number(used_size[i]) + QString("GB \n");
 			str += " free: " + QString::number(free_size[i]) + QString("GB \n");
 		}

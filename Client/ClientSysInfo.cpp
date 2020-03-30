@@ -1,29 +1,34 @@
 #include "ClientSysInfo.h"
 #include<qthread.h>
+//#include <boost/thread.hpp>
 ClientSysInfo::ClientSysInfo() {
 	Update();
 }
 
 void  ClientSysInfo::Update() {
-	m_client_info.OS = CalculateOS_name();
+	m_client_info.OS = CalculateOS();
 	SYSTEM_INFO systemInfo;
 	GetSystemInfo(&systemInfo);
 	qDebug()<< systemInfo.dwNumberOfProcessors;;
 	if (m_client_info.OS == "windows") {
-		m_client_info.TotalRAM = CalculateRAM_Size();
-		m_client_info.CPUNumbers = CalculateCPU_cores();
-		m_client_info.CPUVendor = CalculateCPU_vendor();
-		m_client_info.CPUSpeed = CalculateCPU_Speed();
-		m_client_info.HardDisk_type_list = Calculatevector_logic_dick();
+		m_client_info.TotalRAM = CalculateTotalRAM();
+		m_client_info.CPUNumbers = CalculateCPUNumbers();
+		m_client_info.CPUVendor = CalculateCPUVendor();
+		m_client_info.CPUSpeed = CalculateCPUSpeed();
+		m_client_info.HardDisk_type_list = CalculatevectorLogicDick();
+		m_client_info.HardDisk_TotalSize.clear();
+		m_client_info.HardDisk_Free.clear();
+		m_client_info.HardDisk_Used.clear();
+		m_client_info.HardDisk_MediaType.clear();
 		if (m_client_info.HardDisk_type_list.size() != 0) {
 			for (int i = 0; i < m_client_info.HardDisk_type_list.size(); i++) {
-				m_client_info.HardDisk_TotalSize.push_back(Calculatecapacity(m_client_info.HardDisk_type_list[i]));
-				m_client_info.HardDisk_Free.push_back(Calculatefree_space(m_client_info.HardDisk_type_list[i]));
+				m_client_info.HardDisk_TotalSize.push_back(CalculateCapacity(m_client_info.HardDisk_type_list[i]));
+				m_client_info.HardDisk_Free.push_back(CalculateFreeSpace(m_client_info.HardDisk_type_list[i]));
 				m_client_info.HardDisk_Used.push_back(m_client_info.HardDisk_TotalSize[i] - m_client_info.HardDisk_Free[i]);
 				m_client_info.HardDisk_MediaType.push_back(CalculateHardDisk_MediaType(m_client_info.HardDisk_type_list[i]));
 			}
 		}
-		m_client_info.MacAddress = getMacAddress().toStdString();
+		m_client_info.MacAddress = CalculateMacAddress().toStdString();
 		m_client_info.IPAddress = CalculateIPAddress().toStdString();
 	}
 	else if (m_client_info.OS == "linux") {} // For the future :)
@@ -50,12 +55,12 @@ int ClientSysInfo::get_CPUNumbers() { return m_client_info.CPUNumbers; }
 //soketu
 
 
-string ClientSysInfo::CalculateOS_name() {
+string ClientSysInfo::CalculateOS() {
 	QString OSName = QSysInfo::productType();
 	return OSName.toStdString();
 }
 
-int ClientSysInfo::CalculateRAM_Size() {
+int ClientSysInfo::CalculateTotalRAM() {
 
 	MEMORYSTATUSEX statex;
 	statex.dwLength = sizeof(statex);
@@ -65,7 +70,7 @@ int ClientSysInfo::CalculateRAM_Size() {
 	return RAM_size;
 }
 
-string ClientSysInfo::CalculateCPU_vendor() {
+string ClientSysInfo::CalculateCPUVendor() {
 	std::vector<std::array<int, 4>> data_;
 	std::array<int, 4> cpui;
 	int nIds_;
@@ -92,7 +97,7 @@ string ClientSysInfo::CalculateCPU_vendor() {
 	return vendor;
 }
 
-float ClientSysInfo::CalculateCPU_Speed()
+float ClientSysInfo::CalculateCPUSpeed()
 {
 	LARGE_INTEGER qwWait, qwStart, qwCurrent;
 	QueryPerformanceCounter(&qwStart);
@@ -107,7 +112,7 @@ float ClientSysInfo::CalculateCPU_Speed()
 	return res;
 }
 
-std::vector<std::string> ClientSysInfo::Calculatevector_logic_dick() {
+std::vector<std::string> ClientSysInfo::CalculatevectorLogicDick() {
 	std::vector<std::string> disks;
 	QList listVolumes = QStorageInfo::mountedVolumes();
 	for (int i = 0; i < listVolumes.size(); i++) {
@@ -123,15 +128,23 @@ std::vector<std::string> ClientSysInfo::Calculatevector_logic_dick() {
 
 
 
-QString ClientSysInfo::getMacAddress()
+QString ClientSysInfo::CalculateMacAddress()
 {
 	QNetworkInterface res;
 	QList<QNetworkInterface> list = QNetworkInterface::allInterfaces();
 	for (int i = 0; i < list.size(); i++) {
-		if (!(list[i].flags() & QNetworkInterface::IsLoopBack) && (list[i].type() == 3 || list[i].type() == 8)
-			&& list[i].flags().testFlag(QNetworkInterface::IsRunning) && (list[i].humanReadableName() == "Ethernet" || list[i].humanReadableName() == "Wi-Fi"))
+		if (!(list[i].flags() & QNetworkInterface::IsLoopBack) && (list[i].type() == 3 || list[i].type() == 8))
 		{
-			res = list[i];
+
+			if (list[i].flags().testFlag(QNetworkInterface::IsRunning) && list[i].humanReadableName() == "Wi-Fi")
+			{
+				res = list[i];
+				break;
+			}
+			else if (list[i].humanReadableName() == "Ethernet")
+			{
+				res = list[i];
+			}
 		}
 	}
 	return res.hardwareAddress();
@@ -139,7 +152,7 @@ QString ClientSysInfo::getMacAddress()
 
 QString ClientSysInfo::CalculateIPAddress()
 {
-	QNetworkInterface mac_interface = QNetworkInterface::interfaceFromName(getMacAddress());
+	QNetworkInterface mac_interface = QNetworkInterface::interfaceFromName(CalculateMacAddress());
 	QList<QHostAddress> list_ip = mac_interface.allAddresses();
 	QString res;
 	for (int i = 0; i < list_ip.size(); i++)
@@ -215,7 +228,8 @@ typedef BOOL(WINAPI *LPFN_GLPI)(
 	PSYSTEM_LOGICAL_PROCESSOR_INFORMATION,
 	PDWORD);
 
-int ClientSysInfo::CalculateCPU_cores() {
+int ClientSysInfo::CalculateCPUNumbers() {
+	//return boost::thread::physical_concurrency(); if have boost
 	LPFN_GLPI glpi;
 	BOOL done = FALSE;
 	PSYSTEM_LOGICAL_PROCESSOR_INFORMATION buffer = NULL;
@@ -287,13 +301,13 @@ int ClientSysInfo::CalculateCPU_cores() {
 }
 
 
-int ClientSysInfo::Calculatefree_space(std::string logic_drive) {
+int ClientSysInfo::CalculateFreeSpace(const std::string &logic_drive) {
 	fs::space_info tmpi = fs::space(logic_drive);
 	int size_in_GB = tmpi.free / 1024 / 1024 / 1024;
 	return size_in_GB;
 }
 
-int ClientSysInfo::Calculatecapacity(std::string logic_drive) {
+int ClientSysInfo::CalculateCapacity(const std::string &logic_drive) {
 	fs::space_info tmpi = fs::space(logic_drive);
 	int size_in_GB = tmpi.capacity / 1024 / 1024 / 1024;
 	return size_in_GB;
