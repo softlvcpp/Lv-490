@@ -37,18 +37,22 @@ bool SocketHandler::AddCommand(shared_ptr<Command> command)
 
 bool SocketHandler::Run(ThreadPool* thread_pool)
 {
+	std::ofstream fout{ "D:/dev/Lv-490/SocjketOut.txt", std::ios::app };
+
 	for (auto iter : m_commands)
 	{
 		WSAData wsaData;//config sockets
 		if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
 		{
 			LOG_T << "Server: Error at WSAStartup()";
+			return false;
 		}
 		iter->InitThreadPool(thread_pool);
 		iter->InitConfiguration(m_server_configuration);
 		if(iter->Execute(m_socket_state) == false)
 		{
 			LOG_T << m_socket_state.log_msg.c_str();
+			return false;
 		}
 	}
 	return true;
