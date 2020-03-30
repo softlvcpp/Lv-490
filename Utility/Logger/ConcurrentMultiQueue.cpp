@@ -23,7 +23,8 @@ namespace log490
 			std::scoped_lock lock{ this->writeMutex, right.writeMutex };
 			this->threadOrderedSet = std::move(right.threadOrderedSet);
 			this->threadQueues = std::move(right.threadQueues);
-			this->overallSize = std::move(right.overallSize.load());
+			this->overallSize = right.overallSize.load();
+			right.overallSize.store(0);
 		}
 		return *this;
 	}

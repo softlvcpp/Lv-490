@@ -18,6 +18,7 @@ namespace filelog
         setRTLevel(LogLevel::NoLogs);
         maxFileSize = 0;
         currentFileSize = 0;
+        forceFlush = false;
         setJoined();
     }
 
@@ -56,6 +57,7 @@ namespace filelog
         setRTLevel(lvl);
         maxFileSize = fileSize;
         currentFileSize = 0;
+        forceFlush = false;
 
         // Checks if passed a proper path
         if (!validateFilenameTemplate(fTemplate))
@@ -83,14 +85,18 @@ namespace filelog
 
     void FileLogger::stop(bool writeRemaining)
     {
-        fOnJoinWriteRemaining.store(writeRemaining);
+        //fOnJoinWriteRemaining.store(writeRemaining);
+        fOnJoinWriteRemaining.store(true);
         fLoggerStop.store(true);
 
         messageQueue.cancelWaits();
         if (fileStreamThread.joinable())
             this->fileStreamThread.join();
         if (outputStream.is_open())
+        {
+            outputStream.flush();
             this->outputStream.close();
+        }
 
         setJoined();
     }
@@ -128,6 +134,22 @@ namespace filelog
         return currentFileName.c_str();;
     }
 
+    bool FileLogger::flushIsForced() const
+    {
+        return forceFlush.load();
+    }
+
+    void FileLogger::setForceFlush(bool value)
+    {
+        forceFlush.store(value);
+    }
+
+    void FileLogger::flushNow()
+    {
+        std::unique_lock lock{ streamAccessMutex };
+        outputStream.flush();
+    }
+
 #pragma endregion Public methods
 
 #pragma region Private methods
@@ -135,6 +157,7 @@ namespace filelog
     // Private methods
     bool FileLogger::streamLogMessage(LogData& data)
     {
+        std::unique_lock lock{ streamAccessMutex };
         auto& buff = data.message()->messageBuffer;
 
         auto bytesToWrite = static_cast<size_t>(buff.length() * CHAR_TYPE_SIZE);
@@ -142,7 +165,6 @@ namespace filelog
         if (currentFileSize >= maxFileSize)
         {     
             outputStream.close();
-
             if (!openFile(currentFileName.c_str(), false, bytesToWrite))
                 return false;
           
@@ -151,6 +173,8 @@ namespace filelog
 
         outputStream.write(buff.c_str(), buff.length());
         outputStream.write(FLOG_STR(\n), 1);
+        if (forceFlush)
+            outputStream.flush();
         return true;
     }
 

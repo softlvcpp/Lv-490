@@ -120,6 +120,15 @@ namespace filelog
         /* Returns currently open file's name */
         LOGGER_API const char* getCurrentFilename() const;
 
+        /* Returns true if file-stream flushes on each message */
+        LOGGER_API bool flushIsForced() const;
+
+        /* Set if flush should happen on each received message */
+        LOGGER_API void setForceFlush(bool value);
+
+        /* Forces stream to flush */
+        LOGGER_API void flushNow();
+
     private:
         void logWriteLoop();
         void threadEntry() noexcept;
@@ -140,6 +149,7 @@ namespace filelog
 
         bool getLastModifiedMatchesTemplate(std::string& resultPath);
     private:
+        std::atomic<bool> forceFlush;
         std::atomic<bool> interrupted;             // [flag] interrupted due to exception
         std::atomic<bool> joined;                  // [flag] thread is properly joined      
         std::atomic<bool> fLoggerStop;             // [flag] thread broke loop and joined
@@ -170,6 +180,7 @@ namespace filelog
         std::wregex filenameTemplateRegex;         // path_DATE-TIME_COUNT.extension
         std::regex filenameTNoCounterRegex;        // path_DATE-TIME.extension
         mutable std::mutex filenameAccessMutex;    // write/read mutex for filename
+        mutable std::mutex streamAccessMutex;    // write/read mutex for stream
 
         std::exception interruptedException;       // exception that is saved when logger is interrupted
 
