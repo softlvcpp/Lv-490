@@ -299,4 +299,9 @@ int ClientSysInfo::Calculatecapacity(std::string logic_drive) {
 	return size_in_GB;
 }
 
+CXMLParser::ClientInfo ClientSysInfo::get_client_info() const
+{
+	return m_client_info;
+}
+
 

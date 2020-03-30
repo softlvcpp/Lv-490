@@ -99,9 +99,12 @@ void Client::updateTime()
 		return;
 	}
 
-	string send_XML_string = "XML string must be here";
+	//string send_XML_string = "XML string must be here";
+	string send_XML_string;
+	parser.WriteSystemInformation(send_XML_string, client_info2.get_client_info());
 	L_TRACE << "XML string: ";
 	L_TRACE << send_XML_string.c_str();
+	//qDebug() << send_XML_string.c_str();
 	if (socket.send(send_XML_string))
 	{
 		qDebug() << "Client sent information.";
