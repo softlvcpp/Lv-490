@@ -12,6 +12,7 @@
 
 //#include "../Utility/Logger/LoggerDLL.h"
 
+
 #define USERNAME_LEN 20
 /*
  * This class is implemented as singletone
@@ -42,10 +43,10 @@ private:
 // Parser members
 private:
 	CXMLParser::XMLParser m_parser;
-	std::string m_config_file_name{ "D:/programing/softserve/Lv-490/Server/config.xml" };
+	std::string m_config_file_name{ "D:/dev/Lv-490/Server/config.xml" };
 	bool ReadConfig();
-	std::ofstream fout{ "D:/programing/softserve/Lv-490/temp_log.txt", std::ios::app };
-
+	std::ofstream fout{ "D:/dev/Lv-490/temp_log.txt", std::ios::app };
+ 
 // Server members
 private:
 	std::string m_server_IP;

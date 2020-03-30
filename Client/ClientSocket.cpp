@@ -8,7 +8,7 @@ bool ClientSocket::connect(const QString& host_name, const unsigned int port)
 {
 
 	socket->connectToHost(host_name, port);
-	if (socket->waitForConnected(3000))
+	if (socket->waitForConnected(30))
 	{
 		return true;
 	}

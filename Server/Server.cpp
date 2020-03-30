@@ -1,5 +1,5 @@
 #include "Server.h"
-#define LOG_T SLOG_TRACE(*s_instance->m_logger)
+#define LOG_T SLOG_TRACE(*s_instance->m_logger) 
 #define LOG_D SLOG_DEBUG(*s_instance->m_logger)
 #define LOG_P SLOG_PROD(*s_instance->m_logger)
 
@@ -153,6 +153,8 @@ void Server::ServiceMain(int argc, char** argv)
 		return;
 	}
 
+
+
 	std::thread main_thread(&Server::Main, s_instance);
 	{
 		std::condition_variable condition_var;
@@ -163,7 +165,10 @@ void Server::ServiceMain(int argc, char** argv)
 		s_instance->fout << "\n"<< s_instance->m_service_status.dwCurrentState;
 	}
 
-	s_instance->m_logger->join();
+	//s_instance->m_logger->join();
+
+
+
 }
 
 void Server::ControlHandler(unsigned long request)
@@ -526,11 +531,11 @@ void Server::Main()
 {
 	ThreadPool thread_pool(m_max_threads);
 	SocketHandler socket_handler;
-	CXMLParser::OutDocument temp = m_parser.get_data();
-	socket_handler.set_configuration(std::make_shared<CXMLParser::OutDocument>(temp));
-	socket_handler.InitLoger(m_log_directory_name);
+	socket_handler.set_configuration(&m_parser.get_data());
 	socket_handler.AddCommand(new AddSocketConnection);
-	socket_handler.AddCommand(new StartConnection);	
+	socket_handler.AddCommand(new StartConnection);
+
+	s_instance->fout << m_max_threads << " " << m_server_IP << " " << m_server_listenport;
 	socket_handler.Run(&thread_pool);
 }
 

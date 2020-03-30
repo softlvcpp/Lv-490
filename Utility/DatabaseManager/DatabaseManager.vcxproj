@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{17D2B65F-98FE-4E05-AFCE-D18557403B45}</ProjectGuid>
+    <ProjectGuid>{30909198-530E-4AA8-BE6F-7F63CD455D6C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>DatabaseManager</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
@@ -90,6 +90,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;DATABASEMANAGER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
