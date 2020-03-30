@@ -13,11 +13,11 @@
 #endif
 
 #include "pch.h"
-#include <iostream>
 #include<filesystem>//is_regular_file
 #include<string>
 #include<vector>//ClientInfo
 #include"tinyxml2.h"
+#include"../Logger/LoggerDLL.h"
 using namespace std;
 using namespace filesystem;
 using namespace tinyxml2;
@@ -25,7 +25,7 @@ using namespace tinyxml2;
 class XMLPARSER_API CXMLParser {
 public:
 
-    struct ClientInfo
+    struct ClientInfo//package of data from Client
     {
         string OS;
         string MacAddress;
@@ -40,7 +40,7 @@ public:
         vector<int> HardDisk_Used;
         vector<int> HardDisk_Free;
     };
-    struct OutDocument
+    struct OutDocument//package of data from config file for Server
     {
         string serverdisplayname = "";
         string servername = "";
@@ -60,7 +60,7 @@ public:
     public:
         XMLParser() = default;     
 
-        XMLPARSER_API bool ReadConfigs(const string& file_path)noexcept;//read configuration' file for server
+        XMLPARSER_API bool ReadConfigs(const string& file_path)noexcept;//read configurations' file for server
         XMLPARSER_API void WriteSystemInformation(string& xml_str, ClientInfo& obj) const noexcept;//write client's information in external string
         XMLPARSER_API bool PrepareToDBManager(string& xml_str)noexcept;//prepare client's external string to write in DB
 
@@ -89,6 +89,7 @@ public:
         vector<int> harddisk_totalsize;//
         vector<int> harddisk_used;//
         vector<int> harddisk_free;//
+
     };
 	CXMLParser(void);
 	// TODO: add your methods here.

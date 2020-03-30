@@ -22,27 +22,29 @@
 #define CONFIG_FLUSH "flush"
 #define CONFIG_TIME "time"
 #define CONFIG_PERIOD_TIME "Period_time"
-#define CONFIG_THREADPOOL "threadpool"
+#define CONFIG_THREADPOOL "treadpool"
 #define CONFIG_MAXWORKINGTHREAD "maxworkingthreads"
+
 
 
 bool CXMLParser::XMLParser::ReadConfigs(const string& file_path) noexcept
 {
-    if (!is_regular_file(file_path)) //logger return throw exception("wrong file path");
+    if (!is_regular_file(file_path))
         return false;
 
     XMLDocument doc;
 
-    if (doc.LoadFile(file_path.c_str()) != 0) //logger return throw exception("can't load xml file");
+    if (doc.LoadFile(file_path.c_str()) != 0) 
         return false;
-    XMLElement* pRoot;//smart ptr
+
+    XMLElement* pRoot;
 
     pRoot = doc.FirstChildElement(CONFIG_ROOT);
     if (pRoot == nullptr)
         return false;//file is empty or another format
 
-    /*All checks below forced to avoid abort()*/
-
+   
+     /*All checks below forced to avoid abort()*/
     //<Server>
     XMLElement* Server = pRoot->FirstChildElement(CONFIG_SERVER);
     if (Server == nullptr) return false;//no sense to continue;
@@ -134,33 +136,28 @@ void CXMLParser::XMLParser::WriteSystemInformation(string& xml_str, ClientInfo& 
     //SystemInfo
     XMLElement* pSystemInformation = xmlDoc.NewElement(CLIENT_SYSTEMINFORMATION);//root->client->SystemInformation
 
-    vector<string> HardDisk_type_list = obj.HardDisk_type_list;
-    vector<int> HardDisk_TotalSize = obj.HardDisk_TotalSize;
-    vector<int> HardDisk_Used = obj.HardDisk_Used;
-    vector<int> HardDisk_Free = obj.HardDisk_Free;
-
     //HardDisk loop
     XMLElement* pHardDisk;
-    for (size_t i = 0; i < HardDisk_type_list.size(); ++i)
+    for (size_t i = 0; i < obj.HardDisk_type_list.size(); ++i)
     {
         pHardDisk = xmlDoc.NewElement(CLIENT_HARDDISK);//root->client->SystemInformation->HardDisk
 
-        pHardDisk->SetAttribute(CLIENT_TYPE, "HDD");//as default, to be continue......
+        pHardDisk->SetAttribute(CLIENT_TYPE, obj.HardDisk_MediaType[i].c_str());//type of memory attribute
 
-        pHardDisk->SetAttribute(CLIENT_DRIVE, HardDisk_type_list[i].c_str());
+        pHardDisk->SetAttribute(CLIENT_DRIVE, obj.HardDisk_type_list[i].c_str());//driver attribute
 
-        XMLElement* pHardDisk_TotalSize = xmlDoc.NewElement(CLIENT_HARDDISK_TOTALSIZE);//root->client->SystemInformation->HardDisk
-        pHardDisk_TotalSize->SetText(HardDisk_TotalSize[i]);
-        XMLElement* pHardDisk_Used = xmlDoc.NewElement(CLIENT_HARDDISK_USED);//root->client->SystemInformation->HardDisk
-        pHardDisk_Used->SetText(HardDisk_Used[i]);
-        XMLElement* pHardDisk_Free = xmlDoc.NewElement(CLIENT_HARDDISK_FREE);//root->client->SystemInformation->HardDisk
-        pHardDisk_Free->SetText(HardDisk_Free[i]);
+        XMLElement* pHardDisk_TotalSize = xmlDoc.NewElement(CLIENT_HARDDISK_TOTALSIZE);//root->client->SystemInformation->HardDisk->TotalSize
+        pHardDisk_TotalSize->SetText(obj.HardDisk_TotalSize[i]);
+        XMLElement* pHardDisk_Used = xmlDoc.NewElement(CLIENT_HARDDISK_USED);//root->client->SystemInformation->HardDisk->Used
+        pHardDisk_Used->SetText(obj.HardDisk_Used[i]);
+        XMLElement* pHardDisk_Free = xmlDoc.NewElement(CLIENT_HARDDISK_FREE);//root->client->SystemInformation->HardDisk->Free
+        pHardDisk_Free->SetText(obj.HardDisk_Free[i]);
 
-        pHardDisk->InsertEndChild(pHardDisk_TotalSize);
-        pHardDisk->InsertEndChild(pHardDisk_Used);
-        pHardDisk->InsertEndChild(pHardDisk_Free);
+        pHardDisk->InsertEndChild(pHardDisk_TotalSize);//inserting this tags
+        pHardDisk->InsertEndChild(pHardDisk_Used);//
+        pHardDisk->InsertEndChild(pHardDisk_Free);//
 
-        pSystemInformation->InsertEndChild(pHardDisk);
+        pSystemInformation->InsertEndChild(pHardDisk);//
     }
     //RAM
     XMLElement* pTotalRAM = xmlDoc.NewElement(CLIENT_TOTALRAM);//root->client->SystemInformation->TotalRAM
@@ -169,13 +166,13 @@ void CXMLParser::XMLParser::WriteSystemInformation(string& xml_str, ClientInfo& 
     //CPU
     XMLElement* CPU = xmlDoc.NewElement(CLIENT_CPU);//root->client->SystemInformation->CPU
 
-    XMLElement* CPUNumbers = xmlDoc.NewElement(CLIENT_CPU_NUMBERS);//root->client->SystemInformation->CPU
+    XMLElement* CPUNumbers = xmlDoc.NewElement(CLIENT_CPU_NUMBERS);//root->client->SystemInformation->CPU->CPUNumbers
     CPUNumbers->SetText(obj.CPUNumbers);
     CPU->InsertEndChild(CPUNumbers);
-    XMLElement* CPUVendor = xmlDoc.NewElement(CLIENT_CPU_VENDOR);//root->client->SystemInformation->CPU
+    XMLElement* CPUVendor = xmlDoc.NewElement(CLIENT_CPU_VENDOR);//root->client->SystemInformation->CPU->CPUVendors
     CPUVendor->SetText(obj.CPUVendor.c_str());
     CPU->InsertEndChild(CPUVendor);
-    XMLElement* CPUSpeed = xmlDoc.NewElement(CLIENT_CPU_SPEED);//root->client->SystemInformation->CPU
+    XMLElement* CPUSpeed = xmlDoc.NewElement(CLIENT_CPU_SPEED);//root->client->SystemInformation->CPU->CPUSpeed
     CPUSpeed->SetText(obj.CPUSpeed);
     CPU->InsertEndChild(CPUSpeed);
 
@@ -185,37 +182,37 @@ void CXMLParser::XMLParser::WriteSystemInformation(string& xml_str, ClientInfo& 
     pRoot->InsertFirstChild(pClient);
 
 
-    XMLPrinter printer;
+    XMLPrinter printer;//use printer to take data in string
     xmlDoc.Accept(&printer);
     xml_str = printer.CStr();
 }
 
 bool CXMLParser::XMLParser::PrepareToDBManager(string& xml_str)noexcept
 {
-    if (xml_str == "")//logger
+    if (xml_str == "")
         return false;
 
     XMLDocument doc;
 
-    if (doc.Parse(xml_str.c_str()) != 0) //logger return throw exception("can't load xml file");
+    if (doc.Parse(xml_str.c_str()) != 0)
         return false;
 
     //<root>
-    XMLElement* pRoot;//smart ptr
+    XMLElement* pRoot;
 
     pRoot = doc.FirstChildElement(CLIENT_ROOT);
     if (pRoot == nullptr)
-        return false;//file is empty or another format
+        return false;
 
     //<Client>
     XMLElement* pClient = pRoot->FirstChildElement(CLIENT_CLIENT);
     if (pClient == nullptr) return false;//no sense to continue;
 
     if (pClient->FirstChildElement(CLIENT_IPADRESS) != nullptr)
-        ip_address = pClient->FirstChildElement(CLIENT_IPADRESS)->GetText();//ip_address
+        ip_address = pClient->FirstChildElement(CLIENT_IPADRESS)->GetText();
 
     if (pClient->FirstChildElement(CLIENT_MACADRESS) != nullptr)
-        mac_address = pClient->FirstChildElement(CLIENT_MACADRESS)->GetText();//mac_address
+        mac_address = pClient->FirstChildElement(CLIENT_MACADRESS)->GetText();
 
     //<SystemInformation>
     XMLElement* pSysInfo = pClient->FirstChildElement(CLIENT_SYSTEMINFORMATION);
