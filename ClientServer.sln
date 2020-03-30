@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XML_Parser", "Utility\XML_P
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client", "Client\Client.vcxproj", "{1AAA5D41-E524-41FD-B911-392639C4471E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DatabaseManager", "DatabaseManager\DatabaseManager.vcxproj", "{17D2B65F-98FE-4E05-AFCE-D18557403B45}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -64,6 +66,14 @@ Global
 		{1AAA5D41-E524-41FD-B911-392639C4471E}.Release|x64.ActiveCfg = Release|x64
 		{1AAA5D41-E524-41FD-B911-392639C4471E}.Release|x64.Build.0 = Release|x64
 		{1AAA5D41-E524-41FD-B911-392639C4471E}.Release|x86.ActiveCfg = Release|x64
+		{17D2B65F-98FE-4E05-AFCE-D18557403B45}.Debug|x64.ActiveCfg = Debug|x64
+		{17D2B65F-98FE-4E05-AFCE-D18557403B45}.Debug|x64.Build.0 = Debug|x64
+		{17D2B65F-98FE-4E05-AFCE-D18557403B45}.Debug|x86.ActiveCfg = Debug|Win32
+		{17D2B65F-98FE-4E05-AFCE-D18557403B45}.Debug|x86.Build.0 = Debug|Win32
+		{17D2B65F-98FE-4E05-AFCE-D18557403B45}.Release|x64.ActiveCfg = Release|x64
+		{17D2B65F-98FE-4E05-AFCE-D18557403B45}.Release|x64.Build.0 = Release|x64
+		{17D2B65F-98FE-4E05-AFCE-D18557403B45}.Release|x86.ActiveCfg = Release|Win32
+		{17D2B65F-98FE-4E05-AFCE-D18557403B45}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,6 +84,7 @@ Global
 		{1BA25CA9-C5E8-48DF-BC7B-0A4E51F2A042} = {C83F4286-D06A-40D2-9001-7B4A2CF9BD1B}
 		{6EEC450D-3371-4426-99D0-D04495A9056D} = {5C6D293B-C708-49F1-81D7-A398D6D31F3F}
 		{1AAA5D41-E524-41FD-B911-392639C4471E} = {CB3F7764-081F-4CD4-B829-7B26E07F6DEC}
+		{17D2B65F-98FE-4E05-AFCE-D18557403B45} = {5C6D293B-C708-49F1-81D7-A398D6D31F3F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4F7935A9-E941-4FC9-AADE-824F589B8400}
