@@ -1,43 +1,75 @@
-Server: Recieved: 256 bytes of "aaaaaaaaaaaaaaaaaaaaa" message.
-Server: Recieved: 256 bytes of "aaaaaaaaaaaaaaaaaaaaa" message.
-Server: Recieved: 256 bytes of "aaaaaaaaaaaaaaaaaaaaa" message.
-Server: Recieved: 256 bytes of "aaaaaaaaaaaaaaaaaaaaa" message.
-Server: Recieved: 256 bytes of "bbbbbbbbbbbbbbbbbb" message.
-Server: Recieved: 256 bytes of "b" message.
-Server: Recieved: 256 bytes of "bbbbbbbbbbbbbbbb" message.
-Server: Recieved: 256 bytes of "aaaaaaaaaaaaaaaaaaaaaaa" message.
-Server: Recieved: 256 bytes of "aaaaaaaaaaaaaaaaaaaa" message.
-Server: Recieved: 256 bytes of "fdkv" message.
-Server: Recieved: 256 bytes of "dfsv" message.
-Server: Recieved: 256 bytes of "fdv" message.
-Server: Recieved: 256 bytes of "fdsv" message.
-Server: Recieved: 256 bytes of "dfsv" message.
-Server: Recieved: 256 bytes of "gfb" message.
-Server: Recieved: 256 bytes of "gfb" message.
-Server: Recieved: 256 bytes of "gfb" message.
-Server: Recieved: 256 bytes of "gfb" message.
-Server: Recieved: 256 bytes of "gfb" message.
-Server: Recieved: 256 bytes of "Hello World" message.
-Server: Recieved: 256 bytes of "exit" message.
-Server: Recieved: 256 bytes of "test" message.
-Server: Recieved: 256 bytes of "teste" message.
-Server: Recieved: 256 bytes of "testet" message.
-Server: Recieved: 256 bytes of "exit" message.
-Server: Recieved: 256 bytes of "jfkd;v" message.
-Server: Recieved: 256 bytes of "fdsv" message.
-Server: Recieved: 256 bytes of "fdsv" message.
-Server: Recieved: 256 bytes of "fdsv" message.
-Server: Recieved: 256 bytes of "1111111111" message.
-Server: Recieved: 256 bytes of "111111" message.
-Server: Recieved: 256 bytes of "111111111111" message.
-Server: Recieved: 256 bytes of "111111111111" message.
-Server: Recieved: 256 bytes of "111111111111" message.
-Server: Recieved: 256 bytes of "111111111111" message.
-Server: Recieved: 256 bytes of "111111111111" message.
-Server: Recieved: 256 bytes of "exit" message.
-Server: Recieved: 256 bytes of "test2" message.
-Server: Recieved: 256 bytes of "test2" message.
-Server: Recieved: 256 bytes of "test1" message.
-Server: Recieved: 256 bytes of "test1" message.
-Server: Recieved: 256 bytes of "sfdg" message.
-Server: Recieved: 256 bytes of "gfh" message.
+Server: Recieved: 743 bytes of "<root>
+    <Client>
+        <IPAddress>192.168.31.100</IPAddress>
+        <MacAddress></MacAddress>
+        <SystemInformation>
+            <HardDisk type="HDD" drive="C:/">
+                <TotalSize>99</TotalSize>
+                <Used>93</Used>
+                <Free>6</Free>
+            </HardDisk>
+            <HardDisk type="HDD" drive="D:/">
+                <TotalSize>137</TotalSize>
+                <Used>64</Used>
+                <Free>73</Free>
+            </HardDisk>
+            <TotalRAM>7971</TotalRAM>
+            <CPU>
+                <CPUNumbers>2</CPUNumbers>
+                <CPUVendor>GenuineIntel</CPUVendor>
+                <CPUSpeed>2711</CPUSpeed>
+            </CPU>
+        </SystemInformation>
+    </Client>
+</root>
+" message.
+Server: Recieved: 743 bytes of "<root>
+    <Client>
+        <IPAddress>192.168.31.100</IPAddress>
+        <MacAddress></MacAddress>
+        <SystemInformation>
+            <HardDisk type="HDD" drive="C:/">
+                <TotalSize>99</TotalSize>
+                <Used>93</Used>
+                <Free>6</Free>
+            </HardDisk>
+            <HardDisk type="HDD" drive="D:/">
+                <TotalSize>137</TotalSize>
+                <Used>64</Used>
+                <Free>73</Free>
+            </HardDisk>
+            <TotalRAM>7971</TotalRAM>
+            <CPU>
+                <CPUNumbers>2</CPUNumbers>
+                <CPUVendor>GenuineIntel</CPUVendor>
+                <CPUSpeed>2711</CPUSpeed>
+            </CPU>
+        </SystemInformation>
+    </Client>
+</root>
+" message.
+Server: Recieved: 743 bytes of "<root>
+    <Client>
+        <IPAddress>192.168.31.100</IPAddress>
+        <MacAddress></MacAddress>
+        <SystemInformation>
+            <HardDisk type="HDD" drive="C:/">
+                <TotalSize>99</TotalSize>
+                <Used>93</Used>
+                <Free>6</Free>
+            </HardDisk>
+            <HardDisk type="HDD" drive="D:/">
+                <TotalSize>137</TotalSize>
+                <Used>64</Used>
+                <Free>73</Free>
+            </HardDisk>
+            <TotalRAM>7971</TotalRAM>
+            <CPU>
+                <CPUNumbers>2</CPUNumbers>
+                <CPUVendor>GenuineIntel</CPUVendor>
+                <CPUSpeed>2711</CPUSpeed>
+            </CPU>
+        </SystemInformation>
+    </Client>
+</root>
+" message.

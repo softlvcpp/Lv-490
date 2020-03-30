@@ -2,12 +2,6 @@
 
 bool AddSocketConnection::Execute(SocketState& socket_state)//return bool
 {
-	//WSAData wsaData;//config sockets
-	//if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
-	//{
-	//	//log: "Server: Error at WSAStartup()\n"
-	//}
-
 	// create new socket, use the Internet address family (AF_INET), streaming sockets (SOCK_STREAM), and the TCP/IP protocol (IPPROTO_TCP).
 	SOCKET new_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
@@ -80,7 +74,7 @@ bool AcceptConnection::Execute(SocketState& socket_state)
 }
 
 bool ReceiveMessage::Execute(SocketState& socket_state)
-{
+{	
 	std::ofstream test_output("D:/programing/softserve/Lv-490/output.txt", std::ios::app);
 
 	SOCKET current_socket = socket_state.id;
@@ -89,13 +83,22 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 	{
 		//get message size from client
 		int msg_size = 0;
-		int bytes_received = recv(current_socket, (char*)&msg_size, sizeof(int), 0);
+		socket_state.buffer.resize(sizeof(int));
+		int bytes_received = recv(current_socket, (char*)socket_state.buffer.c_str(), sizeof(int), 0);
+		msg_size = std::stoi(socket_state.buffer);
+
 		if (SOCKET_ERROR == bytes_received)
 		{
 			return false;
 		}
-		socket_state.buffer.resize(msg_size + 1);
-		bytes_received = recv(current_socket, (char*)socket_state.buffer.c_str(), BUFFER_SIZE, 0);
+		if (msg_size == 0)
+		{
+			RemoveSocket remove_socket;
+			remove_socket.Execute(socket_state);
+			return false;
+		}
+		socket_state.buffer.resize(msg_size);
+		bytes_received = recv(current_socket, (char*)socket_state.buffer.c_str(), socket_state.buffer.size(), 0);
 
 		/*size_t msg_end = socket_state.buffer.find('\0');
 		socket_state.buffer.erase(socket_state.buffer.begin() + msg_end, socket_state.buffer.end());*/
@@ -115,6 +118,36 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 		{
 			//потім потрібно буде парсити цю стрічку, але на даному етапі просто вивід в консоль є
 			test_output << "Server: Recieved: " << bytes_received << " bytes of \"" << socket_state.buffer << "\" message.\n";
+
+			std::string xml_string = socket_state.buffer;
+
+			try
+			{
+				CXMLParser::XMLParser xml_parser;
+				//xml_parser.PrepareToDBManager(xml_string);
+
+				/*test_output << "Cpu numbers: " << xml_parser.get_cpunumbers();
+				test_output << "Cpu speed: " << xml_parser.get_cpuspeed();
+				test_output << "Cpu vendor: " << xml_parser.get_cpuvendor();*/
+				/*for (int i = 0; i < xml_parser.get_harddisk_free().size(); ++i)
+				{
+					test_output << xml_parser.get_harddisk_type_list()[i];
+					test_output << "Hard disk free" << xml_parser.get_harddisk_free()[i];
+					test_output << "Hard disk total size: " << xml_parser.get_harddisk_totalsize()[i];
+					test_output << "Hard disk used" << xml_parser.get_harddisk_used()[i];
+				}
+				test_output << "Ip: " << xml_parser.get_ipaddress();
+				test_output << "Mac: " << xml_parser.get_macaddress();
+				test_output << "Ram: " << xml_parser.get_totalram();*/
+
+				test_output.close();
+			}
+			catch (...)
+			{
+
+				test_output.close();
+				test_output << "parser error\n";
+			}
 
 			if (socket_state.buffer == "exit")
 			{

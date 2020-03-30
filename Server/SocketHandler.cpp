@@ -1,16 +1,15 @@
 #include "SocketHandler.h"
 
-#define LOG_T SLOG_TRACE(*m_logger)
-#define LOG_D SLOG_DEBUG(*m_logger)
-#define LOG_P SLOG_PROD(*m_logger)
+#define LOG_T SLOG_TRACE(*m_socket_logger)
+#define LOG_D SLOG_DEBUG(*m_socket_logger)
+#define LOG_P SLOG_PROD(*m_socket_logger)
 
-SocketHandler::SocketHandler(const std::string& directory_name): m_log_directory_name(directory_name)
-{	
-	InitLoger();	
+SocketHandler::SocketHandler()
+{		
 	WSAData wsaData;//config sockets
 	if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
-	{
-		LOG_T << "Server: Error at WSAStartup()";
+	{		
+		//LOG_T << "Server: Error at WSAStartup()";
 	}	
 }
 
@@ -20,6 +19,8 @@ SocketHandler::~SocketHandler()
 	LOG_T << "Server: Closing Connection";
 	closesocket(m_socket_state.id);
 	WSACleanup();
+	LOG_T << "logger end";
+	m_socket_logger->join();
 }
 
 bool SocketHandler::AddCommand(Command* command)
@@ -37,10 +38,9 @@ bool SocketHandler::AddCommand(shared_ptr<Command> command)
 
 bool SocketHandler::Run(ThreadPool* thread_pool)
 {
-	std::ofstream fout{ "D:/dev/Lv-490/SocjketOut.txt", std::ios::app };
-
 	for (auto iter : m_commands)
 	{
+		LOG_T << "run";
 		WSAData wsaData;//config sockets
 		if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
 		{
@@ -62,6 +62,7 @@ bool SocketHandler::Run(std::shared_ptr<ThreadPool> thread_pool)
 {
 	for (auto iter : m_commands)
 	{
+		LOG_T << "run";
 		WSAData wsaData;//config sockets
 		if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
 		{
@@ -89,18 +90,18 @@ bool SocketHandler::set_configuration(std::shared_ptr<CXMLParser::OutDocument> s
 	return true;
 }
 
-bool SocketHandler::InitLoger()
+bool SocketHandler::InitLoger(const std::string& directory_name)
 {
-	std::string log_file_path = "C:/Users/";
-	char user_name[USERNAME_LEN];
+	std::string log_file_path = "D:/";
+	/*char user_name[USERNAME_LEN];
 	unsigned long len = USERNAME_LEN;
 	if (!GetUserNameA(user_name, &len))
 	{
 		return false;
 	}
-	log_file_path += user_name;
+	log_file_path += "User";
 	log_file_path += "/";
-	log_file_path += m_log_directory_name;
+	log_file_path += directory_name;
 	log_file_path += "/";
 	if (!CreateDirectoryA(log_file_path.c_str(), nullptr))
 	{
@@ -108,10 +109,11 @@ bool SocketHandler::InitLoger()
 		{
 			return false;
 		}
-	}
+	}*/
 	log_file_path += m_server_configuration->filename;
-	filelog::LogLevel log_level = filelog::LogLevel::NoLogs;
-	switch (std::stoi(m_server_configuration->loglevel))
+	filelog::LogLevel log_level = filelog::LogLevel::Trace;
+	int level = std::stoi(m_server_configuration->loglevel);
+	switch (level)
 	{
 	case 0:
 		log_level = filelog::LogLevel::NoLogs;
@@ -128,6 +130,6 @@ bool SocketHandler::InitLoger()
 	default:
 		break;
 	}
-	m_logger = std::unique_ptr<filelog::FileLogger>(new filelog::FileLogger(log_file_path.c_str(), log_level));
+	m_socket_logger = std::shared_ptr<filelog::FileLogger>(new filelog::FileLogger(log_file_path.c_str(), true, log_level));
 	return true;
 }
