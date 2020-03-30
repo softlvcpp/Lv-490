@@ -1,0 +1,180 @@
+16768-30/03/2020 12:46:14-[DEBUG]-[Client::updateTime] Client doesn`t connect to server.
+16768-30/03/2020 12:46:14-[TRACE]-[Client::updateTime] Client doesn`t connect to server.
+16768-30/03/2020 12:46:14-[TRACE]-[Client::updateTime] Socket operation timed out
+16768-30/03/2020 12:46:14-[TRACE]-[Client::updateTime] XML string: 
+16768-30/03/2020 12:46:14-[TRACE]-[Client::updateTime] <root>
+    <Client>
+        <IPAddress>192.168.0.54</IPAddress>
+        <MacAddress>D0:C5:D3:25:E5:65</MacAddress>
+        <SystemInformation>
+            <HardDisk type="HDD" drive="C:/">
+                <TotalSize>106</TotalSize>
+                <Used>96</Used>
+                <Free>10</Free>
+            </HardDisk>
+            <HardDisk type="HDD" drive="D:/">
+                <TotalSize>585</TotalSize>
+                <Used>245</Used>
+                <Free>340</Free>
+            </HardDisk>
+            <HardDisk type="HDD" drive="E:/">
+                <TotalSize>345</TotalSize>
+                <Used>82</Used>
+                <Free>263</Free>
+            </HardDisk>
+            <TotalRAM>16267</TotalRAM>
+            <CPU>
+                <CPUNumbers>4</CPUNumbers>
+                <CPUVendor>GenuineIntel</CPUVendor>
+                <CPUSpeed>1991</CPUSpeed>
+            </CPU>
+        </SystemInformation>
+    </Client>
+</root>
+
+16768-30/03/2020 12:46:14-[TRACE]-[Client::updateTime] Socket operation timed out
+16768-30/03/2020 12:46:14-[TRACE]-[Client::updateTime] Client doesn`t send information.
+16768-30/03/2020 12:46:17-[DEBUG]-[Client::updateTime] Client doesn`t connect to server.
+16768-30/03/2020 12:46:17-[TRACE]-[Client::updateTime] Client doesn`t connect to server.
+16768-30/03/2020 12:46:17-[TRACE]-[Client::updateTime] Socket operation timed out
+16768-30/03/2020 12:46:17-[TRACE]-[Client::updateTime] XML string: 
+16768-30/03/2020 12:46:17-[TRACE]-[Client::updateTime] <root>
+    <Client>
+        <IPAddress>192.168.0.54</IPAddress>
+        <MacAddress>D0:C5:D3:25:E5:65</MacAddress>
+        <SystemInformation>
+            <HardDisk type="HDD" drive="C:/">
+                <TotalSize>106</TotalSize>
+                <Used>96</Used>
+                <Free>10</Free>
+            </HardDisk>
+            <HardDisk type="HDD" drive="D:/">
+                <TotalSize>585</TotalSize>
+                <Used>245</Used>
+                <Free>340</Free>
+            </HardDisk>
+            <HardDisk type="HDD" drive="E:/">
+                <TotalSize>345</TotalSize>
+                <Used>82</Used>
+                <Free>263</Free>
+            </HardDisk>
+            <TotalRAM>16267</TotalRAM>
+            <CPU>
+                <CPUNumbers>4</CPUNumbers>
+                <CPUVendor>GenuineIntel</CPUVendor>
+                <CPUSpeed>1992</CPUSpeed>
+            </CPU>
+        </SystemInformation>
+    </Client>
+</root>
+
+16768-30/03/2020 12:46:17-[TRACE]-[Client::updateTime] Socket operation timed out
+16768-30/03/2020 12:46:17-[TRACE]-[Client::updateTime] Client doesn`t send information.
+16768-30/03/2020 12:46:21-[DEBUG]-[Client::updateTime] Client doesn`t connect to server.
+16768-30/03/2020 12:46:21-[TRACE]-[Client::updateTime] Client doesn`t connect to server.
+16768-30/03/2020 12:46:21-[TRACE]-[Client::updateTime] Socket operation timed out
+16768-30/03/2020 12:46:21-[TRACE]-[Client::updateTime] XML string: 
+16768-30/03/2020 12:46:21-[TRACE]-[Client::updateTime] <root>
+    <Client>
+        <IPAddress>192.168.0.54</IPAddress>
+        <MacAddress>D0:C5:D3:25:E5:65</MacAddress>
+        <SystemInformation>
+            <HardDisk type="HDD" drive="C:/">
+                <TotalSize>106</TotalSize>
+                <Used>96</Used>
+                <Free>10</Free>
+            </HardDisk>
+            <HardDisk type="HDD" drive="D:/">
+                <TotalSize>585</TotalSize>
+                <Used>245</Used>
+                <Free>340</Free>
+            </HardDisk>
+            <HardDisk type="HDD" drive="E:/">
+                <TotalSize>345</TotalSize>
+                <Used>82</Used>
+                <Free>263</Free>
+            </HardDisk>
+            <TotalRAM>16267</TotalRAM>
+            <CPU>
+                <CPUNumbers>4</CPUNumbers>
+                <CPUVendor>GenuineIntel</CPUVendor>
+                <CPUSpeed>1991</CPUSpeed>
+            </CPU>
+        </SystemInformation>
+    </Client>
+</root>
+
+16768-30/03/2020 12:46:21-[TRACE]-[Client::updateTime] Socket operation timed out
+16768-30/03/2020 12:46:21-[TRACE]-[Client::updateTime] Client doesn`t send information.
+16768-30/03/2020 12:46:25-[DEBUG]-[Client::updateTime] Client doesn`t connect to server.
+16768-30/03/2020 12:46:25-[TRACE]-[Client::updateTime] Client doesn`t connect to server.
+16768-30/03/2020 12:46:25-[TRACE]-[Client::updateTime] Socket operation timed out
+16768-30/03/2020 12:46:25-[TRACE]-[Client::updateTime] XML string: 
+16768-30/03/2020 12:46:25-[TRACE]-[Client::updateTime] <root>
+    <Client>
+        <IPAddress>192.168.0.54</IPAddress>
+        <MacAddress>D0:C5:D3:25:E5:65</MacAddress>
+        <SystemInformation>
+            <HardDisk type="HDD" drive="C:/">
+                <TotalSize>106</TotalSize>
+                <Used>96</Used>
+                <Free>10</Free>
+            </HardDisk>
+            <HardDisk type="HDD" drive="D:/">
+                <TotalSize>585</TotalSize>
+                <Used>245</Used>
+                <Free>340</Free>
+            </HardDisk>
+            <HardDisk type="HDD" drive="E:/">
+                <TotalSize>345</TotalSize>
+                <Used>82</Used>
+                <Free>263</Free>
+            </HardDisk>
+            <TotalRAM>16267</TotalRAM>
+            <CPU>
+                <CPUNumbers>4</CPUNumbers>
+                <CPUVendor>GenuineIntel</CPUVendor>
+                <CPUSpeed>1991</CPUSpeed>
+            </CPU>
+        </SystemInformation>
+    </Client>
+</root>
+
+16768-30/03/2020 12:46:25-[TRACE]-[Client::updateTime] Socket operation timed out
+16768-30/03/2020 12:46:25-[TRACE]-[Client::updateTime] Client doesn`t send information.
+16768-30/03/2020 12:46:29-[DEBUG]-[Client::updateTime] Client doesn`t connect to server.
+16768-30/03/2020 12:46:29-[TRACE]-[Client::updateTime] Client doesn`t connect to server.
+16768-30/03/2020 12:46:29-[TRACE]-[Client::updateTime] Socket operation timed out
+16768-30/03/2020 12:46:29-[TRACE]-[Client::updateTime] XML string: 
+16768-30/03/2020 12:46:29-[TRACE]-[Client::updateTime] <root>
+    <Client>
+        <IPAddress>192.168.0.54</IPAddress>
+        <MacAddress>D0:C5:D3:25:E5:65</MacAddress>
+        <SystemInformation>
+            <HardDisk type="HDD" drive="C:/">
+                <TotalSize>106</TotalSize>
+                <Used>96</Used>
+                <Free>10</Free>
+            </HardDisk>
+            <HardDisk type="HDD" drive="D:/">
+                <TotalSize>585</TotalSize>
+                <Used>245</Used>
+                <Free>340</Free>
+            </HardDisk>
+            <HardDisk type="HDD" drive="E:/">
+                <TotalSize>345</TotalSize>
+                <Used>82</Used>
+                <Free>263</Free>
+            </HardDisk>
+            <TotalRAM>16267</TotalRAM>
+            <CPU>
+                <CPUNumbers>4</CPUNumbers>
+                <CPUVendor>GenuineIntel</CPUVendor>
+                <CPUSpeed>1991</CPUSpeed>
+            </CPU>
+        </SystemInformation>
+    </Client>
+</root>
+
+16768-30/03/2020 12:46:29-[TRACE]-[Client::updateTime] Socket operation timed out
+16768-30/03/2020 12:46:29-[TRACE]-[Client::updateTime] Client doesn`t send information.

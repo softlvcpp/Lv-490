@@ -1,4 +1,5 @@
 #include "ClientSysInfo.h"
+#include "DefineLogger.h"
 #include<qthread.h>
 //#include <boost/thread.hpp>
 ClientSysInfo::ClientSysInfo() {
@@ -6,6 +7,7 @@ ClientSysInfo::ClientSysInfo() {
 }
 
 void  ClientSysInfo::Update() {
+
 	m_client_info.OS = CalculateOS();
 	SYSTEM_INFO systemInfo;
 	GetSystemInfo(&systemInfo);
@@ -313,6 +315,11 @@ int ClientSysInfo::CalculateCapacity(const std::string &logic_drive) {
 	return size_in_GB;
 }
 
+ClientSysInfo::~ClientSysInfo()
+{
+	qDebug() << "exit 1";
+	logger.join();
+}
 CXMLParser::ClientInfo ClientSysInfo::get_client_info() const
 {
 	return m_client_info;

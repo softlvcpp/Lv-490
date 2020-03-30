@@ -71,6 +71,7 @@ public:
 	int CalculateCapacity(const std::string &logic_drive);
 	QString CalculateMacAddress();
 	QString CalculateIPAddress();
+	~ClientSysInfo();
 public: 
 	CXMLParser::ClientInfo get_client_info() const;
 };

@@ -63,7 +63,8 @@ Client::Client(QWidget *parent)
 	//	str += " free:" + QString::number(free_size[i]) + QString("GB \n");
 	//}
 	//ui.textEdit->setText(str);
-
+	//connect(Q)
+	//connect(, &QAction::triggered, qApp, &QApplication::quit);
 	indexComboChanged(0);
 	qDebug() << "hard disk";
 
@@ -97,14 +98,14 @@ void Client::updateTime()
 		L_DEBUG << "Client doesn`t connect to server.";
 		L_TRACE << "Client doesn`t connect to server.";
 		L_TRACE << socket.lastError().c_str();
-		return;
+		//return;
 	}
 
 	string send_XML_string;
 	parser.WriteSystemInformation(send_XML_string, client_info2.get_client_info());
 	L_TRACE << "XML string: ";
 	L_TRACE << send_XML_string.c_str();
-	//qDebug() << send_XML_string.c_str();
+	qDebug() << send_XML_string.c_str();
 	if (socket.send(send_XML_string))
 	{
 		qDebug() << "Client sent information.";
