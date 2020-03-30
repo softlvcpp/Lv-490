@@ -76,7 +76,7 @@ void Client::updateTime()
 		L_TRACE << "Client doesn`t connect to server.";
 		L_TRACE << socket.lastError().c_str();
 		
-		return;
+		//return;
 	}
 
 	string send_XML_string;
