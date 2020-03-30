@@ -69,5 +69,8 @@
     <ClInclude Include="ClientSysInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DefineLogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

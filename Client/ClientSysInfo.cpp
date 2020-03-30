@@ -298,3 +298,5 @@ int ClientSysInfo::Calculatecapacity(std::string logic_drive) {
 	int size_in_GB = tmpi.capacity / 1024 / 1024 / 1024;
 	return size_in_GB;
 }
+
+

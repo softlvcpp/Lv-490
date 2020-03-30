@@ -6,7 +6,9 @@
 #include"ClientSysInfo.h"
 #include<qgraphicsview.h>
 #include<qlayout.h>
-//#include"DefineLogger.h"
+#include"DefineLogger.h"
+#include "../Utility/XML_Parser/XML_Parser.h"
+
 Client::Client(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -77,70 +79,56 @@ void Client::updateTime()
 {
 
 	tmr->setInterval(settings.get_TimeInterval() * 1000); // Задаем интервал таймера
-	qDebug() << "_____SENDING TO SERVER_____";
-	qDebug() << settings.get_port();
-	qDebug() << settings.get_IP();
-	qDebug() << settings.get_TimeInterval()<<" s";
-	tmr->setInterval(settings.get_TimeInterval() * 1000); // Задаем интервал таймера
+	//qDebug() << "_____SENDING TO SERVER_____";
+	//qDebug() << settings.get_port();
+	//qDebug() << settings.get_IP();
+	//qDebug() << settings.get_TimeInterval()<<" s";
+	//tmr->setInterval(settings.get_TimeInterval() * 1000); // Задаем интервал таймера
 	client_info2.Update();
 	if (socket.connect(settings.get_IP(), settings.get_port())) {
 
-	//	L_TRACE << "Client connected to server.";
+		L_TRACE << "Client connected to server.";
 		qDebug() << "Client connected to server.";
 	}
 	else
 	{
 		qDebug() << "Client doesn`t connect to server.";
 		qDebug() << socket.lastError().c_str();
-		//L_TRACE << "Client doesn`t connect to server.";
-		//L_TRACE << socket.lastError().c_str();
+		L_TRACE << "Client doesn`t connect to server.";
+		L_TRACE << socket.lastError().c_str();
 		return;
 	}
+
 	string send_XML_string = "XML string must be here";
-//	L_TRACE << "XML string: ";
-	//L_TRACE << send_XML_string.c_str();
+	L_TRACE << "XML string: ";
+	L_TRACE << send_XML_string.c_str();
 	if (socket.send(send_XML_string))
 	{
 		qDebug() << "Client sent information.";
-		//L_TRACE << "Client sent information.";
+		L_TRACE << "Client sent information.";
 	}
 	else
 	{
 		qDebug() << "Client doesn`t send information.";
 		qDebug() << socket.lastError().c_str();
-		//L_TRACE << socket.lastError().c_str();
-		//L_TRACE << "Client doesn`t send information.";
+		L_TRACE << socket.lastError().c_str();
+		L_TRACE << "Client doesn`t send information.";
 
 		return;
 	}if (socket.disconnect())
 	{
 		qDebug() << "Client diconnect to server.";
-		//L_TRACE << "Client diconnect to server.";
+		L_TRACE << "Client diconnect to server.";
 	}
 	else
 	{
 
-	//	L_TRACE << "Client doesn`t diconnect to server.";
-	//	L_TRACE << socket.lastError().c_str();
+		L_TRACE << "Client doesn`t diconnect to server.";
+		L_TRACE << socket.lastError().c_str();
 		qDebug() << "Client doesn`t diconnect to server.";
 		qDebug() << socket.lastError().c_str();
 		return;
 	}
-//	client_info2.Get
-
-	//socket.send(string_name);
-
-	// SERVER_Connector serv();
-	//ser.cnnect(ipt, port);
-	// File file=XMLPARSEr(file,clientinfo);
-	//send(file);
-
-
-	//get ip port
-//	settings.getip();
-	
-	//connect 
-
 
 }
 //void Client::actionEvent( QAction actionChange_settings) {

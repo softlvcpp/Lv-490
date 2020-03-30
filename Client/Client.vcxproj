@@ -101,6 +101,7 @@
   <ItemGroup>
     <ClInclude Include="ClientSocket.h" />
     <ClInclude Include="ClientSysInfo.h" />
+    <ClInclude Include="DefineLogger.h" />
     <QtMoc Include="SettingsWindow.h" />
   </ItemGroup>
   <ItemGroup>

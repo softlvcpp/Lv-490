@@ -6,7 +6,6 @@
 #include"ClientSysInfo.h"
 #include<qmenubar.h>
 #include"ClientSocket.h"
-#include "../Utility/Logger/LoggerDLL.h"
 class Client : public QMainWindow
 {
 	Q_OBJECT
@@ -14,7 +13,6 @@ class Client : public QMainWindow
 public:
 	Client(QWidget *parent = Q_NULLPTR);
 	ClientSysInfo client_info2;
-	filelog::FileLogger logger{ "file.txt", filelog::LogLevel::Trace };
 private:
 	Ui::Client ui;
 	Dialog settings;
