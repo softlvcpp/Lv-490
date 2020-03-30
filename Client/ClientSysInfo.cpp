@@ -245,7 +245,7 @@ int ClientSysInfo::CalculateCPUNumbers() {
 		"GetLogicalProcessorInformation");
 	if (NULL == glpi)
 	{
-		_tprintf(TEXT("\nGetLogicalProcessorInformation is not supported.\n"));
+		L_TRACE<<("\nGetLogicalProcessorInformation is not supported.\n");
 		return (1);
 	}
 
@@ -265,13 +265,13 @@ int ClientSysInfo::CalculateCPUNumbers() {
 
 				if (NULL == buffer)
 				{
-					_tprintf(TEXT("\nError: Allocation failure\n"));
+					L_TRACE<<"\nError: Allocation failure\n";
 					return (2);
 				}
 			}
 			else
 			{
-				_tprintf(TEXT("\nError %d\n"), GetLastError());
+				L_TRACE<<"\nError %d"+ GetLastError();
 				return (3);
 			}
 		}
@@ -293,7 +293,6 @@ int ClientSysInfo::CalculateCPUNumbers() {
 			break;
 
 		default:
-			_tprintf(TEXT("\nError: Unsupported LOGICAL_PROCESSOR_RELATIONSHIP value.\n"));
 			break;
 		}
 		byteOffset += sizeof(SYSTEM_LOGICAL_PROCESSOR_INFORMATION);
@@ -317,7 +316,6 @@ int ClientSysInfo::CalculateCapacity(const std::string &logic_drive) {
 
 ClientSysInfo::~ClientSysInfo()
 {
-	qDebug() << "exit 1";
 	logger.join();
 }
 CXMLParser::ClientInfo ClientSysInfo::get_client_info() const

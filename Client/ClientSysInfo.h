@@ -57,7 +57,8 @@ public:
 	vector<int>  get_HardDisk_TotalSize();
 	vector<int>  get_HardDisk_Used();
 	vector<int>  get_HardDisk_Free();
-	// Repace Calculate ->> Calcuate
+
+
 	string CalculateOS();
 	int CalculateTotalRAM();
 	string CalculateCPUVendor();
@@ -71,6 +72,8 @@ public:
 	int CalculateCapacity(const std::string &logic_drive);
 	QString CalculateMacAddress();
 	QString CalculateIPAddress();
+	//ui
+	//socket
 	~ClientSysInfo();
 public: 
 	CXMLParser::ClientInfo get_client_info() const;
