@@ -22,7 +22,7 @@
 #define CONFIG_FLUSH "flush"
 #define CONFIG_TIME "time"
 #define CONFIG_PERIOD_TIME "Period_time"
-#define CONFIG_THREADPOOL "treadpool"
+#define CONFIG_THREADPOOL "threadpool"
 #define CONFIG_MAXWORKINGTHREAD "maxworkingthreads"
 
 
@@ -214,7 +214,7 @@ bool CXMLParser::XMLParser::PrepareToDBManager(string& xml_str)noexcept
 
     if (pClient->FirstChildElement(CLIENT_MACADRESS) != nullptr)
         if (pClient->FirstChildElement(CLIENT_MACADRESS)->GetText() != nullptr)
-            mac_address = pClient->FirstChildElement(CLIENT_MACADRESS)->GetText() != nullptr;
+            mac_address = pClient->FirstChildElement(CLIENT_MACADRESS)->GetText();
 
     //<SystemInformation>
     XMLElement* pSysInfo = pClient->FirstChildElement(CLIENT_SYSTEMINFORMATION);

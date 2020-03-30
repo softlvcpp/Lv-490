@@ -1,0 +1,30 @@
+20988-30/03/2020 19:17:45-[DEBUG]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:17:45-[TRACE]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:17:45-[TRACE]-[Client::updateTime] Connection refused
+20988-30/03/2020 19:17:48-[DEBUG]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:17:48-[TRACE]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:17:48-[TRACE]-[Client::updateTime] Connection refused
+20988-30/03/2020 19:17:52-[DEBUG]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:17:52-[TRACE]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:17:52-[TRACE]-[Client::updateTime] Connection refused
+20988-30/03/2020 19:17:56-[DEBUG]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:17:56-[TRACE]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:17:56-[TRACE]-[Client::updateTime] Connection refused
+20988-30/03/2020 19:18:00-[DEBUG]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:18:00-[TRACE]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:18:00-[TRACE]-[Client::updateTime] Connection refused
+20988-30/03/2020 19:18:04-[DEBUG]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:18:04-[TRACE]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:18:04-[TRACE]-[Client::updateTime] Connection refused
+20988-30/03/2020 19:18:08-[DEBUG]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:18:08-[TRACE]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:18:08-[TRACE]-[Client::updateTime] Connection refused
+20988-30/03/2020 19:18:12-[DEBUG]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:18:12-[TRACE]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:18:12-[TRACE]-[Client::updateTime] Connection refused
+20988-30/03/2020 19:18:16-[DEBUG]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:18:16-[TRACE]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:18:16-[TRACE]-[Client::updateTime] Connection refused
+20988-30/03/2020 19:18:20-[DEBUG]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:18:20-[TRACE]-[Client::updateTime] Client doesn`t connect to server.
+20988-30/03/2020 19:18:20-[TRACE]-[Client::updateTime] Connection refused
