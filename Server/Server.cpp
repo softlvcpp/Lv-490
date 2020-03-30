@@ -5,7 +5,7 @@
 
 
 
-Server::Server() : m_name{ _wcsdup(L"TCPServer_LV490") }{}
+Server::Server() : m_name{ _wcsdup(L"TCPServer_Lv490") } {}
 
 bool Server::ReadConfig()
 {
@@ -34,9 +34,14 @@ bool Server::Run(int argc, char** argv)
 	ServiceTable[1].lpServiceProc = nullptr;
 	if (s_instance->ReadConfig() == false)
 	{
+		s_instance->fout << "Can not read config";
 		return false;
 	}
-	s_instance->InitLogger();
+	if (!s_instance->InitLogger())
+	{
+		s_instance->fout << "Can not init logger" << s_instance->m_log_file_name;
+		return false;
+	}
 	if (argc == 2)
 	{
 		if (argv[1] == s_instance->m_install_command)
@@ -85,6 +90,7 @@ bool Server::Run(int argc, char** argv)
 	{
 		if (!StartServiceCtrlDispatcher(ServiceTable))
 		{
+			s_instance->fout << "Error occured";
 			LOG_T << "Unable to start Service Control Dispatcher.";
 			return false;
 		}
@@ -97,11 +103,17 @@ void Server::ServiceMain(int argc, char** argv)
 	if (s_instance == nullptr)
 	{
 		s_instance = std::shared_ptr<Server>(new Server);
-		
-		if (!s_instance->InitLogger())
+		if (s_instance->ReadConfig() == false)
 		{
+			s_instance->fout << "\nCan not read config in service main";
 			return;
 		}
+		if (!s_instance->InitLogger())
+		{
+			s_instance->fout << "\nCan not init logger in service main";
+			return;
+		}
+
 	}
 	s_instance->m_service_status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
 	s_instance->m_service_status.dwCurrentState = SERVICE_START_PENDING;
@@ -148,10 +160,12 @@ void Server::ServiceMain(int argc, char** argv)
 		std::condition_variable condition_var;
 		std::mutex mutex;
 		std::unique_lock<std::mutex> condition_lock(mutex);
+
 		condition_var.wait(condition_lock, []() { return s_instance->m_service_status.dwCurrentState != SERVICE_RUNNING; });
+		s_instance->fout << "\n"<< s_instance->m_service_status.dwCurrentState;
 	}
 
-	s_instance->m_logger->join();
+	//s_instance->m_logger->join();
 
 
 
@@ -313,7 +327,7 @@ bool Server::Start()
 	LOG_P << "Service started";
 	CloseServiceHandle(service);
 	CloseServiceHandle(SCManager);
-	
+
 	return true;
 }
 
@@ -429,7 +443,7 @@ bool Server::Restart()
 		CloseServiceHandle(SCManager);
 		return false;
 	}
-	
+
 	s_instance->m_service_status.dwControlsAccepted = SERVICE_ACCEPT_STOP;
 	SetServiceStatus(s_instance->m_service_status_handle, &s_instance->m_service_status);
 
@@ -477,17 +491,20 @@ bool Server::InitLogger()
 	char user_name[USERNAME_LEN];
 	unsigned long len = USERNAME_LEN;
 	if (!GetUserNameA(user_name, &len))
-	{		
+	{
+		//s_instance->fout << "\ncant get username";
 		return false;
 	}
-	log_file_path += user_name;
+	//	log_file_path += user_name;
+	log_file_path += "User";
 	log_file_path += "/";
 	log_file_path += m_log_directory_name;
 	log_file_path += "/";
 	if (!CreateDirectoryA(log_file_path.c_str(), nullptr))
 	{
 		if (GetLastError() == ERROR_PATH_NOT_FOUND)
-		{			
+		{
+			//	s_instance->fout << "\npath not found "  << log_file_path << std::endl;
 			return false;
 		}
 	}
@@ -511,13 +528,14 @@ Server::~Server()
 }
 
 void Server::Main()
-{	
+{
 	ThreadPool thread_pool(m_max_threads);
 	SocketHandler socket_handler(m_log_directory_name);
 	socket_handler.set_configuration(&m_parser.get_data());
 	socket_handler.AddCommand(new AddSocketConnection);
 	socket_handler.AddCommand(new StartConnection);
 
+	s_instance->fout << m_max_threads << " " << m_server_IP << " " << m_server_listenport;
 	socket_handler.Run(&thread_pool);
 }
 

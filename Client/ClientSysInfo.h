@@ -57,20 +57,24 @@ public:
 	vector<int>  get_HardDisk_TotalSize();
 	vector<int>  get_HardDisk_Used();
 	vector<int>  get_HardDisk_Free();
-	// Repace Calculate ->> Calcuate
-	string CalculateOS_name();
-	int CalculateRAM_Size();
-	string CalculateCPU_vendor();
+
+
+	string CalculateOS();
+	int CalculateTotalRAM();
+	string CalculateCPUVendor();
 	//https docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getlogicalprocessorinformation
 	// Helper function to count set bits in the processor mask.	
-	int CalculateCPU_cores();
-	float CalculateCPU_Speed();
-	std::vector<std::string> Calculatevector_logic_dick();
-	QString getMacAddress();
-	QString CalculateIPAddress();
+	int CalculateCPUNumbers();
+	float CalculateCPUSpeed();
+	std::vector<std::string> CalculatevectorLogicDick();
 	string CalculateHardDisk_MediaType(string LogicalDisk);
-	int Calculatefree_space(std::string logic_drive);
-	int Calculatecapacity(std::string logic_drive);
+	int CalculateFreeSpace(const std::string &logic_drive);
+	int CalculateCapacity(const std::string &logic_drive);
+	QString CalculateMacAddress();
+	QString CalculateIPAddress();
+	//ui
+	//socket
+	~ClientSysInfo();
 public: 
 	CXMLParser::ClientInfo get_client_info() const;
 };

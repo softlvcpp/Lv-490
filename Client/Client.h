@@ -18,6 +18,8 @@ private:
 	Dialog settings;
 	QTimer *tmr;//timer for timecycle connection to server
 	ClientSocket socket;
+	CXMLParser::XMLParser parser;
+	std::thread m_th;
 public slots:
 	void open_settings();
 	void indexComboChanged(int index);

@@ -135,7 +135,6 @@
  <layoutdefault spacing="6" margin="11"/>
  <resources>
   <include location="QtGuiApplication2.qrc"/>
-  <include location="QtGuiApplication2.qrc"/>
  </resources>
  <connections/>
 </ui>
