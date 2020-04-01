@@ -483,29 +483,16 @@ bool Server::Restart()
 
 bool Server::InitLogger()
 {
-	std::string log_file_path = "C:/Users/";
-	char user_name[USERNAME_LEN];
-	unsigned long len = USERNAME_LEN;
-	if (!GetUserNameA(user_name, &len))
-	{
-		//s_instance->fout << "\ncant get username";
-		return false;
-	}
-	//	log_file_path += user_name;
-	log_file_path += "User";
-	log_file_path += "/";
-	log_file_path += m_log_directory_name;
-	log_file_path += "/";
+	std::string log_file_path = "C:/Lv-490_Files/serv_LOGS/";
 	if (!CreateDirectoryA(log_file_path.c_str(), nullptr))
 	{
 		if (GetLastError() == ERROR_PATH_NOT_FOUND)
 		{
-			//	s_instance->fout << "\npath not found "  << log_file_path << std::endl;
 			return false;
 		}
 	}
 	log_file_path += m_log_file_name;
-	m_logger = std::unique_ptr<filelog::FileLogger>(new filelog::FileLogger(log_file_path.c_str(), filelog::LogLevel::Trace));
+	m_logger = std::unique_ptr<filelog::FileLogger>(new filelog::FileLogger(log_file_path.c_str(), true,filelog::LogLevel::Trace));
 	return true;
 }
 

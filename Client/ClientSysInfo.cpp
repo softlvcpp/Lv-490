@@ -137,7 +137,6 @@ QString ClientSysInfo::CalculateMacAddress()
 	for (int i = 0; i < list.size(); i++) {
 		if (list[i].type() == 3 || list[i].type() == 8)
 		{
-
 			if (list[i].flags().testFlag(QNetworkInterface::IsRunning) && list[i].humanReadableName() == "Wi-Fi")
 			{
 				res = list[i];
