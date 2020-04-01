@@ -3,7 +3,7 @@
 class ClientSocket
 {
 private:
-	QScopedPointer<QTcpSocket> socket;
+	QScopedPointer<QTcpSocket> m_socket;
 public:
 	ClientSocket();
 	bool connect(const QString& host_name, const unsigned int port);

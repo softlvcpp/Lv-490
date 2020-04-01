@@ -17,7 +17,7 @@ private:
 	Ui::Client ui;
 	Dialog settings;
 	QTimer *tmr;//timer for timecycle connection to server
-	ClientSocket socket;
+	ClientSocket m_socket;
 	CXMLParser::XMLParser parser;
 	std::thread m_th;
 public slots:

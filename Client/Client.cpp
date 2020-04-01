@@ -55,15 +55,10 @@ void Client::updateTime()
 {
 
 	tmr->setInterval(settings.get_TimeInterval() * 1000); // Задаем интервал таймера
-	////qDebug() << "_____SENDING TO SERVER_____";
-	////qDebug() << settings.get_port();
-	////qDebug() << settings.get_IP();
-	////qDebug() << settings.get_TimeInterval()<<" s";
-	////tmr->setInterval(settings.get_TimeInterval() * 1000); // Задаем интервал таймера
 	client_info2.Update();
 
-	
-	if (socket.connect(settings.get_IP(), settings.get_port())) {
+	if (m_socket.connect(settings.get_IP(), settings.get_port())) //connect to host
+	{
 
 		L_TRACE << "Client connected to server.";
 		qDebug() << "Client connected to server.";
@@ -71,20 +66,19 @@ void Client::updateTime()
 	else
 	{
 		qDebug() << "Client doesn`t connect to server.";
-		qDebug() << socket.lastError().c_str();
-		L_DEBUG << "Client doesn`t connect to server.";
+		qDebug() << m_socket.lastError().c_str();
 		L_TRACE << "Client doesn`t connect to server.";
-		L_TRACE << socket.lastError().c_str();
+		L_TRACE << m_socket.lastError().c_str();
 		
 		return;
 	}
 
 	string send_XML_string;
-	parser.WriteSystemInformation(send_XML_string, client_info2.get_client_info());
+	parser.WriteSystemInformation(send_XML_string, client_info2.get_client_info());// parse in XML string
 	L_TRACE << "XML string: ";
 	L_TRACE << send_XML_string.c_str();
 	qDebug() << send_XML_string.c_str();
-	if (socket.send(send_XML_string))
+	if (m_socket.send(send_XML_string)) //send information
 	{
 		qDebug() << "Client sent information.";
 		L_TRACE << "Client sent information.";
@@ -92,12 +86,12 @@ void Client::updateTime()
 	else
 	{
 		qDebug() << "Client doesn`t send information.";
-		qDebug() << socket.lastError().c_str();
-		L_TRACE << socket.lastError().c_str();
+		qDebug() << m_socket.lastError().c_str();
+		L_TRACE << m_socket.lastError().c_str();
 		L_TRACE << "Client doesn`t send information.";
 		
 		return;
-	}if (socket.disconnect())
+	}if (m_socket.disconnect()) //disconnect to host, cloce socket
 	{
 		qDebug() << "Client diconnect to server.";
 		L_TRACE << "Client diconnect to server.";
@@ -106,10 +100,9 @@ void Client::updateTime()
 	{
 
 		L_TRACE << "Client doesn`t diconnect to server.";
-		L_TRACE << socket.lastError().c_str();
+		L_TRACE << m_socket.lastError().c_str();
 		qDebug() << "Client doesn`t diconnect to server.";
-		qDebug() << socket.lastError().c_str();
-		
+		qDebug() << m_socket.lastError().c_str();
 		return;
 	}
 }

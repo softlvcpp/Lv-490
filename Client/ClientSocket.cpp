@@ -1,50 +1,48 @@
 #include "ClientSocket.h"
 
-ClientSocket::ClientSocket():socket(new QTcpSocket())
+ClientSocket::ClientSocket():m_socket(new QTcpSocket())
 {
 }
 
-bool ClientSocket::connect(const QString& host_name, const unsigned int port)
+bool ClientSocket::connect(const QString& host_name, const unsigned int port)//connect to host
 {
 
-	socket->connectToHost(host_name, port);
-	if (socket->waitForConnected(30))
+	m_socket->connectToHost(host_name, port);
+	if (m_socket->waitForConnected(30))
 	{
 		return true;
 	}
 	return false;
 }
 
-bool ClientSocket::disconnect()
+bool ClientSocket::disconnect()//disconnect to host, cloce socket
 {
-	if (socket->state() == QAbstractSocket::ConnectedState)
+	if (m_socket->state() == QAbstractSocket::ConnectedState)
 	{
-		socket->disconnectFromHost();
-		socket->close();
+		m_socket->disconnectFromHost();
+		m_socket->close();
 		return true;
 	}
 	return false;
 }
 
-bool ClientSocket::send(const std::string message)
+bool ClientSocket::send(const std::string message) //send information
 {
-	if (socket->state() == QAbstractSocket::ConnectedState) {
+	if (m_socket->state() == QAbstractSocket::ConnectedState) {
 		int message_size = message.size();
-		socket->write(std::to_string(message_size).c_str(),sizeof(int));
-		socket->write(message.c_str(), message_size);
+		m_socket->write(std::to_string(message_size).c_str(),sizeof(int));
+		m_socket->write(message.c_str(), message_size);
 		return true;
 	}
 	return false;
 }
 
 
-std::string ClientSocket::lastError() const
+std::string ClientSocket::lastError() const // return last error
 {
-	return socket->errorString().toStdString();
+	return m_socket->errorString().toStdString();
 }
 
 ClientSocket::~ClientSocket()
-{
-	socket->deleteLater();
-}
+{}
 
