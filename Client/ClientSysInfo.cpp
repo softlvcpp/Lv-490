@@ -11,7 +11,7 @@ void  ClientSysInfo::Update() {
 	m_client_info.OS = CalculateOS();
 	SYSTEM_INFO systemInfo;
 	GetSystemInfo(&systemInfo);
-	qDebug()<< systemInfo.dwNumberOfProcessors;;
+	qDebug() << systemInfo.dwNumberOfProcessors;;
 	if (m_client_info.OS == "windows") {
 		m_client_info.TotalRAM = CalculateTotalRAM();
 		m_client_info.CPUNumbers = CalculateCPUNumbers();
@@ -199,7 +199,7 @@ string ClientSysInfo::CalculateHardDisk_MediaType(string LogicalDisk) { // "C:/"
 		&pdg, sizeof(pdg),            // output buffer
 		&junk,                         // # bytes returned
 		(LPOVERLAPPED)NULL);          // synchronous I/O
-	
+
 	string string_res;
 	STORAGE_PROPERTY_QUERY spqSeekP;
 	spqSeekP.PropertyId = (STORAGE_PROPERTY_ID)StorageDeviceSeekPenaltyProperty;
@@ -226,7 +226,7 @@ string ClientSysInfo::CalculateHardDisk_MediaType(string LogicalDisk) { // "C:/"
 	return string_res;
 }
 
-typedef BOOL(WINAPI *LPFN_GLPI)(
+typedef BOOL(WINAPI* LPFN_GLPI)(
 	PSYSTEM_LOGICAL_PROCESSOR_INFORMATION,
 	PDWORD);
 
@@ -245,7 +245,7 @@ int ClientSysInfo::CalculateCPUNumbers() {
 		"GetLogicalProcessorInformation");
 	if (NULL == glpi)
 	{
-		L_TRACE<<("\nGetLogicalProcessorInformation is not supported.\n");
+		L_TRACE << ("\nGetLogicalProcessorInformation is not supported.\n");
 		return (1);
 	}
 
@@ -265,13 +265,13 @@ int ClientSysInfo::CalculateCPUNumbers() {
 
 				if (NULL == buffer)
 				{
-					L_TRACE<<"\nError: Allocation failure\n";
+					L_TRACE << "\nError: Allocation failure\n";
 					return (2);
 				}
 			}
 			else
 			{
-				L_TRACE<<"\nError %d"+ GetLastError();
+				L_TRACE << "\nError %d" + GetLastError();
 				return (3);
 			}
 		}
@@ -302,13 +302,13 @@ int ClientSysInfo::CalculateCPUNumbers() {
 }
 
 
-int ClientSysInfo::CalculateFreeSpace(const std::string &logic_drive) {
+int ClientSysInfo::CalculateFreeSpace(const std::string& logic_drive) {
 	fs::space_info tmpi = fs::space(logic_drive);
 	int size_in_GB = tmpi.free / 1024 / 1024 / 1024;
 	return size_in_GB;
 }
 
-int ClientSysInfo::CalculateCapacity(const std::string &logic_drive) {
+int ClientSysInfo::CalculateCapacity(const std::string& logic_drive) {
 	fs::space_info tmpi = fs::space(logic_drive);
 	int size_in_GB = tmpi.capacity / 1024 / 1024 / 1024;
 	return size_in_GB;

@@ -20,6 +20,7 @@
  */
 class Server
 {
+
 // File IO members and service commands
 private:
 	std::string m_install_command  { "install" };
@@ -30,9 +31,13 @@ private:
 
 	std::string m_log_file_name{ "serverlog.log" };
 	std::string m_log_directory_name{ "Lv-490_logs" };
-	std::unique_ptr<filelog::FileLogger> m_logger;
 	filelog::LogLevel m_log_level;
+
+	std::unique_ptr<filelog::FileLogger> m_logger;
 	std::unique_ptr<wchar_t> m_name;
+
+	std::string m_all_files_dir_name{ "Lv-490_Files" };
+	std::ofstream m_file_output{ "C:/Lv-490_Files/temp_log.txt", std::ios::app };
 //Windows Service members
 private:
 	SERVICE_STATUS m_service_status{};
@@ -40,13 +45,14 @@ private:
 	HANDLE m_service_stop_event{ INVALID_HANDLE_VALUE };
 
 	static std::shared_ptr<Server> s_instance;
+
 // Parser members
 private:
 	CXMLParser::XMLParser m_parser;
-	std::string m_config_file_name{ "D:/dev/Lv-490/Server/config.xml" };
-	bool ReadConfig();
-	std::ofstream fout{ "D:/dev/Lv-490/temp_log.txt", std::ios::app };
+	std::string m_config_file_name{ "C:/Lv-490_Files/config.xml" };
  
+	bool ReadConfig();
+
 // Server members
 private:
 	std::string m_server_IP;

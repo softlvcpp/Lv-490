@@ -92,7 +92,7 @@ bool SocketHandler::set_configuration(std::shared_ptr<CXMLParser::OutDocument> s
 
 bool SocketHandler::InitLoger(const std::string& directory_name)
 {
-	std::string log_file_path = "D:/";
+	std::string log_file_path = "C:/Lv-490_Files/";
 	/*char user_name[USERNAME_LEN];
 	unsigned long len = USERNAME_LEN;
 	if (!GetUserNameA(user_name, &len))

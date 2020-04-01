@@ -1,5 +1,5 @@
 #include "Server.h"
-#define LOG_T SLOG_TRACE(*s_instance->m_logger) 
+#define LOG_T SLOG_TRACE(*s_instance->m_logger)
 #define LOG_D SLOG_DEBUG(*s_instance->m_logger)
 #define LOG_P SLOG_PROD(*s_instance->m_logger)
 
@@ -34,12 +34,12 @@ bool Server::Run(int argc, char** argv)
 	ServiceTable[1].lpServiceProc = nullptr;
 	if (s_instance->ReadConfig() == false)
 	{
-		s_instance->fout << "Can not read config";
+		s_instance->m_file_output << "Can not read config file\n";
 		return false;
 	}
 	if (!s_instance->InitLogger())
 	{
-		s_instance->fout << "Can not init logger" << s_instance->m_log_file_name;
+		s_instance->m_file_output << "Can not init logger " << s_instance->m_log_file_name << "\n";
 		return false;
 	}
 	if (argc == 2)
@@ -48,7 +48,7 @@ bool Server::Run(int argc, char** argv)
 		{
 			if (!s_instance->Install())
 			{
-				LOG_T << "Unable to install windows service";
+				LOG_T << "Unable to install windows service"; 
 				return false;
 			}
 		}
@@ -90,7 +90,7 @@ bool Server::Run(int argc, char** argv)
 	{
 		if (!StartServiceCtrlDispatcher(ServiceTable))
 		{
-			s_instance->fout << "Error occured";
+			s_instance->m_file_output << "Error occured";
 			LOG_T << "Unable to start Service Control Dispatcher.";
 			return false;
 		}
@@ -105,12 +105,12 @@ void Server::ServiceMain(int argc, char** argv)
 		s_instance = std::shared_ptr<Server>(new Server);
 		if (s_instance->ReadConfig() == false)
 		{
-			s_instance->fout << "\nCan not read config in service main";
+			s_instance->m_file_output << "\nCan not read config in service main";
 			return;
 		}
 		if (!s_instance->InitLogger())
 		{
-			s_instance->fout << "\nCan not init logger in service main";
+			s_instance->m_file_output << "\nCan not init logger in service main";
 			return;
 		}
 
@@ -153,8 +153,6 @@ void Server::ServiceMain(int argc, char** argv)
 		return;
 	}
 
-
-
 	std::thread main_thread(&Server::Main, s_instance);
 	{
 		std::condition_variable condition_var;
@@ -162,13 +160,10 @@ void Server::ServiceMain(int argc, char** argv)
 		std::unique_lock<std::mutex> condition_lock(mutex);
 
 		condition_var.wait(condition_lock, []() { return s_instance->m_service_status.dwCurrentState != SERVICE_RUNNING; });
-		s_instance->fout << "\n"<< s_instance->m_service_status.dwCurrentState;
+		s_instance->m_file_output << "\n" << s_instance->m_service_status.dwCurrentState;
 	}
 
-	//s_instance->m_logger->join();
-
-
-
+	s_instance->m_logger->join();
 }
 
 void Server::ControlHandler(unsigned long request)
@@ -221,16 +216,17 @@ bool Server::InitService()
 
 bool Server::Install()
 {
+	// Get current .exe path
 	wchar_t exe_file_path[MAX_PATH];
 	if (GetModuleFileName(NULL, exe_file_path, ARRAYSIZE(exe_file_path)) == 0)
 	{
-		LOG_T << "Unable to get executable path.";
+		LOG_T << "Unable to get executable path. Error " << GetLastError();
 		return false;
 	}
 
 	SC_HANDLE SCManager = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
 	if (!SCManager) {
-		LOG_T << "Unable to open Service Control Manager.";
+		LOG_T << "Unable to open Service Control Manager. Error " << GetLastError();
 		return false;
 	}
 
@@ -251,31 +247,31 @@ bool Server::Install()
 		int err = GetLastError();
 		switch (err) {
 		case ERROR_ACCESS_DENIED:
-			LOG_T << "Unable to create service. Access denied";
+			LOG_T << "Unable to create service. Access denied.  Error " << GetLastError();
 			break;
 		case ERROR_CIRCULAR_DEPENDENCY:
-			LOG_T << "Unable to create service. Circular dependency";
+			LOG_T << "Unable to create service. Circular dependency. Error " << GetLastError();
 			break;
 		case ERROR_DUPLICATE_SERVICE_NAME:
-			LOG_T << "Unable to create service. Duplicate service name";
+			LOG_T << "Unable to create service. Duplicate service name. Error " << GetLastError();
 			break;
 		case ERROR_INVALID_HANDLE:
-			LOG_T << "Unable to create service. Invalid handle";
+			LOG_T << "Unable to create service. Invalid handle. Error " << GetLastError();;
 			break;
 		case ERROR_INVALID_NAME:
-			LOG_T << "Unable to create service. Invalid name";
+			LOG_T << "Unable to create service. Invalid name. Error " << GetLastError();
 			break;
 		case ERROR_INVALID_PARAMETER:
-			LOG_T << "Unable to create service. Invalid parameter";
+			LOG_T << "Unable to create service. Invalid parameter. Error " << GetLastError();
 			break;
 		case ERROR_INVALID_SERVICE_ACCOUNT:
-			LOG_T << "Unable to create service. invalid service account";
+			LOG_T << "Unable to create service. invalid service account. Error " << GetLastError();
 			break;
 		case ERROR_SERVICE_EXISTS:
-			LOG_T << "Unable to create service. Service exists";
+			LOG_T << "Unable to create service. Service exists. Error " << GetLastError();
 			break;
 		default:
-			LOG_T << "Unable to create service. Undefined error";
+			LOG_T << "Unable to create service. Undefined error. Error " << GetLastError();
 			break;
 		}
 		CloseServiceHandle(SCManager);
@@ -313,13 +309,13 @@ bool Server::Start()
 	SC_HANDLE SCManager = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
 	if (!SCManager)
 	{
-		LOG_T << "Unable to open Service Control Manager";
+		LOG_T << "Unable to open Service Control Manager. Error " << GetLastError();
 		return false;
 	}
 	SC_HANDLE service = OpenService(SCManager, s_instance->m_name.get(), SERVICE_START);
 
 	if (!StartService(service, 0, NULL)) {
-		LOG_T << "Unable to start service";
+		LOG_T << "Unable to start service. Error " << GetLastError();
 		CloseServiceHandle(SCManager);
 		return false;
 	}
@@ -339,7 +335,7 @@ bool Server::Stop()
 	SC_HANDLE SCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 	if (!SCManager)
 	{
-		LOG_T << "Unable to open Service Control Manager.";
+		LOG_T << "Unable to open Service Control Manager. Error " << GetLastError();
 		return false;
 	}
 	SC_HANDLE service = OpenService(
@@ -350,7 +346,7 @@ bool Server::Stop()
 
 	if (service == nullptr)
 	{
-		LOG_T << "Unable to open service.";
+		LOG_T << "Unable to open service. Error " << GetLastError();
 
 		CloseServiceHandle(SCManager);
 		return false;
@@ -363,7 +359,7 @@ bool Server::Stop()
 		sizeof(SERVICE_STATUS_PROCESS),
 		&bytes_needed))
 	{
-		LOG_T << "Unable to get service status.";
+		LOG_T << "Unable to get service status. Error " << GetLastError();
 		CloseServiceHandle(service);
 		CloseServiceHandle(SCManager);
 		return false;
@@ -372,7 +368,7 @@ bool Server::Stop()
 
 	if (ssp.dwCurrentState == SERVICE_STOPPED)
 	{
-		LOG_T << "Unable to stop service. The service is stopped alredy.";
+		LOG_T << "Unable to stop service. The service is stopped alredy. Error " << GetLastError();
 		CloseServiceHandle(service);
 		CloseServiceHandle(SCManager);
 		return false;
@@ -386,7 +382,7 @@ bool Server::Stop()
 		SERVICE_CONTROL_STOP,
 		(LPSERVICE_STATUS)&ssp))
 	{
-		LOG_T << "Unable to stop service.";
+		LOG_T << "Unable to stop service. Error " << GetLastError();
 		CloseServiceHandle(service);
 		CloseServiceHandle(SCManager);
 		return false;
@@ -406,7 +402,7 @@ bool Server::Restart()
 	SC_HANDLE SCManager = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
 	if (!SCManager)
 	{
-		LOG_T << "Unable to open Service Control Manager.";
+		LOG_T << "Unable to open Service Control Manager. Error " << GetLastError();
 		return false;
 	}
 	SC_HANDLE service = OpenService(
@@ -417,7 +413,7 @@ bool Server::Restart()
 		SERVICE_QUERY_STATUS);
 	if (service == nullptr)
 	{
-		LOG_T << "Unable to open service.";
+		LOG_T << "Unable to open service. Error " << GetLastError();
 		CloseServiceHandle(SCManager);
 		return false;
 	}
@@ -429,7 +425,7 @@ bool Server::Restart()
 		sizeof(SERVICE_STATUS_PROCESS),
 		&bytes_needed))
 	{
-		LOG_T << "Unable to get service status.";
+		LOG_T << "Unable to get service status. Error " << GetLastError();
 		CloseServiceHandle(service);
 		CloseServiceHandle(SCManager);
 		return false;
@@ -438,7 +434,7 @@ bool Server::Restart()
 
 	if (ssp.dwCurrentState == SERVICE_STOPPED)
 	{
-		LOG_T << "Unable to stop service. The service is stopped alredy.";
+		LOG_T << "Unable to stop service. The service is stopped alredy. Error " << GetLastError();
 		CloseServiceHandle(service);
 		CloseServiceHandle(SCManager);
 		return false;
@@ -452,7 +448,7 @@ bool Server::Restart()
 		SERVICE_CONTROL_STOP,
 		(LPSERVICE_STATUS)&ssp))
 	{
-		LOG_T << "Unable to stop service.";
+		LOG_T << "Unable to stop service. Error " << GetLastError();
 		CloseServiceHandle(service);
 		CloseServiceHandle(SCManager);
 		return false;
@@ -468,13 +464,13 @@ bool Server::Restart()
 			sizeof(SERVICE_STATUS_PROCESS),
 			&bytes_needed))
 		{
-			LOG_T << "Unable to get service status.";
+			LOG_T << "Unable to get service status. Error " << GetLastError();
 			return false;
 		}
 		Sleep(sleep_time_ms);
 	}
 	if (!StartService(service, 0, NULL)) {
-		LOG_T << "Unable to start service.";
+		LOG_T << "Unable to start service. Error " << GetLastError();
 		std::cout << GetLastError();
 		CloseServiceHandle(SCManager);
 		return false;
@@ -525,17 +521,18 @@ Server& Server::get_instance()
 Server::~Server()
 {
 	CloseHandle(m_service_stop_event);
+	CloseHandle(s_instance->m_service_status_handle);
 }
 
 void Server::Main()
 {
 	ThreadPool thread_pool(m_max_threads);
 	SocketHandler socket_handler;
-	socket_handler.set_configuration(&m_parser.get_data());
+	CXMLParser::OutDocument temp = m_parser.get_data();
+	socket_handler.set_configuration(std::make_shared<CXMLParser::OutDocument>(temp));
+	socket_handler.InitLoger(m_log_directory_name);
 	socket_handler.AddCommand(new AddSocketConnection);
 	socket_handler.AddCommand(new StartConnection);
-
-	s_instance->fout << m_max_threads << " " << m_server_IP << " " << m_server_listenport;
 	socket_handler.Run(&thread_pool);
 }
 

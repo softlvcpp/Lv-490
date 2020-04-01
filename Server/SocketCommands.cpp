@@ -75,7 +75,7 @@ bool AcceptConnection::Execute(SocketState& socket_state)
 
 bool ReceiveMessage::Execute(SocketState& socket_state)
 {	
-	std::ofstream test_output("D:/programing/softserve/Lv-490/output.txt", std::ios::app);
+	std::ofstream test_output("C:/Lv-490_Files/output.txt", std::ios::app);
 
 	SOCKET current_socket = socket_state.id;
 
