@@ -57,7 +57,7 @@ void Client::updateTime()
 	tmr->setInterval(settings.get_TimeInterval() * 1000); // Задаем интервал таймера
 	client_info2.Update();
 
-	if (m_socket.connect(settings.get_IP(), settings.get_port())) //connect to host
+	if (m_socket.Connect(settings.get_IP().toStdString(), settings.get_port())) //connect to host
 	{
 
 		L_TRACE << "Client connected to server.";
@@ -66,9 +66,9 @@ void Client::updateTime()
 	else
 	{
 		qDebug() << "Client doesn`t connect to server.";
-		qDebug() << m_socket.lastError().c_str();
+		qDebug() << m_socket.LastError().c_str();
 		L_TRACE << "Client doesn`t connect to server.";
-		L_TRACE << m_socket.lastError().c_str();
+		L_TRACE << m_socket.LastError().c_str();
 		
 		return;
 	}
@@ -78,7 +78,7 @@ void Client::updateTime()
 	L_TRACE << "XML string: ";
 	L_TRACE << send_XML_string.c_str();
 	qDebug() << send_XML_string.c_str();
-	if (m_socket.send(send_XML_string)) //send information
+	if (m_socket.Send(send_XML_string)) //send information
 	{
 		qDebug() << "Client sent information.";
 		L_TRACE << "Client sent information.";
@@ -86,12 +86,12 @@ void Client::updateTime()
 	else
 	{
 		qDebug() << "Client doesn`t send information.";
-		qDebug() << m_socket.lastError().c_str();
-		L_TRACE << m_socket.lastError().c_str();
+		qDebug() << m_socket.LastError().c_str();
+		L_TRACE << m_socket.LastError().c_str();
 		L_TRACE << "Client doesn`t send information.";
 		
 		return;
-	}if (m_socket.disconnect()) //disconnect to host, cloce socket
+	}if (m_socket.Disconnect()) //disconnect to host, cloce socket
 	{
 		qDebug() << "Client diconnect to server.";
 		L_TRACE << "Client diconnect to server.";
@@ -100,9 +100,9 @@ void Client::updateTime()
 	{
 
 		L_TRACE << "Client doesn`t diconnect to server.";
-		L_TRACE << m_socket.lastError().c_str();
+		L_TRACE << m_socket.LastError().c_str();
 		qDebug() << "Client doesn`t diconnect to server.";
-		qDebug() << m_socket.lastError().c_str();
+		qDebug() << m_socket.LastError().c_str();
 		return;
 	}
 }

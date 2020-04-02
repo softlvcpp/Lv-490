@@ -5,7 +5,7 @@
 #include"SettingsWindow.h"
 #include"ClientSysInfo.h"
 #include<qmenubar.h>
-#include"ClientSocket.h"
+#include"QTcpClientSocket.h"
 class Client : public QMainWindow
 {
 	Q_OBJECT
@@ -17,7 +17,7 @@ private:
 	Ui::Client ui;
 	Dialog settings;
 	QTimer *tmr;//timer for timecycle connection to server
-	ClientSocket m_socket;
+	QTcpClientSocket m_socket;
 	CXMLParser::XMLParser parser;
 	std::thread m_th;
 public slots:

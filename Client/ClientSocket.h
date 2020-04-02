@@ -1,15 +1,10 @@
 #pragma once
-#include <QTcpSocket>
+#include <string>
 class ClientSocket
 {
-private:
-	QScopedPointer<QTcpSocket> m_socket;
 public:
-	ClientSocket();
-	bool connect(const QString& host_name, const unsigned int port);
-	bool disconnect();
-	bool send(const std::string message);
-	std::string lastError() const;
-	~ClientSocket();
+	virtual bool Connect(const std::string& host_name, const unsigned int port) = 0;//connect to host
+	virtual bool Disconnect()=0;//disconnect to host, cloce socket
+	virtual bool Send(const std::string& message)=0;//send information
 };
 
