@@ -40,13 +40,6 @@ bool SocketHandler::Run(ThreadPool* thread_pool)
 {
 	for (auto iter : m_commands)
 	{
-		LOG_T << "run";
-		WSAData wsaData;//config sockets
-		if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
-		{
-			LOG_T << "Server: Error at WSAStartup()";
-			return false;
-		}
 		iter->InitThreadPool(thread_pool);
 		iter->InitConfiguration(m_server_configuration);
 		if(iter->Execute(m_socket_state) == false)
@@ -62,12 +55,6 @@ bool SocketHandler::Run(std::shared_ptr<ThreadPool> thread_pool)
 {
 	for (auto iter : m_commands)
 	{
-		LOG_T << "run";
-		WSAData wsaData;//config sockets
-		if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
-		{
-			LOG_T << "Server: Error at WSAStartup()";
-		}
 		iter->InitThreadPool(thread_pool);
 		iter->InitConfiguration(m_server_configuration);
 		if (iter->Execute(m_socket_state) == false)
@@ -92,26 +79,16 @@ bool SocketHandler::set_configuration(std::shared_ptr<CXMLParser::OutDocument> s
 
 bool SocketHandler::InitLoger(const std::string& directory_name)
 {
-	std::string log_file_path = "C:/Lv-490_Files/";
-	/*char user_name[USERNAME_LEN];
-	unsigned long len = USERNAME_LEN;
-	if (!GetUserNameA(user_name, &len))
-	{
-		return false;
-	}
-	log_file_path += "User";
-	log_file_path += "/";
-	log_file_path += directory_name;
-	log_file_path += "/";
+	std::string log_file_path = "C:/Lv-490_Files/serv_LOGS/";
 	if (!CreateDirectoryA(log_file_path.c_str(), nullptr))
 	{
 		if (GetLastError() == ERROR_PATH_NOT_FOUND)
 		{
 			return false;
 		}
-	}*/
+	}
 	log_file_path += m_server_configuration->filename;
-	filelog::LogLevel log_level = filelog::LogLevel::Trace;
+	filelog::LogLevel log_level = filelog::LogLevel::NoLogs;
 	int level = std::stoi(m_server_configuration->loglevel);
 	switch (level)
 	{

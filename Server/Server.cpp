@@ -513,8 +513,7 @@ void Server::Main()
 {
 	ThreadPool thread_pool(m_max_threads);
 	SocketHandler socket_handler;
-	CXMLParser::OutDocument temp = m_parser.get_data();
-	socket_handler.set_configuration(std::make_shared<CXMLParser::OutDocument>(temp));
+	socket_handler.set_configuration(std::make_shared<CXMLParser::OutDocument>(m_parser.get_data()));
 	socket_handler.InitLoger(m_log_directory_name);
 	socket_handler.AddCommand(new AddSocketConnection);
 	socket_handler.AddCommand(new StartConnection);

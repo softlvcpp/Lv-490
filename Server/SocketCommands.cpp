@@ -66,7 +66,6 @@ bool AcceptConnection::Execute(SocketState& socket_state)
 	{
 		return false;
 	}
-
 	
 	socket_state.id = accepted_socket;
 	socket_state.state = ACCEPTED;
@@ -75,8 +74,6 @@ bool AcceptConnection::Execute(SocketState& socket_state)
 
 bool ReceiveMessage::Execute(SocketState& socket_state)
 {	
-	std::ofstream test_output("C:/Lv-490_Files/output.txt", std::ios::app);
-
 	SOCKET current_socket = socket_state.id;
 
 	while (true)
@@ -85,23 +82,23 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 		int msg_size = 0;
 		socket_state.buffer.resize(sizeof(int));
 		size_t bytes_received = recv(current_socket, (char*)socket_state.buffer.c_str(), sizeof(int), 0);
+
 		msg_size = std::stoi(socket_state.buffer);
 
 		if (SOCKET_ERROR == bytes_received)
 		{
 			return false;
 		}
+
 		if (msg_size == 0)
 		{
 			RemoveSocket remove_socket;
 			remove_socket.Execute(socket_state);
 			return false;
 		}
+
 		socket_state.buffer.resize(msg_size);
 		bytes_received = recv(current_socket, (char*)socket_state.buffer.c_str(), socket_state.buffer.size(), 0);
-
-		/*size_t msg_end = socket_state.buffer.find('\0');
-		socket_state.buffer.erase(socket_state.buffer.begin() + msg_end, socket_state.buffer.end());*/
 
 		if (SOCKET_ERROR == bytes_received)
 		{
@@ -116,38 +113,31 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 		}
 		else
 		{
+			std::ofstream test_output("C:/Lv-490_Files/output.txt", std::ios::app);
+
 			//потім потрібно буде парсити цю стрічку, але на даному етапі просто вивід в консоль є
 			test_output << "Server: Recieved: " << bytes_received << " bytes of \"" << socket_state.buffer << "\" message.\n";
 
 			std::string xml_string = socket_state.buffer;
 
-			try
+			CXMLParser::XMLParser xml_parser;
+			xml_parser.PrepareToDBManager(xml_string);
+
+			test_output << "Cpu numbers: " << xml_parser.get_cpunumbers() << '\n';
+			test_output << "Cpu speed: " << xml_parser.get_cpuspeed() << '\n';
+			test_output << "Cpu vendor: " << xml_parser.get_cpuvendor() << '\n';
+			for (int i = 0; i < xml_parser.get_harddisk_free().size(); ++i)
 			{
-				CXMLParser::XMLParser xml_parser;
-				xml_parser.PrepareToDBManager(xml_string);
-
-				test_output << "Cpu numbers: " << xml_parser.get_cpunumbers() << '\n';
-				test_output << "Cpu speed: " << xml_parser.get_cpuspeed() << '\n';
-				test_output << "Cpu vendor: " << xml_parser.get_cpuvendor() << '\n';
-				for (int i = 0; i < xml_parser.get_harddisk_free().size(); ++i)
-				{
-					test_output << xml_parser.get_harddisk_type_list()[i] << '\n';
-					test_output << "Hard disk free: " << xml_parser.get_harddisk_free()[i] << '\n';
-					test_output << "Hard disk total size: " << xml_parser.get_harddisk_totalsize()[i] << '\n';
-					test_output << "Hard disk used: " << xml_parser.get_harddisk_used()[i] << '\n';
-				}
-				test_output << "Ip: " << xml_parser.get_ipaddress() << '\n';
-				test_output << "Mac: " << xml_parser.get_macaddress() << '\n';
-				test_output << "Ram: " << xml_parser.get_totalram() << '\n';
-
-				test_output.close();
+				test_output << xml_parser.get_harddisk_type_list()[i] << '\n';
+				test_output << "Hard disk free: " << xml_parser.get_harddisk_free()[i] << '\n';
+				test_output << "Hard disk total size: " << xml_parser.get_harddisk_totalsize()[i] << '\n';
+				test_output << "Hard disk used: " << xml_parser.get_harddisk_used()[i] << '\n';
 			}
-			catch (...)
-			{
+			test_output << "Ip: " << xml_parser.get_ipaddress() << '\n';
+			test_output << "Mac: " << xml_parser.get_macaddress() << '\n';
+			test_output << "Ram: " << xml_parser.get_totalram() << '\n';
 
-				test_output.close();
-				test_output << "parser error\n";
-			}
+			test_output.close();
 
 			if (socket_state.buffer == "exit")
 			{

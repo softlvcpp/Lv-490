@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="TCPServer_Lv490" Language="1033" Version="1.0.0.0" Manufacturer="Lv-490_C++" UpgradeCode="cfa5704b-b0c5-4455-a870-bfa712751793">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <WixVariable Id = "WixUILicenseRtf" Value ="$(var.ProjectDir)\License\License.rtf" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+    
+    <UIRef Id ="WixUI_Minimal"/>
+    
+    <Feature Id="ProductFeature" Title="TCPServer_Lv490" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Product>
+
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="Lv-490_server" />
+      </Directory>
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="ProductComponent">
+        <File Source="$(var.Server.TargetPath)" />
+      </Component>
+      <Component Id="ProductLoggerComponent">
+        <File Source="$(var.LoggerLibrary.TargetPath)" />
+      </Component>
+      <Component Id="ProductParserComponent">
+        <File Source="$(var.XML_Parser.TargetPath)" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>
