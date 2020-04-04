@@ -38,6 +38,7 @@ private:
 
 	std::string m_all_files_dir_name{ "Lv-490_Files" };
 	std::ofstream m_file_output{ "C:/Lv-490_Files/temp_log.txt", std::ios::app };
+
 //Windows Service members
 private:
 	SERVICE_STATUS m_service_status{};
@@ -55,8 +56,7 @@ private:
 
 // Server members
 private:
-	std::string m_server_IP;
-	std::string m_server_listenport;
+	
 	unsigned m_max_threads;
 public:
 	static bool Run(int argc, char** argv);
@@ -87,4 +87,3 @@ private:
 
 	bool InitLogger();
 };
-

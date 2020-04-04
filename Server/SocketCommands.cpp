@@ -84,7 +84,7 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 		//get message size from client
 		int msg_size = 0;
 		socket_state.buffer.resize(sizeof(int));
-		int bytes_received = recv(current_socket, (char*)socket_state.buffer.c_str(), sizeof(int), 0);
+		size_t bytes_received = recv(current_socket, (char*)socket_state.buffer.c_str(), sizeof(int), 0);
 		msg_size = std::stoi(socket_state.buffer);
 
 		if (SOCKET_ERROR == bytes_received)

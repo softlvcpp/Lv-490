@@ -15,8 +15,6 @@ bool Server::ReadConfig()
 	}
 	auto server_data = m_parser.get_data();
 	m_log_file_name = server_data.filename;
-	m_server_IP = server_data.ipadress;
-	m_server_listenport = server_data.listenport;
 	m_log_level = static_cast<filelog::LogLevel>(server_data.loglevel[0] - '0');
 	m_max_threads = std::stoi(server_data.maxworkingthreads);
 
