@@ -66,6 +66,7 @@ class RemoveSocket : public Command
 public:
 	RemoveSocket() {};
 	bool Execute(SocketState& socket_state);
+	static bool remove_socket(SOCKET& server_socket);
 };
 
 class AcceptConnection : public Command

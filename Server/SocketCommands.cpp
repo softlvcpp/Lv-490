@@ -26,8 +26,7 @@ bool AddSocketConnection::Execute(SocketState& socket_state)//return bool
 	if (SOCKET_ERROR == ::bind(new_socket, (SOCKADDR*)&serverService, sizeof(serverService)))
 	{
 		socket_state.log_msg = "Server: Error at bind(): " + WSAGetLastError();
-		closesocket(new_socket);
-		WSACleanup();
+		RemoveSocket::remove_socket(new_socket);
 		return false;
 	}
 
@@ -37,8 +36,7 @@ bool AddSocketConnection::Execute(SocketState& socket_state)//return bool
 	if (SOCKET_ERROR == listen(new_socket, SOMAXCONN))
 	{
 		socket_state.log_msg = "Server: Error at listen(): " + WSAGetLastError();
-		closesocket(new_socket);
-		WSACleanup();
+		RemoveSocket::remove_socket(new_socket);
 		return false;
 	}
 
@@ -51,8 +49,15 @@ bool AddSocketConnection::Execute(SocketState& socket_state)//return bool
 
 bool RemoveSocket::Execute(SocketState& socket_state)
 {
-	closesocket(socket_state.id);	
+	RemoveSocket::remove_socket(socket_state.id);
 	socket_state.state = LISTEN;
+	return true;
+}
+
+bool RemoveSocket::remove_socket(SOCKET& server_socket)
+{
+	closesocket(server_socket);
+	WSACleanup();
 	return true;
 }
 
@@ -79,43 +84,51 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 	while (true)
 	{
 		//get message size from client
-		int msg_size = 0;
-		socket_state.buffer.resize(sizeof(int));
-		size_t bytes_received = recv(current_socket, (char*)socket_state.buffer.c_str(), sizeof(int), 0);
-
-		msg_size = std::stoi(socket_state.buffer);
+		
+		socket_state.buffer.clear();
+		std::string incomming_buffer;
+		incomming_buffer.resize(BUFFER_SIZE);
+		size_t bytes_received = recv(current_socket, const_cast<char*>(incomming_buffer.c_str()), sizeof(int), 0);
 
 		if (SOCKET_ERROR == bytes_received)
 		{
+			RemoveSocket::remove_socket(socket_state.id);
 			return false;
 		}
+
+		int msg_size = std::stoi(incomming_buffer);
 
 		if (msg_size == 0)
 		{
-			RemoveSocket remove_socket;
-			remove_socket.Execute(socket_state);
+			RemoveSocket::remove_socket(socket_state.id);
 			return false;
 		}
 
-		socket_state.buffer.resize(msg_size);
-		bytes_received = recv(current_socket, (char*)socket_state.buffer.c_str(), socket_state.buffer.size(), 0);
+		//get main message from client
+		bytes_received = 0;
+		while(bytes_received < msg_size)
+		{
+			bytes_received += recv(current_socket, const_cast<char*>(incomming_buffer.c_str()), BUFFER_SIZE, 0);
+			socket_state.buffer.append(incomming_buffer);
+		}
+		socket_state.buffer.erase(socket_state.buffer.begin() + msg_size, socket_state.buffer.end());
 
 		if (SOCKET_ERROR == bytes_received)
 		{
+			RemoveSocket::remove_socket(socket_state.id);
 			return false;
 		}
 
 		if (bytes_received == 0)
 		{
-			RemoveSocket remove_socket;
-			remove_socket.Execute(socket_state);
+			RemoveSocket::remove_socket(socket_state.id);
 			return false;
 		}
 		else
 		{
 			std::ofstream test_output("C:/Lv-490_Files/output.txt", std::ios::app);
-
-			//потім потрібно буде парсити цю стрічку, але на даному етапі просто вивід в консоль є
+						
+			//потім потрібно буде записувати прийняту інформацію в бд, але на даному етапі просто вивід в консоль є
 			test_output << "Server: Recieved: " << bytes_received << " bytes of \"" << socket_state.buffer << "\" message.\n";
 
 			std::string xml_string = socket_state.buffer;
@@ -126,7 +139,7 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 			test_output << "Cpu numbers: " << xml_parser.get_cpunumbers() << '\n';
 			test_output << "Cpu speed: " << xml_parser.get_cpuspeed() << '\n';
 			test_output << "Cpu vendor: " << xml_parser.get_cpuvendor() << '\n';
-			for (int i = 0; i < xml_parser.get_harddisk_free().size(); ++i)
+			for (size_t i = 0; i < xml_parser.get_harddisk_free().size(); ++i)
 			{
 				test_output << xml_parser.get_harddisk_type_list()[i] << '\n';
 				test_output << "Hard disk free: " << xml_parser.get_harddisk_free()[i] << '\n';
@@ -141,8 +154,7 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 
 			if (socket_state.buffer == "exit")
 			{
-				RemoveSocket remove_socket;
-				remove_socket.Execute(socket_state);
+				RemoveSocket::remove_socket(socket_state.id);
 				return true;
 			}
 		}
@@ -167,6 +179,7 @@ bool StartConnection::Execute(SocketState& socket_state)
 		if(new_conection.state == ACCEPTED)
 		{
 			new_conection.state = RECEIVE;
+			//add message receiving in thread pool
 			m_thread_pool->ExecuteTask(&StartConnection::DoRecv, this, new_conection);
 		}
 	}
