@@ -146,17 +146,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Server.cpp" />
     <ClCompile Include="SocketCommands.cpp" />
     <ClCompile Include="SocketHandler.cpp" />
     <ClCompile Include="ThreadPool.cpp" />
-    <ClCompile Include="Server.cpp" />
+    <ClCompile Include="ServerService.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Server.h" />
     <ClInclude Include="SocketCommands.h" />
     <ClInclude Include="SocketHandler.h" />
     <ClInclude Include="ThreadPool.h" />
-    <ClInclude Include="Server.h" />
+    <ClInclude Include="ServerService.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Utility\Logger\LoggerLibrary.vcxproj">
