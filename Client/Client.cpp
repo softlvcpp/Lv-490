@@ -53,8 +53,8 @@ Client::Client(QWidget *parent)
 
 void Client::updateTime()
 {
-
-	tmr->setInterval(settings.get_TimeInterval() * 1000); // Задаем интервал таймера
+	const unsigned int time_measurement = 1000; // 1000- seconds, 1 = milliseconds, 60000 - minuts...;
+	tmr->setInterval(settings.get_TimeInterval() * time_measurement); // Задаем интервал таймера
 	client_info2.Update();
 
 	if (m_socket.Connect(settings.get_IP().toStdString(), settings.get_port())) //connect to host

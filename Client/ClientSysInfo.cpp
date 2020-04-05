@@ -134,8 +134,8 @@ QString ClientSysInfo::CalculateMacAddress()
 {
 	QNetworkInterface res;
 	QList<QNetworkInterface> list = QNetworkInterface::allInterfaces();
-	for (int i = 0; i < list.size(); i++) {
-		if (list[i].type() == 3 || list[i].type() == 8)
+	for (size_t i = 0; i < list.size(); i++) {
+		if (list[i].type() == QNetworkInterface::Ethernet || list[i].type() == QNetworkInterface::Wifi)
 		{
 			if (list[i].flags().testFlag(QNetworkInterface::IsRunning) && list[i].humanReadableName() == "Wi-Fi")
 			{
@@ -156,7 +156,7 @@ QString ClientSysInfo::CalculateIPAddress()
 	QNetworkInterface mac_interface = QNetworkInterface::interfaceFromName(CalculateMacAddress());
 	QList<QHostAddress> list_ip = mac_interface.allAddresses();
 	QString res;
-	for (int i = 0; i < list_ip.size(); i++)
+	for (size_t i = 0; i < list_ip.size(); i++)
 	{
 		if (!list_ip[i].isLinkLocal() && !list_ip[i].isLoopback()) {
 			res = list_ip[i].toString();
@@ -315,7 +315,7 @@ int ClientSysInfo::CalculateCapacity(const std::string& logic_drive) {
 
 ClientSysInfo::~ClientSysInfo()
 {
-	g_logger.join();
+
 }
 CXMLParser::ClientInfo ClientSysInfo::get_client_info() const
 {
