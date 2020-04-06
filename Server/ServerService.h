@@ -1,21 +1,23 @@
 #pragma once
+#define _WINSOCKAPI_
 #include <string>
 #include <iostream>
+
 #include <memory>
 #include <fstream>
 #include <mutex>
 #include <condition_variable>
 
-#include "Server.h"
-
 #include <Windows.h>
 
+#include "Server.h"
 
 
 
 
 
-#define USERNAME_LEN 20
+
+
 /*
  * This class is implemented as singletone
  * The class functions don`t throw exceptions

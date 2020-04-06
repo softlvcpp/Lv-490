@@ -5,11 +5,11 @@
 
     <WixVariable Id = "WixUILicenseRtf" Value ="$(var.ProjectDir)\License\License.rtf" />
 
-    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of the product is already installed." />
     <MediaTemplate />
     
     <UIRef Id ="WixUI_Minimal"/>
-    
+
     <Feature Id="ProductFeature" Title="TCPServer_Lv490" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
@@ -27,7 +27,7 @@
   <Fragment>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="ProductComponent">
-        <File Source="$(var.Server.TargetPath)" />
+        <File Id = "EXE" Source="$(var.Server.TargetPath)" />
       </Component>
       <Component Id="ProductLoggerComponent">
         <File Source="$(var.LoggerLibrary.TargetPath)" />
@@ -36,5 +36,16 @@
         <File Source="$(var.XML_Parser.TargetPath)" />
       </Component>
     </ComponentGroup>
+
+    <CustomAction Id="EXECUTE_AFTER_FINALIZE"
+              Execute="deferred"
+              Impersonate="no"
+              Return="asyncNoWait"
+              FileKey="EXE"
+              ExeCommand="install" />
+
+    <InstallExecuteSequence>
+      <Custom Action="EXECUTE_AFTER_FINALIZE" After="InstallFiles">NOT Installed</Custom>
+    </InstallExecuteSequence>
   </Fragment>
 </Wix>
