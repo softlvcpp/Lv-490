@@ -13,7 +13,7 @@ Client::Client(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
-	
+	ui.tableWidget->hide();
 	setWindowIcon(QIcon("main_icon.png"));
 	settings.setModal(true);
 	//settings.exec();
@@ -36,6 +36,7 @@ Client::Client(QWidget *parent)
 
 	connect(ui.comboBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(indexComboChanged(int)));
+	
 	//QActionEvent::action
 	//QMenu::actionEvent()
 	connect(ui.actionChange_settings, SIGNAL(triggered()),
@@ -113,6 +114,30 @@ void Client::updateTime()
 //	qDebug() << "1111"  ;
 //}
 
+void Client::update_processes() {
+	qDebug() << "_______________update_processes______________";
+	ui.textEdit->hide();
+	ui.tableWidget->show();
+	client_info2.CalculateProcesses();
+	map<int, string> tmp = client_info2.get_Processes();
+
+	ui.tableWidget->setColumnCount(2);
+	ui.tableWidget->setRowCount(tmp.size());
+	ui.tableWidget->horizontalScrollBar()->setDisabled(true);
+	ui.tableWidget->setHorizontalHeaderLabels(QStringList() << "ID" << "Name");
+
+	ui.tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+	ui.tableWidget->horizontalHeader()->setStretchLastSection(true);
+	ui.tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);//u will dont have permision to edit items
+	int i = 0;
+	for (map<int, string>::iterator itr = tmp.begin(); itr != tmp.end(); itr++) {
+		ui.tableWidget->setItem(i, 0, new QTableWidgetItem(QString::number(itr->first)));
+		ui.tableWidget->setItem(i, 1, new QTableWidgetItem(QString(itr->second.c_str())));
+		i++;
+	}
+}
+
+
 void Client::open_settings() {
 
 	settings.setModal(true);
@@ -120,10 +145,14 @@ void Client::open_settings() {
 }
 void Client::indexComboChanged(int index)
 {
+	//ui.textEdit->show();
 	client_info2.Update();
+	ui.tableWidget->hide();
+	ui.textEdit->show();
 	int num= ui.comboBox->currentIndex();
+	//timer->stop();
 	if (num == 0) {
-
+		client_info2.CalculateProcesses();
 		QString str = "OS: " + QString(client_info2.CalculateOS().c_str()) + '\n';
 
 		str += "CPU vendor: " + QString(client_info2.get_CPUVendor().c_str()) + "\n";
@@ -190,6 +219,16 @@ void Client::indexComboChanged(int index)
 		str += "MAC address: " + QString(client_info2.get_MacAddress().c_str()) + "\n";
 		str += "IP address: " + QString(client_info2.CalculateIPAddress()) + "\n";
 		ui.textEdit->setText(str);
+	}
+	if (num == 5) {
+		update_processes();
+
+		//timer = new QTimer(this);
+		//connect(timer, SIGNAL(timeout()), this, SLOT(update_processes())); 
+		//timer->start();//10 sec -> TODO -> to another const file
+
+		
+		
 	}
 	ui.textEdit->ensureCursorVisible();
 	// Do something here on ComboBox index change
