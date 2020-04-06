@@ -1,6 +1,10 @@
 #include "ClientSysInfo.h"
 #include "DefineLogger.h"
 #include<qthread.h>
+#include <tlhelp32.h> // for snapshot
+
+#include <windows.h>
+#include <conio.h>
 //#include <boost/thread.hpp>
 ClientSysInfo::ClientSysInfo() {
 	Update();
@@ -311,6 +315,47 @@ int ClientSysInfo::CalculateCapacity(const std::string& logic_drive) {
 	fs::space_info tmpi = fs::space(logic_drive);
 	int size_in_GB = tmpi.capacity / 1024 / 1024 / 1024;
 	return size_in_GB;
+}
+map<int, string>  ClientSysInfo::get_Processes() {
+	return m_processes;
+}
+void ClientSysInfo::CalculateProcesses() {
+	HANDLE Snapshot_handle;
+	Snapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	if (Snapshot_handle == NULL)
+	{
+		cout << "error" << endl;// in logger	
+	}
+	PROCESSENTRY32 proc;
+	proc.dwSize = sizeof(PROCESSENTRY32);
+	if (Process32First(Snapshot_handle, &proc))//Returns TRUE if the first entry of the process list has been copied to the buffer or FALSE otherwise.
+	{
+		wstring ws(proc.szExeFile);
+		string str(ws.begin(), ws.end());
+		m_processes.insert(pair<int, string>(proc.th32ProcessID, str));
+		while (Process32Next(Snapshot_handle, &proc)) {
+			wstring ws(proc.szExeFile);
+			string str(ws.begin(), ws.end());
+			//cout << str << endl;
+			qDebug() << "NAME:" + QString(str.c_str()) + "  ID: " + QString::number(proc.th32ProcessID);
+			m_processes.insert(pair<int, string>(proc.th32ProcessID, str));
+		}
+	}
+	
+	//if (Process32First(Snapshot_handle, &proc))
+	//{
+	//	do {
+
+
+	//		wstring ws(proc.szExeFile);
+	//		string str(ws.begin(), ws.end());
+	//		//cout << str << endl;
+	//		qDebug() << "NAME:" + QString(str.c_str()) + "  ID: " + QString::number(proc.th32ProcessID);
+	//		m_processes.insert(pair<int, string>(proc.th32ProcessID, str));
+	//	} while (Process32Next(Snapshot_handle, &proc));
+	//}
+
+	CloseHandle(Snapshot_handle);
 }
 
 ClientSysInfo::~ClientSysInfo()

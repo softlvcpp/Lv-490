@@ -3,39 +3,13 @@
 #define _CRT_SECURE_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
-#include <iostream>
-#include <winsock2.h>
-#include <string.h>
-#include <string>
-#include <vector>
-#include <memory>
-#include <fstream>
-#include <Mstcpip.h>
 #include "ThreadPool.h"
+#include "SocketState.h"
 
 #include "..\Utility\Logger\LoggerDLL.h"
 #include "..\Utility\XML_Parser\XML_Parser.h"
 
 #pragma comment(lib, "Ws2_32.lib")
-
-//using namespace std;
-
-typedef struct
-{
-	SOCKET id;			//socket handle
-	int	state;			//receiving? 0 - LISTEN, 1 - ACCEPTED, 2 - RECEIVEING
-	std::string buffer;
-	std::string log_msg;
-} SocketState;
-
-constexpr int BUFFER_SIZE = 512;//default buffer size
-
-enum
-{
-	LISTEN,
-	ACCEPTED,
-	RECEIVE
-};
 
 class Command
 {
@@ -66,6 +40,7 @@ class RemoveSocket : public Command
 public:
 	RemoveSocket() {};
 	bool Execute(SocketState& socket_state);
+	static bool RemoveUsedSocket(SOCKET& server_socket);
 };
 
 class AcceptConnection : public Command

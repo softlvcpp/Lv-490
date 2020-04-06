@@ -16,6 +16,7 @@
 #include<qnetworkinterface.h>
 #include<qhostaddress.h>
 #include<filesystem>
+#include<map>
 
 #include <windows.h>
 #include <malloc.h>    
@@ -42,6 +43,7 @@ class ClientSysInfo
 	vector<int> HardDisk_Used;
 	vector<int> HardDisk_Free;*/
 	CXMLParser::ClientInfo m_client_info;
+	std::map <int,string> m_processes;
 public:
 	ClientSysInfo();
 	void Update();
@@ -57,7 +59,7 @@ public:
 	vector<int>  get_HardDisk_TotalSize();
 	vector<int>  get_HardDisk_Used();
 	vector<int>  get_HardDisk_Free();
-
+	map<int, string> get_Processes();
 
 	string CalculateOS();
 	int CalculateTotalRAM();
@@ -72,6 +74,7 @@ public:
 	int CalculateCapacity(const std::string &logic_drive);
 	QString CalculateMacAddress();
 	QString CalculateIPAddress();
+	void CalculateProcesses();
 	//ui
 	//socket
 	~ClientSysInfo();
