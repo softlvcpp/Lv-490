@@ -4,7 +4,7 @@ bool AddSocketConnection::Execute(SocketState& socket_state)//return bool
 {
 	// create new socket, use the Internet address family (AF_INET), streaming sockets (SOCK_STREAM), and the TCP/IP protocol (IPPROTO_TCP).
 	SOCKET new_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
+	
 	// check for errors to ensure that the new_socket is a valid socket.	
 	if (INVALID_SOCKET == new_socket)
 	{
@@ -84,7 +84,7 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 	while (true)
 	{
 		//get message size from client
-		
+
 		socket_state.buffer.clear();
 		std::string incomming_buffer;
 		incomming_buffer.resize(BUFFER_SIZE);
@@ -106,13 +106,16 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 
 		//get main message from client
 		bytes_received = 0;
-		while(bytes_received < msg_size)
+		while (bytes_received < msg_size)
 		{
 			bytes_received += recv(current_socket, const_cast<char*>(incomming_buffer.c_str()), BUFFER_SIZE, 0);
 			socket_state.buffer.append(incomming_buffer);
 		}
-		socket_state.buffer.erase(socket_state.buffer.begin() + msg_size, socket_state.buffer.end());
-
+		if (msg_size <= socket_state.buffer.size())
+		{
+			socket_state.buffer.erase(socket_state.buffer.begin() + msg_size, socket_state.buffer.end());
+		}
+				
 		if (SOCKET_ERROR == bytes_received)
 		{
 			RemoveSocket::RemoveUsedSocket(socket_state.id);
@@ -153,7 +156,7 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 			test_output.close();
 
 			if (socket_state.buffer == "exit")
-			{
+			{				
 				RemoveSocket::RemoveUsedSocket(socket_state.id);
 				return true;
 			}

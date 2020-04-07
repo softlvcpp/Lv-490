@@ -5,8 +5,10 @@ Server::Server(const CXMLParser::OutDocument& config, std::string log_dir_name) 
 {
 	m_socket_handler.set_configuration(std::make_shared<CXMLParser::OutDocument>(config));
 	m_socket_handler.InitLoger(log_dir_name);
-	m_socket_handler.AddCommand(new AddSocketConnection);
-	m_socket_handler.AddCommand(new StartConnection);
+	AddSocketConnection* add_socket_connection = new AddSocketConnection;
+	m_socket_handler.AddCommand(add_socket_connection);
+	StartConnection* start_connection = new StartConnection;
+	m_socket_handler.AddCommand(start_connection);
 
 }
 	
