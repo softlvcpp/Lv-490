@@ -9,7 +9,7 @@
 #include"DefineLogger.h"
 #include "../Utility/XML_Parser/XML_Parser.h"
 #include<thread>
-Client::Client(QWidget *parent)
+Client::Client(QWidget* parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
@@ -26,39 +26,75 @@ Client::Client(QWidget *parent)
 
 	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
 
-	
+
 	QGraphicsView view;
 	view.setFrameStyle(QFrame::NoFrame);
-	
+
 	tmr = new QTimer(this); // Создаем объект класса QTimer и передаем адрес переменной
-	connect(tmr, SIGNAL(timeout()), this, SLOT(updateTime())); // In thread TODO next demo
+	//connect(tmr, SIGNAL(timeout()), this, SLOT(updateTime())); // In thread TODO next demo
+	connect(tmr, SIGNAL(timeout()), this, SLOT(runUpdateTime())); // In thread TODO next demo
 	tmr->start();
 
 	connect(ui.comboBox, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(indexComboChanged(int)));
-	
+
 	//QActionEvent::action
 	//QMenu::actionEvent()
 	connect(ui.actionChange_settings, SIGNAL(triggered()),
 		this, SLOT(open_settings()));
-	
+
 	indexComboChanged(0);
 	qDebug() << "hard disk";
 
-	
+
 	QString text = "OS  " + QString(client_info2.CalculateOS().c_str()) + '\n' + "CPU vendor " + QString(client_info2.CalculateCPUVendor().c_str()) + '\n';
 
 
 }
+void Client::closeEvent(QCloseEvent* event) {
+	qDebug() << "CloseEvent:";
+	if (m_th->joinable())
+	{
+		m_th->join();
+	}
+	delete m_th;
 
+};
+
+void Client::runUpdateTime()
+{
+	const unsigned int TimeMeasurement = 1000; // 1000- seconds, 1 = milliseconds, 60000 - minuts...;
+
+	tmr->setInterval(settings.get_TimeInterval() * TimeMeasurement); // Задаем интервал таймера
+	if (m_th != nullptr)
+	{
+		if (m_th->joinable())
+		{
+			m_th->join();
+		}
+		delete m_th;
+	}
+	m_th = new std::thread(&Client::updateTime, this);
+}
 
 void Client::updateTime()
 {
-	const unsigned int time_measurement = 1000; // 1000- seconds, 1 = milliseconds, 60000 - minuts...;
-	tmr->setInterval(settings.get_TimeInterval() * time_measurement); // Задаем интервал таймера
-	client_info2.Update();
+	//const unsigned int time_measurement = 1000; // 1000- seconds, 1 = milliseconds, 60000 - minuts...;
+	//tmr->setInterval(settings.get_TimeInterval() * time_measurement); // Задаем интервал таймера
+	QTcpClientSocket m_socket;
+	if (m_socket.Init(settings.get_IP().toStdString(), settings.get_port()))
+	{
+		L_TRACE << "Client socket inited.";
+		qDebug()<< "Client socket inited.";
 
-	if (m_socket.Connect(settings.get_IP().toStdString(), settings.get_port())) //connect to host
+	}
+	else
+	{
+		L_TRACE << "Client socket doesn`t inited.";
+		qDebug() << "Client socket doesn`t inited.";
+	}
+
+	if (m_socket.Connect()) //connect to host
 	{
 
 		L_TRACE << "Client connected to server.";
@@ -74,6 +110,7 @@ void Client::updateTime()
 		return;
 	}
 
+	client_info2.Update();
 	string send_XML_string;
 	parser.WriteSystemInformation(send_XML_string, client_info2.get_client_info());// parse in XML string
 	L_TRACE << "XML string: ";
@@ -149,7 +186,7 @@ void Client::indexComboChanged(int index)
 	client_info2.Update();
 	ui.tableWidget->hide();
 	ui.textEdit->show();
-	int num= ui.comboBox->currentIndex();
+	int num = ui.comboBox->currentIndex();
 	//timer->stop();
 	if (num == 0) {
 		client_info2.CalculateProcesses();
@@ -166,21 +203,21 @@ void Client::indexComboChanged(int index)
 		std::vector<int> used_size = client_info2.get_HardDisk_Used();
 		std::vector<std::string> volume_vector = client_info2.CalculatevectorLogicDick();//= {"C:\\","D:\\","E:\\" };
 		for (int i = 0; i < volume_vector.size(); i++) {
-			str += "Hard Disk (" + QString(volume_vector[i].c_str()) + ") " + QString(client_info2.CalculateHardDisk_MediaType(volume_vector[i]).c_str())+ "\n";
-				str += " capacity: " + QString::number(client_info2.CalculateCapacity(volume_vector[i]))+QString("GB \n");
-				str += " used: " + QString::number(used_size[i]) + QString("GB \n");
-				str += " free: " + QString::number(free_size[i])+ QString("GB \n");
+			str += "Hard Disk (" + QString(volume_vector[i].c_str()) + ") " + QString(client_info2.CalculateHardDisk_MediaType(volume_vector[i]).c_str()) + "\n";
+			str += " capacity: " + QString::number(client_info2.CalculateCapacity(volume_vector[i])) + QString("GB \n");
+			str += " used: " + QString::number(used_size[i]) + QString("GB \n");
+			str += " free: " + QString::number(free_size[i]) + QString("GB \n");
 		}
 
 		str += "MAC address: " + QString(client_info2.get_MacAddress().c_str()) + "\n";
 		str += "IP address: " + QString(client_info2.CalculateIPAddress()) + "\n";
 		ui.textEdit->setText(str);
-		
-		
+
+
 	}
 	if (num == 1) {
 		QString str;
-	
+
 		std::vector<int> free_size = client_info2.get_HardDisk_Free();
 		std::vector<int> total_size = client_info2.get_HardDisk_TotalSize();
 		std::vector<int> used_size = client_info2.get_HardDisk_Used();
@@ -210,9 +247,9 @@ void Client::indexComboChanged(int index)
 		str += "Total RAM: " + QString::number(client_info2.get_TotalRAM()) + "MB\n";
 		ui.textEdit->setText(str);
 		qDebug() << "ram";
-	
 
-		
+
+
 	}
 	if (num == 4) {
 		QString str;
@@ -227,8 +264,8 @@ void Client::indexComboChanged(int index)
 		//connect(timer, SIGNAL(timeout()), this, SLOT(update_processes())); 
 		//timer->start();//10 sec -> TODO -> to another const file
 
-		
-		
+
+
 	}
 	ui.textEdit->ensureCursorVisible();
 	// Do something here on ComboBox index change

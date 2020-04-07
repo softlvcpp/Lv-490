@@ -18,10 +18,11 @@ private:
 	Dialog settings;
 	QTimer *tmr;//timer for timecycle connection to server
 	QTimer* timer;//for processes
-	QTcpClientSocket m_socket;
 	CXMLParser::XMLParser parser;
-	std::thread m_th;
+	std::thread* m_th;
 public slots:
+	void closeEvent(QCloseEvent* event);//performed by pressing the red cross button
+	void runUpdateTime();// runs updateTime() in a separate thread
 	void open_settings();
 	void indexComboChanged(int index);
 	void updateTime(); //slot for updating function(connection to server)
