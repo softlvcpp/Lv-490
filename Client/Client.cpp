@@ -81,8 +81,8 @@ void Client::updateTime()
 {
 	//const unsigned int time_measurement = 1000; // 1000- seconds, 1 = milliseconds, 60000 - minuts...;
 	//tmr->setInterval(settings.get_TimeInterval() * time_measurement); // Задаем интервал таймера
-	QTcpClientSocket m_socket;
-	if (m_socket.Init(settings.get_IP().toStdString(), settings.get_port()))
+	QScopedPointer<ClientSocket> socket(new QTcpClientSocket());
+	if (socket->Init(settings.get_IP().toStdString(), settings.get_port()))
 	{
 		L_TRACE << "Client socket inited.";
 		qDebug()<< "Client socket inited.";
@@ -94,7 +94,7 @@ void Client::updateTime()
 		qDebug() << "Client socket doesn`t inited.";
 	}
 
-	if (m_socket.Connect()) //connect to host
+	if (socket->Connect()) //connect to host
 	{
 
 		L_TRACE << "Client connected to server.";
@@ -103,9 +103,9 @@ void Client::updateTime()
 	else
 	{
 		qDebug() << "Client doesn`t connect to server.";
-		qDebug() << m_socket.LastError().c_str();
+		qDebug() << socket->LastError().c_str();
 		L_TRACE << "Client doesn`t connect to server.";
-		L_TRACE << m_socket.LastError().c_str();
+		L_TRACE << socket->LastError().c_str();
 		
 		return;
 	}
@@ -116,7 +116,7 @@ void Client::updateTime()
 	L_TRACE << "XML string: ";
 	L_TRACE << send_XML_string.c_str();
 	qDebug() << send_XML_string.c_str();
-	if (m_socket.Send(send_XML_string)) //send information
+	if (socket->Send(send_XML_string)) //send information
 	{
 		qDebug() << "Client sent information.";
 		L_TRACE << "Client sent information.";
@@ -124,12 +124,12 @@ void Client::updateTime()
 	else
 	{
 		qDebug() << "Client doesn`t send information.";
-		qDebug() << m_socket.LastError().c_str();
-		L_TRACE << m_socket.LastError().c_str();
+		qDebug() << socket->LastError().c_str();
+		L_TRACE << socket->LastError().c_str();
 		L_TRACE << "Client doesn`t send information.";
 		
 		return;
-	}if (m_socket.Disconnect()) //disconnect to host, cloce socket
+	}if (socket->Disconnect()) //disconnect to host, cloce socket
 	{
 		qDebug() << "Client diconnect to server.";
 		L_TRACE << "Client diconnect to server.";
@@ -138,11 +138,12 @@ void Client::updateTime()
 	{
 
 		L_TRACE << "Client doesn`t diconnect to server.";
-		L_TRACE << m_socket.LastError().c_str();
+		L_TRACE << socket->LastError().c_str();
 		qDebug() << "Client doesn`t diconnect to server.";
-		qDebug() << m_socket.LastError().c_str();
+		qDebug() << socket->LastError().c_str();
 		return;
 	}
+	
 }
 //void Client::actionEvent( QAction actionChange_settings) {
 //
