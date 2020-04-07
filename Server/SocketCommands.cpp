@@ -26,7 +26,7 @@ bool AddSocketConnection::Execute(SocketState& socket_state)//return bool
 	if (SOCKET_ERROR == ::bind(new_socket, (SOCKADDR*)&serverService, sizeof(serverService)))
 	{
 		socket_state.log_msg = "Server: Error at bind(): " + WSAGetLastError();
-		RemoveSocket::remove_socket(new_socket);
+		RemoveSocket::RemoveUsedSocket(new_socket);
 		return false;
 	}
 
@@ -36,7 +36,7 @@ bool AddSocketConnection::Execute(SocketState& socket_state)//return bool
 	if (SOCKET_ERROR == listen(new_socket, SOMAXCONN))
 	{
 		socket_state.log_msg = "Server: Error at listen(): " + WSAGetLastError();
-		RemoveSocket::remove_socket(new_socket);
+		RemoveSocket::RemoveUsedSocket(new_socket);
 		return false;
 	}
 
@@ -49,12 +49,12 @@ bool AddSocketConnection::Execute(SocketState& socket_state)//return bool
 
 bool RemoveSocket::Execute(SocketState& socket_state)
 {
-	RemoveSocket::remove_socket(socket_state.id);
+	RemoveSocket::RemoveUsedSocket(socket_state.id);
 	socket_state.state = LISTEN;
 	return true;
 }
 
-bool RemoveSocket::remove_socket(SOCKET& server_socket)
+bool RemoveSocket::RemoveUsedSocket(SOCKET& server_socket)
 {
 	closesocket(server_socket);
 	WSACleanup();
@@ -92,7 +92,7 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 
 		if (SOCKET_ERROR == bytes_received)
 		{
-			RemoveSocket::remove_socket(socket_state.id);
+			RemoveSocket::RemoveUsedSocket(socket_state.id);
 			return false;
 		}
 
@@ -100,7 +100,7 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 
 		if (msg_size == 0)
 		{
-			RemoveSocket::remove_socket(socket_state.id);
+			RemoveSocket::RemoveUsedSocket(socket_state.id);
 			return false;
 		}
 
@@ -115,13 +115,13 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 
 		if (SOCKET_ERROR == bytes_received)
 		{
-			RemoveSocket::remove_socket(socket_state.id);
+			RemoveSocket::RemoveUsedSocket(socket_state.id);
 			return false;
 		}
 
 		if (bytes_received == 0)
 		{
-			RemoveSocket::remove_socket(socket_state.id);
+			RemoveSocket::RemoveUsedSocket(socket_state.id);
 			return false;
 		}
 		else
@@ -154,7 +154,7 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 
 			if (socket_state.buffer == "exit")
 			{
-				RemoveSocket::remove_socket(socket_state.id);
+				RemoveSocket::RemoveUsedSocket(socket_state.id);
 				return true;
 			}
 		}

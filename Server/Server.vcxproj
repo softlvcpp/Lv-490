@@ -163,6 +163,7 @@
     <ClInclude Include="Server.h" />
     <ClInclude Include="SocketCommands.h" />
     <ClInclude Include="SocketHandler.h" />
+    <ClInclude Include="SocketState.h" />
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="ServerService.h" />
   </ItemGroup>
