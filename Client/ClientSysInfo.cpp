@@ -328,6 +328,7 @@ void ClientSysInfo::CalculateProcesses() {
 	}
 	PROCESSENTRY32 proc;
 	proc.dwSize = sizeof(PROCESSENTRY32);
+	m_processes.clear();
 	if (Process32First(Snapshot_handle, &proc))//Returns TRUE if the first entry of the process list has been copied to the buffer or FALSE otherwise.
 	{
 		wstring ws(proc.szExeFile);
@@ -337,24 +338,11 @@ void ClientSysInfo::CalculateProcesses() {
 			wstring ws(proc.szExeFile);
 			string str(ws.begin(), ws.end());
 			//cout << str << endl;
-			qDebug() << "NAME:" + QString(str.c_str()) + "  ID: " + QString::number(proc.th32ProcessID);
+			//qDebug() << "NAME:" + QString(str.c_str()) + "  ID: " + QString::number(proc.th32ProcessID);
 			m_processes.insert(pair<int, string>(proc.th32ProcessID, str));
 		}
 	}
 	
-	//if (Process32First(Snapshot_handle, &proc))
-	//{
-	//	do {
-
-
-	//		wstring ws(proc.szExeFile);
-	//		string str(ws.begin(), ws.end());
-	//		//cout << str << endl;
-	//		qDebug() << "NAME:" + QString(str.c_str()) + "  ID: " + QString::number(proc.th32ProcessID);
-	//		m_processes.insert(pair<int, string>(proc.th32ProcessID, str));
-	//	} while (Process32Next(Snapshot_handle, &proc));
-	//}
-
 	CloseHandle(Snapshot_handle);
 }
 
