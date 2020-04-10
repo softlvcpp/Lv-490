@@ -514,12 +514,12 @@ void ServerService::Main()
 	s_instance->m_server->Run();
 }
 
-void ServerService::set_log_dir_name(std::string log_dir_name)
+void ServerService::set_log_dir_name(std::string_view log_dir_name)
 {
 	m_log_directory_name = log_dir_name;
 }
 
-void ServerService::set_config_file_name(std::string file_name)
+void ServerService::set_config_file_name(std::string_view file_name)
 {
 	m_config_file_name = file_name;
 }

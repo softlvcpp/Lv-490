@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <iostream>
 #include <fstream>
 #include <mutex>

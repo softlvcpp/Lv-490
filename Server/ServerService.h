@@ -1,6 +1,7 @@
 #pragma once
 #define _WINSOCKAPI_
 #include <string>
+#include <string_view>
 #include <iostream>
 
 #include <memory>
@@ -27,12 +28,13 @@ class ServerService
 
 // File IO members and service commands
 private:
-	std::string m_install_command  { "install" };
-	std::string m_uninstall_command{ "uninstall" };
-	std::string m_start_command    { "start" };
-	std::string m_stop_command     { "stop" };
-	std::string m_restart_command  { "restart" };
+	const std::string m_install_command  { "install" };
+	const std::string m_uninstall_command{ "uninstall" };
+	const std::string m_start_command    { "start" };
+	const std::string m_stop_command     { "stop" };
+	const std::string m_restart_command  { "restart" };
 
+	//REDO Logger
 	std::string m_log_file_name{ "serverlog.log" };
 	std::string m_log_directory_name{ "Lv-490_logs" };
 	filelog::LogLevel m_log_level;
@@ -65,8 +67,8 @@ private:
 public:
 	static bool Run(int argc, char** argv);
 	static ServerService& get_instance();
-	void set_log_dir_name(std::string log_dir_name);
-	void set_config_file_name(std::string file_name);
+	void set_log_dir_name(std::string_view log_dir_name);
+	void set_config_file_name(std::string_view file_name);
 
 	~ServerService();
 
