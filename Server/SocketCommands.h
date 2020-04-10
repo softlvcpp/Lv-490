@@ -7,11 +7,6 @@
 #include "SocketState.h"
 #include "SocketDeleter.h"
 
-#include "..\Utility\Logger\LoggerDLL.h"
-#include "..\Utility\XML_Parser\XML_Parser.h"
-
-#pragma comment(lib, "Ws2_32.lib")
-
 class Command
 {
 public:

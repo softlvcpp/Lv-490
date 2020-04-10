@@ -1,12 +1,6 @@
 #pragma once
 
-#include <winsock2.h>
-#include <string>
-#include <iostream>
-#include <vector>
-#include <memory>
-#include <fstream>
-#include <Mstcpip.h>
+#include "pch.h"
 
 constexpr int BUFFER_SIZE = 512;//default buffer size
 
