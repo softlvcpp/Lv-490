@@ -10,7 +10,7 @@
 
 constexpr int BUFFER_SIZE = 512;//default buffer size
 
-enum
+enum State
 {
 	LISTEN,
 	ACCEPTED,
@@ -20,7 +20,7 @@ enum
 typedef struct
 {
 	SOCKET id;			//socket handle
-	int	state;			//receiving? 0 - LISTEN, 1 - ACCEPTED, 2 - RECEIVEING
+	State	state;			//receiving? 0 - LISTEN, 1 - ACCEPTED, 2 - RECEIVEING
 	std::string buffer;
 	std::string log_msg;
 } SocketState;

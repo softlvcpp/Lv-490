@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include "SocketCommands.h"
 
 using namespace std;
@@ -16,8 +15,7 @@ public:
 	bool AddCommand(Command* command);
 	bool AddCommand(shared_ptr<Command> command);
 
-	bool Run(ThreadPool* thread_pool);
-	bool Run(std::shared_ptr<ThreadPool> thread_pool);
+	bool Run();
 
 	bool set_configuration(CXMLParser::OutDocument* server_configuration);
 	bool set_configuration(std::shared_ptr<CXMLParser::OutDocument> server_configuration);
@@ -31,6 +29,6 @@ private:
 	std::shared_ptr<CXMLParser::OutDocument> m_server_configuration;
 
 	vector<shared_ptr<Command>> m_commands;
-	SocketState m_socket_state;
+	SOCKET_shared_ptr m_socket_state;
 };
 
