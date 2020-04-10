@@ -5,6 +5,7 @@
 
 #include "ThreadPool.h"
 #include "SocketState.h"
+#include "SocketDeleter.h"
 
 #include "..\Utility\Logger\LoggerDLL.h"
 #include "..\Utility\XML_Parser\XML_Parser.h"
@@ -15,55 +16,49 @@ class Command
 {
 public:
 	Command() {};
-	virtual bool Execute(SocketState& socket_state) = 0;
+	virtual bool Execute(SOCKET_shared_ptr& socket_state) = 0;
 	
-	bool InitThreadPool(ThreadPool* main_pool);
-	bool InitThreadPool(std::shared_ptr<ThreadPool> main_pool);
-
 	bool InitConfiguration(CXMLParser::OutDocument* server_configuration);
 	bool InitConfiguration(std::shared_ptr<CXMLParser::OutDocument> server_configuration);
 
 protected:
-	std::shared_ptr<ThreadPool> m_thread_pool;
 	std::shared_ptr<CXMLParser::OutDocument> m_server_configuration;
+	SocketWrapper socket_wrapper;
 };
 
 class AddSocketConnection : public Command
 {
 public:
 	AddSocketConnection() {};
-	bool Execute(SocketState& socket_state);
-};
-
-class RemoveSocket : public Command
-{
-public:
-	RemoveSocket() {};
-	bool Execute(SocketState& socket_state);
-	static bool RemoveUsedSocket(SOCKET& server_socket);
+	bool Execute(SOCKET_shared_ptr& socket_state) override;
 };
 
 class AcceptConnection : public Command
 {
 public:
-	AcceptConnection(SOCKET server_socket):server_socket(server_socket) {};
-	bool Execute(SocketState& socket_state);
+	AcceptConnection(SOCKET_shared_ptr server_socket) : m_server_socket(server_socket) {};
+	bool Execute(SOCKET_shared_ptr& socket_state) override;
 private:
-	SOCKET server_socket;
+	SOCKET_shared_ptr m_server_socket;
 };
 
 class ReceiveMessage : public Command
 {
 public:
 	ReceiveMessage() {};
-	bool Execute(SocketState& socket_state);
+	bool Execute(SOCKET_shared_ptr& socket_state) override;
 };
 
 class StartConnection : public Command
 {
 public:
 	StartConnection() {};
-	bool Execute(SocketState& socket_state);
+	bool Execute(SOCKET_shared_ptr& socket_state) override;
+
+	bool InitThreadPool(ThreadPool* main_pool);
+	bool InitThreadPool(std::shared_ptr<ThreadPool> main_pool);
+
 private:
-	void DoRecv(SocketState new_conection);
+	std::shared_ptr<ThreadPool> m_thread_pool;
+	void DoRecv(SOCKET_shared_ptr& new_conection);
 };

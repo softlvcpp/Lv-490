@@ -17,9 +17,7 @@ SocketHandler::~SocketHandler()
 {
 	//closing connections and Winsock.
 	LOG_T << "Server: Closing Connection";
-	closesocket(m_socket_state.id);
 	WSACleanup();
-	LOG_T << "logger end";
 	m_socket_logger->join();
 }
 
@@ -36,30 +34,15 @@ bool SocketHandler::AddCommand(shared_ptr<Command> command)
 	return true;
 }
 
-bool SocketHandler::Run(ThreadPool* thread_pool)
+bool SocketHandler::Run()
 {
 	for (auto iter : m_commands)
 	{
-		iter->InitThreadPool(thread_pool);
 		iter->InitConfiguration(m_server_configuration);
 		if(iter->Execute(m_socket_state) == false)
 		{
-			LOG_T << m_socket_state.log_msg.c_str();
+			LOG_T << m_socket_state->log_msg.c_str();
 			return false;
-		}
-	}
-	return true;
-}
-
-bool SocketHandler::Run(std::shared_ptr<ThreadPool> thread_pool)
-{
-	for (auto iter : m_commands)
-	{
-		iter->InitThreadPool(thread_pool);
-		iter->InitConfiguration(m_server_configuration);
-		if (iter->Execute(m_socket_state) == false)
-		{
-			LOG_T << m_socket_state.log_msg.c_str();
 		}
 	}
 	return true;
