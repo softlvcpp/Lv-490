@@ -3,7 +3,7 @@
 #define LOG_D SLOG_DEBUG(*s_instance->m_logger)
 #define LOG_P SLOG_PROD(*s_instance->m_logger)
 
-
+#include "SmartServiceHandle.h"
 
 ServerService::ServerService() : m_name{ _wcsdup(L"TCPServer_Lv490") } {}
 
@@ -26,7 +26,7 @@ bool ServerService::Run(int argc, char** argv)
 {
 	SERVICE_TABLE_ENTRY ServiceTable[2];
 	ServiceTable[0].lpServiceName = s_instance->m_name.get();
-	ServiceTable[0].lpServiceProc = (LPSERVICE_MAIN_FUNCTION)ServiceMain;
+	ServiceTable[0].lpServiceProc = reinterpret_cast<LPSERVICE_MAIN_FUNCTION>(ServiceMain);
 	ServiceTable[1].lpServiceName = nullptr;
 	ServiceTable[1].lpServiceProc = nullptr;
 	if (s_instance->ReadConfig() == false)
@@ -221,14 +221,15 @@ bool ServerService::Install()
 		return false;
 	}
 
-	SC_HANDLE SCManager = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+	SmartServiceHandle SCManager = HandleManager::MakeSmart(OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE));
 	if (!SCManager) {
 		LOG_T << "Unable to open Service Control Manager. Error " << GetLastError();
 		return false;
 	}
 
-	SC_HANDLE service = CreateService(
-		SCManager,
+	SmartServiceHandle service = HandleManager::MakeSmart(
+		CreateService(
+		SCManager.get(),
 		s_instance->m_name.get(),
 		s_instance->m_name.get(),
 		SERVICE_ALL_ACCESS,
@@ -237,7 +238,7 @@ bool ServerService::Install()
 		SERVICE_ERROR_NORMAL,
 		exe_file_path,
 		NULL, NULL, NULL, NULL, NULL
-	);
+	));
 
 
 	if (!service) {
@@ -271,56 +272,46 @@ bool ServerService::Install()
 			LOG_T << "Unable to create service. Undefined error. Error " << GetLastError();
 			break;
 		}
-		CloseServiceHandle(SCManager);
 		return false;
 	}
-	CloseServiceHandle(service);
-	CloseServiceHandle(SCManager);
 	LOG_P << "Service installed.";
 	return true;
 }
 
 bool ServerService::Uninstall()
 {
-	SC_HANDLE SCManager = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+	SmartServiceHandle SCManager = HandleManager::MakeSmart(OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE));
 	if (!SCManager) {
 		LOG_T << "Unable to open Service Control Manager.";
 		return false;
 	}
-	SC_HANDLE service = OpenService(SCManager, s_instance->m_name.get(), SERVICE_STOP | DELETE);
+	SmartServiceHandle service = HandleManager::MakeSmart(OpenService(SCManager.get(), s_instance->m_name.get(), SERVICE_STOP | DELETE));
 	if (!service) {
 		LOG_T << "Unable to uninstall service.";
-		CloseServiceHandle(SCManager);
 		return false;
 	}
 
-	DeleteService(service);
-	CloseServiceHandle(service);
-	CloseServiceHandle(SCManager);
+	DeleteService(service.get());
 	LOG_P << "Service uninstalled.";
 	return true;
 }
 
 bool ServerService::Start()
 {
-	SC_HANDLE SCManager = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+	SmartServiceHandle SCManager = HandleManager::MakeSmart(OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE));
 	if (!SCManager)
 	{
 		LOG_T << "Unable to open Service Control Manager. Error " << GetLastError();
 		return false;
 	}
-	SC_HANDLE service = OpenService(SCManager, s_instance->m_name.get(), SERVICE_START);
+	SmartServiceHandle service = HandleManager::MakeSmart(OpenService(SCManager.get(), s_instance->m_name.get(), SERVICE_START));
 
-	if (!StartService(service, 0, NULL)) {
+	if (!StartService(service.get(), 0, NULL)) {
 		LOG_T << "Unable to start service. Error " << GetLastError();
-		CloseServiceHandle(SCManager);
 		return false;
 	}
 
 	LOG_P << "Service started";
-	CloseServiceHandle(service);
-	CloseServiceHandle(SCManager);
-
 	return true;
 }
 
@@ -329,36 +320,32 @@ bool ServerService::Stop()
 	SERVICE_STATUS_PROCESS ssp;
 	unsigned long bytes_needed;
 
-	SC_HANDLE SCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+	SmartServiceHandle SCManager = HandleManager::MakeSmart(OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS));
 	if (!SCManager)
 	{
 		LOG_T << "Unable to open Service Control Manager. Error " << GetLastError();
 		return false;
 	}
-	SC_HANDLE service = OpenService(
-		SCManager,
+	SmartServiceHandle service = HandleManager::MakeSmart(OpenService(
+		SCManager.get(),
 		s_instance->m_name.get(),
 		SERVICE_STOP |
-		SERVICE_QUERY_STATUS);
+		SERVICE_QUERY_STATUS));
 
 	if (service == nullptr)
 	{
 		LOG_T << "Unable to open service. Error " << GetLastError();
-
-		CloseServiceHandle(SCManager);
 		return false;
 	}
 
 	if (!QueryServiceStatusEx(
-		service,
+		service.get(),
 		SC_STATUS_PROCESS_INFO,
 		(LPBYTE)&ssp,
 		sizeof(SERVICE_STATUS_PROCESS),
 		&bytes_needed))
 	{
 		LOG_T << "Unable to get service status. Error " << GetLastError();
-		CloseServiceHandle(service);
-		CloseServiceHandle(SCManager);
 		return false;
 	}
 
@@ -366,8 +353,6 @@ bool ServerService::Stop()
 	if (ssp.dwCurrentState == SERVICE_STOPPED)
 	{
 		LOG_T << "Unable to stop service. The service is stopped alredy. Error " << GetLastError();
-		CloseServiceHandle(service);
-		CloseServiceHandle(SCManager);
 		return false;
 	}
 
@@ -375,18 +360,14 @@ bool ServerService::Stop()
 	SetServiceStatus(s_instance->m_service_status_handle, &s_instance->m_service_status);
 
 	if (!ControlService(
-		service,
+		service.get(),
 		SERVICE_CONTROL_STOP,
 		(LPSERVICE_STATUS)&ssp))
 	{
 		LOG_T << "Unable to stop service. Error " << GetLastError();
-		CloseServiceHandle(service);
-		CloseServiceHandle(SCManager);
 		return false;
 	}
 
-	CloseServiceHandle(service);
-	CloseServiceHandle(SCManager);
 	LOG_P << "Service stopped";
 
 	return true;
@@ -396,35 +377,32 @@ bool ServerService::Restart()
 {
 	SERVICE_STATUS_PROCESS ssp;
 	unsigned long bytes_needed;
-	SC_HANDLE SCManager = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+	SmartServiceHandle SCManager = HandleManager::MakeSmart(OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE));
 	if (!SCManager)
 	{
 		LOG_T << "Unable to open Service Control Manager. Error " << GetLastError();
 		return false;
 	}
-	SC_HANDLE service = OpenService(
-		SCManager,
+	SmartServiceHandle service = HandleManager::MakeSmart(OpenService(
+		SCManager.get(),
 		s_instance->m_name.get(),
 		SERVICE_STOP |
 		SERVICE_START |
-		SERVICE_QUERY_STATUS);
+		SERVICE_QUERY_STATUS));
 	if (service == nullptr)
 	{
 		LOG_T << "Unable to open service. Error " << GetLastError();
-		CloseServiceHandle(SCManager);
 		return false;
 	}
 
 	if (!QueryServiceStatusEx(
-		service,
+		service.get(),
 		SC_STATUS_PROCESS_INFO,
 		(LPBYTE)&ssp,
 		sizeof(SERVICE_STATUS_PROCESS),
 		&bytes_needed))
 	{
 		LOG_T << "Unable to get service status. Error " << GetLastError();
-		CloseServiceHandle(service);
-		CloseServiceHandle(SCManager);
 		return false;
 	}
 
@@ -432,8 +410,6 @@ bool ServerService::Restart()
 	if (ssp.dwCurrentState == SERVICE_STOPPED)
 	{
 		LOG_T << "Unable to stop service. The service is stopped alredy. Error " << GetLastError();
-		CloseServiceHandle(service);
-		CloseServiceHandle(SCManager);
 		return false;
 	}
 
@@ -441,13 +417,11 @@ bool ServerService::Restart()
 	SetServiceStatus(s_instance->m_service_status_handle, &s_instance->m_service_status);
 
 	if (!ControlService(
-		service,
+		service.get(),
 		SERVICE_CONTROL_STOP,
 		(LPSERVICE_STATUS)&ssp))
 	{
 		LOG_T << "Unable to stop service. Error " << GetLastError();
-		CloseServiceHandle(service);
-		CloseServiceHandle(SCManager);
 		return false;
 	}
 
@@ -455,7 +429,7 @@ bool ServerService::Restart()
 	while (ssp.dwCurrentState != SERVICE_STOPPED)
 	{
 		if (!QueryServiceStatusEx(
-			service,
+			service.get(),
 			SC_STATUS_PROCESS_INFO,
 			(LPBYTE)&ssp,
 			sizeof(SERVICE_STATUS_PROCESS),
@@ -466,15 +440,12 @@ bool ServerService::Restart()
 		}
 		Sleep(sleep_time_ms);
 	}
-	if (!StartService(service, 0, NULL)) {
+	if (!StartService(service.get(), 0, NULL)) {
 		LOG_T << "Unable to start service. Error " << GetLastError();
 		std::cout << GetLastError();
-		CloseServiceHandle(SCManager);
 		return false;
 	}
 
-	CloseServiceHandle(service);
-	CloseServiceHandle(SCManager);
 	return true;
 }
 

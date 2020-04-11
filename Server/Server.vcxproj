@@ -162,6 +162,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Server.h" />
+    <ClInclude Include="SmartServiceHandle.h" />
     <ClInclude Include="SocketCommands.h" />
     <ClInclude Include="SocketDeleter.h" />
     <ClInclude Include="SocketHandler.h" />

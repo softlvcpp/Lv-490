@@ -68,6 +68,9 @@
     <ClInclude Include="SocketDeleter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SmartServiceHandle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Server.rc">

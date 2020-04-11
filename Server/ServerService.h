@@ -72,7 +72,7 @@ public:
 
 	~ServerService();
 
-	//This is, basicly, the "main" function of the service
+	//This is the "main" function of the service
 	virtual void Main();
 
 	ServerService(const ServerService&) = delete;
