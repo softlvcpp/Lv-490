@@ -1,6 +1,10 @@
 #include "ClientSysInfo.h"
 #include "DefineLogger.h"
 #include<qthread.h>
+#include <tlhelp32.h> // for snapshot
+
+#include <windows.h>
+#include <conio.h>
 //#include <boost/thread.hpp>
 ClientSysInfo::ClientSysInfo() {
 	Update();
@@ -11,7 +15,7 @@ void  ClientSysInfo::Update() {
 	m_client_info.OS = CalculateOS();
 	SYSTEM_INFO systemInfo;
 	GetSystemInfo(&systemInfo);
-	qDebug()<< systemInfo.dwNumberOfProcessors;;
+	qDebug() << systemInfo.dwNumberOfProcessors;;
 	if (m_client_info.OS == "windows") {
 		m_client_info.TotalRAM = CalculateTotalRAM();
 		m_client_info.CPUNumbers = CalculateCPUNumbers();
@@ -134,10 +138,9 @@ QString ClientSysInfo::CalculateMacAddress()
 {
 	QNetworkInterface res;
 	QList<QNetworkInterface> list = QNetworkInterface::allInterfaces();
-	for (int i = 0; i < list.size(); i++) {
-		if (!(list[i].flags() & QNetworkInterface::IsLoopBack) && (list[i].type() == 3 || list[i].type() == 8))
+	for (size_t i = 0; i < list.size(); i++) {
+		if (list[i].type() == QNetworkInterface::Ethernet || list[i].type() == QNetworkInterface::Wifi)
 		{
-
 			if (list[i].flags().testFlag(QNetworkInterface::IsRunning) && list[i].humanReadableName() == "Wi-Fi")
 			{
 				res = list[i];
@@ -157,7 +160,7 @@ QString ClientSysInfo::CalculateIPAddress()
 	QNetworkInterface mac_interface = QNetworkInterface::interfaceFromName(CalculateMacAddress());
 	QList<QHostAddress> list_ip = mac_interface.allAddresses();
 	QString res;
-	for (int i = 0; i < list_ip.size(); i++)
+	for (size_t i = 0; i < list_ip.size(); i++)
 	{
 		if (!list_ip[i].isLinkLocal() && !list_ip[i].isLoopback()) {
 			res = list_ip[i].toString();
@@ -199,7 +202,7 @@ string ClientSysInfo::CalculateHardDisk_MediaType(string LogicalDisk) { // "C:/"
 		&pdg, sizeof(pdg),            // output buffer
 		&junk,                         // # bytes returned
 		(LPOVERLAPPED)NULL);          // synchronous I/O
-	
+
 	string string_res;
 	STORAGE_PROPERTY_QUERY spqSeekP;
 	spqSeekP.PropertyId = (STORAGE_PROPERTY_ID)StorageDeviceSeekPenaltyProperty;
@@ -226,7 +229,7 @@ string ClientSysInfo::CalculateHardDisk_MediaType(string LogicalDisk) { // "C:/"
 	return string_res;
 }
 
-typedef BOOL(WINAPI *LPFN_GLPI)(
+typedef BOOL(WINAPI* LPFN_GLPI)(
 	PSYSTEM_LOGICAL_PROCESSOR_INFORMATION,
 	PDWORD);
 
@@ -245,7 +248,7 @@ int ClientSysInfo::CalculateCPUNumbers() {
 		"GetLogicalProcessorInformation");
 	if (NULL == glpi)
 	{
-		L_TRACE<<("\nGetLogicalProcessorInformation is not supported.\n");
+		L_TRACE << ("\nGetLogicalProcessorInformation is not supported.\n");
 		return (1);
 	}
 
@@ -265,13 +268,13 @@ int ClientSysInfo::CalculateCPUNumbers() {
 
 				if (NULL == buffer)
 				{
-					L_TRACE<<"\nError: Allocation failure\n";
+					L_TRACE << "\nError: Allocation failure\n";
 					return (2);
 				}
 			}
 			else
 			{
-				L_TRACE<<"\nError %d"+ GetLastError();
+				L_TRACE << "\nError %d" + GetLastError();
 				return (3);
 			}
 		}
@@ -302,21 +305,50 @@ int ClientSysInfo::CalculateCPUNumbers() {
 }
 
 
-int ClientSysInfo::CalculateFreeSpace(const std::string &logic_drive) {
+int ClientSysInfo::CalculateFreeSpace(const std::string& logic_drive) {
 	fs::space_info tmpi = fs::space(logic_drive);
 	int size_in_GB = tmpi.free / 1024 / 1024 / 1024;
 	return size_in_GB;
 }
 
-int ClientSysInfo::CalculateCapacity(const std::string &logic_drive) {
+int ClientSysInfo::CalculateCapacity(const std::string& logic_drive) {
 	fs::space_info tmpi = fs::space(logic_drive);
 	int size_in_GB = tmpi.capacity / 1024 / 1024 / 1024;
 	return size_in_GB;
 }
+map<int, string>  ClientSysInfo::get_Processes() {
+	return m_processes;
+}
+void ClientSysInfo::CalculateProcesses() {
+	HANDLE Snapshot_handle;
+	Snapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	if (Snapshot_handle == NULL)
+	{
+		cout << "error" << endl;// in logger	
+	}
+	PROCESSENTRY32 proc;
+	proc.dwSize = sizeof(PROCESSENTRY32);
+	m_processes.clear();
+	if (Process32First(Snapshot_handle, &proc))//Returns TRUE if the first entry of the process list has been copied to the buffer or FALSE otherwise.
+	{
+		wstring ws(proc.szExeFile);
+		string str(ws.begin(), ws.end());
+		m_processes.insert(pair<int, string>(proc.th32ProcessID, str));
+		while (Process32Next(Snapshot_handle, &proc)) {
+			wstring ws(proc.szExeFile);
+			string str(ws.begin(), ws.end());
+			//cout << str << endl;
+			//qDebug() << "NAME:" + QString(str.c_str()) + "  ID: " + QString::number(proc.th32ProcessID);
+			m_processes.insert(pair<int, string>(proc.th32ProcessID, str));
+		}
+	}
+	
+	CloseHandle(Snapshot_handle);
+}
 
 ClientSysInfo::~ClientSysInfo()
 {
-	logger.join();
+
 }
 CXMLParser::ClientInfo ClientSysInfo::get_client_info() const
 {

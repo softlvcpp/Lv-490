@@ -381,9 +381,12 @@ MigrationBackup/
 *.lai
 *.la
 *.a
-*.lib
 
 # Executables
 *.exe
 *.out
 *.app
+
+
+#Log files
+Client/clientlog*

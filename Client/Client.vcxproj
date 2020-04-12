@@ -84,7 +84,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp" />
-    <ClCompile Include="ClientSocket.cpp" />
+    <ClCompile Include="QTcpClientSocket.cpp" />
     <ClCompile Include="ClientSysInfo.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SettingsWindow.cpp" />
@@ -101,6 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClientSocket.h" />
+    <ClInclude Include="QTcpClientSocket.h" />
     <ClInclude Include="ClientSysInfo.h" />
     <ClInclude Include="DefineLogger.h" />
     <QtMoc Include="SettingsWindow.h" />

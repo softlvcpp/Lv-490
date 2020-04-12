@@ -7,14 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>535</width>
-    <height>331</height>
+    <height>431</height>
    </rect>
   </property>
   <property name="maximumSize">
    <size>
     <width>535</width>
-    <height>331</height>
+    <height>431</height>
    </size>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>9</pointsize>
+   </font>
   </property>
   <property name="windowTitle">
    <string>Client</string>
@@ -24,7 +29,7 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>20</y>
+      <y>30</y>
       <width>321</width>
       <height>31</height>
      </rect>
@@ -46,12 +51,17 @@
     </item>
     <item>
      <property name="text">
-      <string>RAM information</string>
+      <string>RAM Information</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>Network infrmation</string>
+      <string>Network Information</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Process Information</string>
      </property>
     </item>
    </widget>
@@ -59,7 +69,7 @@
     <property name="geometry">
      <rect>
       <x>410</x>
-      <y>20</y>
+      <y>30</y>
       <width>100</width>
       <height>100</height>
      </rect>
@@ -93,16 +103,31 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>70</y>
+      <y>90</y>
       <width>321</width>
-      <height>201</height>
+      <height>271</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
     </property>
     <property name="autoFillBackground">
      <bool>false</bool>
     </property>
     <property name="readOnly">
      <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QTableWidget" name="tableWidget">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>90</y>
+      <width>321</width>
+      <height>271</height>
+     </rect>
     </property>
    </widget>
   </widget>

@@ -74,6 +74,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -102,6 +104,8 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -144,17 +148,27 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Server.cpp" />
     <ClCompile Include="SocketCommands.cpp" />
+    <ClCompile Include="SocketDeleter.cpp" />
     <ClCompile Include="SocketHandler.cpp" />
     <ClCompile Include="ThreadPool.cpp" />
-    <ClCompile Include="Server.cpp" />
+    <ClCompile Include="ServerService.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="SocketCommands.h" />
-    <ClInclude Include="SocketHandler.h" />
-    <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="Server.h" />
+    <ClInclude Include="SmartServiceHandle.h" />
+    <ClInclude Include="SocketCommands.h" />
+    <ClInclude Include="SocketDeleter.h" />
+    <ClInclude Include="SocketHandler.h" />
+    <ClInclude Include="SocketState.h" />
+    <ClInclude Include="ThreadPool.h" />
+    <ClInclude Include="ServerService.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Utility\Logger\LoggerLibrary.vcxproj">

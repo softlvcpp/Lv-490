@@ -13,10 +13,10 @@ class Dialog : public QDialog
 	Q_OBJECT
 
 public:
-	int port;
-	QString ip;
-	int timeInterval;
-	int get_port();
+	short m_port;
+	QString m_ip;
+	int m_timeInterval;
+	short get_port();
 	QString get_IP();
 	int get_TimeInterval();
 	explicit Dialog(QWidget *parent = nullptr);
