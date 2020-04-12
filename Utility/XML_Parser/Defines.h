@@ -12,10 +12,7 @@
 #define XMLPARSER_API __declspec(dllimport)
 #endif
 
-
-
-
-//defines for Read()
+//defines for config file
 #define CONFIG_ROOT "root"
 #define CONFIG_SERVER "Server"
 #define CONFIG_SERVERNAME "servername"
@@ -34,7 +31,7 @@
 #define CONFIG_THREADPOOL "threadpool"
 #define CONFIG_MAXWORKINGTHREAD "maxworkingthreads"
 
-//defines for WriteSystemInformation() and PrepareToDBManager()
+//defines for client's info file
 #define CLIENT_ROOT "root"
 #define CLIENT_CLIENT "Client"
 #define CLIENT_MACADRESS "MacAddress"
@@ -51,3 +48,7 @@
 #define CLIENT_CPU_NUMBERS "CPUNumbers"
 #define CLIENT_CPU_VENDOR "CPUVendor"
 #define CLIENT_CPU_SPEED "CPUSpeed"
+#define CLIENT_PROCESSINFORMATION "ProcessesInformation"
+#define CLIENT_PROCESS "Process"
+#define CLIENT_PROCESS_ATTRIBUTE_NAME "name"
+#define CLIENT_PROCESS_ATTRIBUTE_PID "pid"

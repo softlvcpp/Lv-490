@@ -3,12 +3,12 @@
 #include"XMLClient.h"
 
 
-void XMLClient::WriteSystemInformation(string &xml_str) const noexcept
+void XMLClient::WriteSystemInformation(string& xml_str) const noexcept
 {
     XMLDocument xml_doc;
     //root
     XMLNode* root = xml_doc.NewElement(CLIENT_ROOT);
-    
+
     xml_doc.InsertFirstChild(root);
     //client
     XMLElement* client = xml_doc.NewElement(CLIENT_CLIENT);//root->client
@@ -24,28 +24,23 @@ void XMLClient::WriteSystemInformation(string &xml_str) const noexcept
 
     //SystemInfo
     XMLElement* sys_info = xml_doc.NewElement(CLIENT_SYSTEMINFORMATION);//root->client->SystemInformation
-    
-    vector<string> HardDisk_type_list= m_hard_disk_type_list;
-    vector<int> HardDisk_TotalSize= m_hard_disk_totalsize;
-    vector<int> HardDisk_Used= m_hard_disk_used;
-    vector<int> HardDisk_Free= m_hard_disk_free;
 
     //HardDisk loop
     XMLElement* hard_disk;
-    for (size_t i=0;i<HardDisk_type_list.size();++i)
+    for (size_t i = 0; i < m_hard_disk_type_list.size(); ++i)
     {
         hard_disk = xml_doc.NewElement(CLIENT_HARDDISK);//root->client->SystemInformation->HardDisk
 
-        hard_disk->SetAttribute(CLIENT_TYPE, "HDD");//as default, to be continue......
+        hard_disk->SetAttribute(CLIENT_TYPE, m_hard_disk_type_list[i].c_str());
 
-        hard_disk->SetAttribute(CLIENT_DRIVE, HardDisk_type_list[i].c_str());
-        
+        hard_disk->SetAttribute(CLIENT_DRIVE, m_hard_disk_type_list[i].c_str());
+
         XMLElement* pHardDisk_TotalSize = xml_doc.NewElement(CLIENT_HARDDISK_TOTALSIZE);//root->client->SystemInformation->HardDisk
-        pHardDisk_TotalSize->SetText(HardDisk_TotalSize[i]);
+        pHardDisk_TotalSize->SetText(m_hard_disk_total_size[i]);
         XMLElement* pHardDisk_Used = xml_doc.NewElement(CLIENT_HARDDISK_USED);//root->client->SystemInformation->HardDisk
-        pHardDisk_Used->SetText(HardDisk_Used[i]);
+        pHardDisk_Used->SetText(m_hard_disk_used[i]);
         XMLElement* pHardDisk_Free = xml_doc.NewElement(CLIENT_HARDDISK_FREE);//root->client->SystemInformation->HardDisk
-        pHardDisk_Free->SetText(HardDisk_Free[i]);
+        pHardDisk_Free->SetText(m_hard_disk_free[i]);
 
         hard_disk->InsertEndChild(pHardDisk_TotalSize);
         hard_disk->InsertEndChild(pHardDisk_Used);
@@ -71,9 +66,22 @@ void XMLClient::WriteSystemInformation(string &xml_str) const noexcept
     XMLElement* cpu_speed = xml_doc.NewElement(CLIENT_CPU_SPEED);//root->client->SystemInformation->CPU
     cpu_speed->SetText(m_cpu_speed);
     cpu_branch->InsertEndChild(cpu_speed);
-
-    //end
     sys_info->InsertEndChild(cpu_branch);
+
+    XMLElement* process_info = xml_doc.NewElement(CLIENT_PROCESSINFORMATION);//root->client->SystemInformation->ProcessInformation
+
+    XMLElement* process;
+
+    for (auto it = m_processes.begin(); it != m_processes.end(); it++)//map iterator
+    {
+        process = xml_doc.NewElement(CLIENT_PROCESS);
+        process->SetAttribute(CLIENT_PROCESS_ATTRIBUTE_NAME, it->second.c_str());
+        process->SetAttribute(CLIENT_PROCESS_ATTRIBUTE_PID, it->first);
+        process_info->InsertEndChild(process);
+    }
+    sys_info->InsertEndChild(process_info);
+
+    //end    
     client->InsertEndChild(sys_info);
     root->InsertFirstChild(client);
 

@@ -25,11 +25,12 @@ public:
     string  get_cpu_vendor()const { return m_cpu_vendor; }
 
     vector<string>   get_hard_disk_type_list()const { return m_hard_disk_type_list; }
-    vector<int>      get_hard_disk_totalsize()const { return m_hard_disk_totalsize; }
+    vector<string>   get_hard_disk_media_type()const { return m_hard_disk_media_type; }
+    vector<int>      get_hard_disk_total_size()const { return m_hard_disk_total_size; }
     vector<int>      get_hard_disk_used()const { return m_hard_disk_used; }
     vector<int>      get_hard_disk_free()const { return m_hard_disk_free; }
 
-   
+    map <int, string>get_processes()const { return m_processes; }
 
     //Setters
     void set_mac_address(string other) { m_mac_address = other; }
@@ -39,23 +40,25 @@ public:
     void set_cpu_speed(int other) { m_cpu_speed = other; }
     void set_cpu_vendor(string other) { m_cpu_vendor = other; }
     void set_hard_disk_type_list(vector<string> other) { m_hard_disk_type_list = other; }
-    void set_hard_disk_totalsize(vector<int> other) { m_hard_disk_totalsize = other; }
+    void set_hard_disk_media_type(vector<string> other) { m_hard_disk_media_type = other; }
+    void set_hard_disk_total_size(vector<int> other) { m_hard_disk_total_size = other; }
     void set_hard_disk_used(vector<int> other) { m_hard_disk_used = other; }
     void set_hard_disk_free(vector<int> other) { m_hard_disk_free = other; }
 
 private:
     //clients' information members
-    string m_mac_address{ "" };
-    string m_ip_address{ "" };
+    string m_mac_address;
+    string m_ip_address;
 
-    int m_total_ram{ 0 };
-    int m_cpu_numbers{ 0 };
-    int m_cpu_speed{ 0 };
+    int m_total_ram;
+    int m_cpu_numbers;
+    int m_cpu_speed;
 
-    string m_cpu_vendor{ "" };
+    string m_cpu_vendor;
 
     vector<string>  m_hard_disk_type_list;
-    vector<int>     m_hard_disk_totalsize;
+    vector<string>  m_hard_disk_media_type;
+    vector<int>     m_hard_disk_total_size;
     vector<int>     m_hard_disk_used;
     vector<int>     m_hard_disk_free;
 
