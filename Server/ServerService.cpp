@@ -1,9 +1,10 @@
 #include "ServerService.h"
+#include "SmartServiceHandle.h"
+
 #define LOG_T SLOG_TRACE(*s_instance->m_logger)
 #define LOG_D SLOG_DEBUG(*s_instance->m_logger)
 #define LOG_P SLOG_PROD(*s_instance->m_logger)
 
-#include "SmartServiceHandle.h"
 
 ServerService::ServerService() : m_name{ _wcsdup(L"TCPServer_Lv490") } {}
 
