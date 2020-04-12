@@ -11,7 +11,7 @@
 #else
 #define XMLPARSER_API __declspec(dllimport)
 #endif
-XMLPARSER_API int fnXMLParser(void);
+
 
 
 

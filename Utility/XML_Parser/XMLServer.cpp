@@ -11,7 +11,7 @@ bool XMLServer::ReadConfigs(const string& file_path) noexcept
 
     if (doc.LoadFile(file_path.c_str()) != 0) //logger return throw exception("can't load xml file");
         return false;
-    XMLElement* root;//smart ptr
+    XMLElement* root;
 
     root = doc.FirstChildElement(CONFIG_ROOT);
     if (root == nullptr)

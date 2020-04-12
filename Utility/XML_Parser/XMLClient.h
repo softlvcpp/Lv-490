@@ -1,19 +1,18 @@
 #pragma once
 #include"pch.h"
 #include"Defines.h"
-//#include"../../Client/ClientSysInfo.h"
 
 class IXMLClient
 {
 public:
-   // virtual void WriteSystemInformation(string& xml_str, ClientSysInfo& obj) const noexcept = 0;//write client's information in external string
+    virtual void WriteSystemInformation(string& xml_str) const noexcept = 0;//write client's information in external string
     virtual ~IXMLClient() {};
 };
 
 class XMLPARSER_API XMLClient final :public IXMLClient
 {
 public:
-  //  void WriteSystemInformation(string& xml_str, ClientSysInfo& obj) const noexcept override;//write client's information in external string
+   void WriteSystemInformation(string& xml_str) const noexcept override;//write client's information in external string
 
     //Getters
     string  get_macaddress()const { return m_mac_address; }
@@ -25,10 +24,10 @@ public:
 
     string  get_cpuvendor()const { return m_cpu_vendor; }
 
-    vector<string>   get_harddisk_type_list()const { return m_harddisk_type_list; }
-    vector<int>      get_harddisk_totalsize()const { return m_harddisk_totalsize; }
-    vector<int>      get_harddisk_used()const { return m_harddisk_used; }
-    vector<int>      get_harddisk_free()const { return m_harddisk_free; }
+    vector<string>   get_harddisk_type_list()const { return m_hard_disk_type_list; }
+    vector<int>      get_harddisk_totalsize()const { return m_hard_disk_totalsize; }
+    vector<int>      get_harddisk_used()const { return m_hard_disk_used; }
+    vector<int>      get_harddisk_free()const { return m_hard_disk_free; }
 
     //Setters
     void set_macaddress(string other) { m_mac_address = other; }
@@ -37,10 +36,10 @@ public:
     void set_cpunumbers(int other) { m_cpu_numbers = other; }
     void set_cpuspeed(int other) { m_cpu_speed = other; }
     void set_cpuvendor(string other) { m_cpu_vendor = other; }
-    void set_harddisk_type_list(vector<string> other) { m_harddisk_type_list = other; }
-    void set_harddisk_totalsize(vector<int> other) { m_harddisk_totalsize = other; }
-    void set_harddisk_used(vector<int> other) { m_harddisk_used = other; }
-    void set_harddisk_free(vector<int> other) { m_harddisk_free = other; }
+    void set_harddisk_type_list(vector<string> other) { m_hard_disk_type_list = other; }
+    void set_harddisk_totalsize(vector<int> other) { m_hard_disk_totalsize = other; }
+    void set_harddisk_used(vector<int> other) { m_hard_disk_used = other; }
+    void set_harddisk_free(vector<int> other) { m_hard_disk_free = other; }
 
 private:
     //clients' information members
@@ -53,10 +52,10 @@ private:
 
     string m_cpu_vendor{ "" };
 
-    vector<string>  m_harddisk_type_list;
-    vector<int>     m_harddisk_totalsize;
-    vector<int>     m_harddisk_used;
-    vector<int>     m_harddisk_free;
+    vector<string>  m_hard_disk_type_list;
+    vector<int>     m_hard_disk_totalsize;
+    vector<int>     m_hard_disk_used;
+    vector<int>     m_hard_disk_free;
 };
 
 extern XMLPARSER_API int nXMLParser;

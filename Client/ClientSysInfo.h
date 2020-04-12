@@ -1,10 +1,8 @@
 #pragma once
 
-#include <QApplication>
+
 #include <iostream>
-#include <QStorageInfo>
-#include <qdebug.h>
-#include <QList>
+
 #include <thread>
 #include <array>
 #include <vector>
@@ -13,8 +11,7 @@
 #include <comutil.h>
 #include <wbemidl.h>
 #include <string>
-#include<qnetworkinterface.h>
-#include<qhostaddress.h>
+
 #include<filesystem>
 #include<map>
 
@@ -24,7 +21,8 @@
 #include <tchar.h>
 #include<thread>
 
-#include "../Utility/XML_Parser/XML_Parser.h"
+#include "../Utility/XML_Parser/XMLClient.h"
+
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -42,7 +40,7 @@ class ClientSysInfo
 	vector<int> HardDisk_TotalSize;
 	vector<int> HardDisk_Used;
 	vector<int> HardDisk_Free;*/
-	CXMLParser::ClientInfo m_client_info;
+	XMLClient m_client_info;
 	std::map <int,string> m_processes;
 public:
 	ClientSysInfo();
@@ -72,13 +70,13 @@ public:
 	string CalculateHardDisk_MediaType(string LogicalDisk);
 	int CalculateFreeSpace(const std::string &logic_drive);
 	int CalculateCapacity(const std::string &logic_drive);
-	QString CalculateMacAddress();
-	QString CalculateIPAddress();
+	string CalculateMacAddress();
+	string CalculateIPAddress();
 	void CalculateProcesses();
 	//ui
 	//socket
 	~ClientSysInfo();
 public: 
-	CXMLParser::ClientInfo get_client_info() const;
+
 };
 

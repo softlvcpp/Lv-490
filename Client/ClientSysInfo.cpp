@@ -3,6 +3,14 @@
 #include<qthread.h>
 #include <tlhelp32.h> // for snapshot
 
+//qt libs
+#include <QApplication>
+#include <QStorageInfo>
+#include <qdebug.h>
+#include <QList>
+#include<qnetworkinterface.h>
+#include<qhostaddress.h>
+////
 #include <windows.h>
 #include <conio.h>
 //#include <boost/thread.hpp>
@@ -350,9 +358,6 @@ ClientSysInfo::~ClientSysInfo()
 {
 
 }
-CXMLParser::ClientInfo ClientSysInfo::get_client_info() const
-{
-	return m_client_info;
-}
+
 
 
