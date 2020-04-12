@@ -15,6 +15,7 @@ public:
    void WriteSystemInformation(string& xml_str) const noexcept override;//write client's information in external string
 
     //Getters
+    string  get_os()const { return m_os; }
     string  get_mac_address()const { return m_mac_address; }
     string  get_ip_address()const { return m_ip_address; }
 
@@ -33,6 +34,7 @@ public:
     map <int, string>get_processes()const { return m_processes; }
 
     //Setters
+    void set_os(string other) { m_os = other; }
     void set_mac_address(string other) { m_mac_address = other; }
     void set_ip_address(string other) { m_ip_address = other; }
     void set_total_ram(int other) { m_total_ram = other; }
@@ -47,6 +49,7 @@ public:
 
 private:
     //clients' information members
+    string m_os;
     string m_mac_address;
     string m_ip_address;
 
@@ -61,7 +64,7 @@ private:
     vector<int>     m_hard_disk_total_size;
     vector<int>     m_hard_disk_used;
     vector<int>     m_hard_disk_free;
-
+    
     map <int, string> m_processes;
 };
 

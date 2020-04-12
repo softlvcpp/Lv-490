@@ -62,16 +62,20 @@ private:
     string m_maxworkingthreads = "";
 
     //clients' information members
-    string  m_mac_address = "";
-    string  m_ip_address = "";
-    int     m_total_ram = 0;
-    int     m_cpu_numbers = 0;
-    string  m_cpu_vendor = "";
-    int     m_cpu_speed = 0;
+    string  m_mac_address;
+    string  m_ip_address;
+    int     m_total_ram;
+    int     m_cpu_numbers;
+    string  m_cpu_vendor;
+    int     m_cpu_speed;
+
     vector<string>  m_harddisk_type_list;
+    vector<string>  m_hard_disk_media_type;
     vector<int>     m_harddisk_totalsize;
     vector<int>     m_harddisk_used;
     vector<int>     m_harddisk_free;
+    
+    map <int, string> m_processes;
 };
 
 extern XMLPARSER_API int nXMLParser;
