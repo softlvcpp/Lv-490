@@ -14,5 +14,5 @@
 #include <winsock2.h>
 #include <Windows.h>
 
-#include "../Utility/XML_Parser/XML_Parser.h"
+#include "../Utility/XML_Parser/XMLServer.h"
 #include "../Utility/Logger/LoggerDLL.h"

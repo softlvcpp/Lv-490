@@ -28,11 +28,11 @@ class ServerService
 
 // File IO members and service commands
 private:
-	const std::string m_install_command  { "install" };
-	const std::string m_uninstall_command{ "uninstall" };
-	const std::string m_start_command    { "start" };
-	const std::string m_stop_command     { "stop" };
-	const std::string m_restart_command  { "restart" };
+	std::string_view m_install_command  { "install" };
+	std::string_view m_uninstall_command{ "uninstall" };
+	std::string_view m_start_command    { "start" };
+	std::string_view m_stop_command     { "stop" };
+	std::string_view m_restart_command  { "restart" };
 
 	//REDO Logger
 	std::string m_log_file_name{ "serverlog.log" };
@@ -59,7 +59,7 @@ private:
 
 // Parser members
 private:
-	CXMLParser::XMLParser m_parser;
+	XMLServer m_parser;
 	std::string m_config_file_name{ "C:/Lv-490_Files/config.xml" };
  
 	bool ReadConfig();
