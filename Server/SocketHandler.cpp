@@ -48,13 +48,13 @@ bool SocketHandler::Run()
 	return true;
 }
 
-bool SocketHandler::set_configuration(CXMLParser::OutDocument* server_configuration)
+bool SocketHandler::set_configuration(XMLServer* server_configuration)
 {
-	m_server_configuration = std::shared_ptr<CXMLParser::OutDocument>(server_configuration);
+	m_server_configuration = std::shared_ptr<XMLServer>(server_configuration);
 	return true;
 }
 
-bool SocketHandler::set_configuration(std::shared_ptr<CXMLParser::OutDocument> server_configuration)
+bool SocketHandler::set_configuration(std::shared_ptr<XMLServer> server_configuration)
 {
 	m_server_configuration = server_configuration;
 	return true;
@@ -70,9 +70,9 @@ bool SocketHandler::InitLoger(const std::string& directory_name)
 			return false;
 		}
 	}
-	log_file_path += m_server_configuration->filename;
+	log_file_path += m_server_configuration->get_filename();
 	filelog::LogLevel log_level = filelog::LogLevel::NoLogs;
-	int level = std::stoi(m_server_configuration->loglevel);
+	int level = std::stoi(m_server_configuration->get_loglevel());
 	switch (level)
 	{
 	case 0:

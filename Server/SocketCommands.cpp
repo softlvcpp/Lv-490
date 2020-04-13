@@ -16,9 +16,9 @@ bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 	sockaddr_in serverService;
 	serverService.sin_family = AF_INET;
 	//set IP
-	serverService.sin_addr.s_addr = inet_addr(m_server_configuration->ipadress.c_str());
+	serverService.sin_addr.s_addr = inet_addr(m_server_configuration->get_ipadress().c_str());
 	//set port
-	serverService.sin_port = htons(std::stoi(m_server_configuration->listenport.c_str()));
+	serverService.sin_port = htons(std::stoi(m_server_configuration->get_listenport().c_str()));
 	
 	//bind the socket for client's requests
 	if (SOCKET_ERROR == ::bind(socket_state->id, (SOCKADDR*)&serverService, sizeof(serverService)))
@@ -103,9 +103,9 @@ bool ReceiveMessage::Execute(SOCKET_shared_ptr& socket_state)
 
 			std::string xml_string = socket_state->buffer;
 
-			CXMLParser::XMLParser xml_parser;
+			XMLServer xml_parser;
 			xml_parser.PrepareToDBManager(xml_string);
-
+			
 			test_output << "Cpu numbers: " << xml_parser.get_cpunumbers() << '\n';
 			test_output << "Cpu speed: " << xml_parser.get_cpuspeed() << '\n';
 			test_output << "Cpu vendor: " << xml_parser.get_cpuvendor() << '\n';
@@ -166,13 +166,13 @@ bool StartConnection::InitThreadPool(std::shared_ptr<ThreadPool> main_pool)
 	return true;
 }
 
-bool Command::InitConfiguration(CXMLParser::OutDocument* server_configuration)
+bool Command::InitConfiguration(XMLServer* server_configuration)
 {
-	m_server_configuration = std::shared_ptr<CXMLParser::OutDocument>(server_configuration);
+	m_server_configuration = std::shared_ptr<XMLServer>(server_configuration);
 	return true;
 }
 
-bool Command::InitConfiguration(std::shared_ptr<CXMLParser::OutDocument> server_configuration)
+bool Command::InitConfiguration(std::shared_ptr<XMLServer> server_configuration)
 {
 	m_server_configuration = server_configuration;
 	return true;
