@@ -175,10 +175,11 @@ bool XMLServer::PrepareToDBManager(string& xml_str)noexcept
 
     for (XMLElement* e = sys_info->FirstChildElement(CLIENT_HARDDISK); e != nullptr; e = e->NextSiblingElement(CLIENT_HARDDISK))
     {
-        m_harddisk_type_list.emplace_back(e->Attribute(CLIENT_DRIVE));
-        m_harddisk_totalsize.emplace_back(e->FirstChildElement(CLIENT_HARDDISK_TOTALSIZE)->IntText());
-        m_harddisk_used.emplace_back(e->FirstChildElement(CLIENT_HARDDISK_USED)->IntText());
-        m_harddisk_free.emplace_back(e->FirstChildElement(CLIENT_HARDDISK_FREE)->IntText());
+        m_hard_disk_type_list.emplace_back(e->Attribute(CLIENT_DRIVE));
+        m_hard_disk_media_type.emplace_back(e->Attribute(CLIENT_TYPE));
+        m_hard_disk_total_size.emplace_back(e->FirstChildElement(CLIENT_HARDDISK_TOTALSIZE)->IntText());
+        m_hard_disk_used.emplace_back(e->FirstChildElement(CLIENT_HARDDISK_USED)->IntText());
+        m_hard_disk_free.emplace_back(e->FirstChildElement(CLIENT_HARDDISK_FREE)->IntText());
     }
 
     //<totalRAM>
@@ -195,12 +196,19 @@ bool XMLServer::PrepareToDBManager(string& xml_str)noexcept
             m_cpu_numbers = cpu_branch->FirstChildElement(CLIENT_CPU_NUMBERS)->IntText();
 
     if (cpu_branch->FirstChildElement(CLIENT_CPU_VENDOR) != nullptr)
-        if (cpu_branch->FirstChildElement(CLIENT_CPU_VENDOR)->GetText());
+        if (cpu_branch->FirstChildElement(CLIENT_CPU_VENDOR)->GetText())
     m_cpu_vendor = cpu_branch->FirstChildElement(CLIENT_CPU_VENDOR)->GetText();
 
     if (cpu_branch->FirstChildElement(CLIENT_CPU_SPEED))
         if (cpu_branch->FirstChildElement(CLIENT_CPU_SPEED)->IntText())
             m_cpu_speed = cpu_branch->FirstChildElement(CLIENT_CPU_SPEED)->IntText();
+
+    //ProcessInformation
+    XMLElement* process_info = sys_info->FirstChildElement(CLIENT_PROCESSINFORMATION);
+    if (process_info == nullptr) return false;//no sense to continue;
+
+    for (XMLElement* e = sys_info->FirstChildElement(CLIENT_PROCESSINFORMATION); e != nullptr; e = e->NextSiblingElement(CLIENT_PROCESSINFORMATION))
+        m_processes.emplace(stoi(e->Attribute(CLIENT_PROCESS_ATTRIBUTE_PID)), string(e->Attribute(CLIENT_PROCESS_ATTRIBUTE_NAME)));
 
     return true;//all is good
 }

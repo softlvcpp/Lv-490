@@ -12,8 +12,8 @@
 #include <iostream>
 #include<filesystem>//is_regular_file
 #include<string>
-#include<vector>//ClientSysInfo
-#include<fstream>//
+#include<vector>
+#include<fstream>
 #include"tinyxml2.h"
 #include<map>
 using namespace std;

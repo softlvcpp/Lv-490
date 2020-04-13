@@ -16,9 +16,9 @@ bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 	sockaddr_in serverService;
 	serverService.sin_family = AF_INET;
 	//set IP
-	serverService.sin_addr.s_addr = inet_addr(m_server_configuration->ipadress.c_str());
+	serverService.sin_addr.s_addr = inet_addr(m_server_configuration->get_ipadress().c_str());
 	//set port
-	serverService.sin_port = htons(std::stoi(m_server_configuration->listenport.c_str()));
+	serverService.sin_port = htons(std::stoi(m_server_configuration->get_listenport().c_str()));
 	
 	//bind the socket for client's requests
 	if (SOCKET_ERROR == ::bind(socket_state->id, (SOCKADDR*)&serverService, sizeof(serverService)))
@@ -103,22 +103,23 @@ bool ReceiveMessage::Execute(SOCKET_shared_ptr& socket_state)
 
 			std::string xml_string = socket_state->buffer;
 
-			CXMLParser::XMLParser xml_parser;
-			xml_parser.PrepareToDBManager(xml_string);
+			XMLServer xml_parser;
+			xml_parser.PrepareToDBManager(xml_string);		
+					
 
-			test_output << "Cpu numbers: " << xml_parser.get_cpunumbers() << '\n';
-			test_output << "Cpu speed: " << xml_parser.get_cpuspeed() << '\n';
-			test_output << "Cpu vendor: " << xml_parser.get_cpuvendor() << '\n';
-			for (size_t i = 0; i < xml_parser.get_harddisk_free().size(); ++i)
+			test_output << "Cpu numbers: " << xml_parser.get_cpu_numbers() << '\n';
+			test_output << "Cpu speed: " << xml_parser.get_cpu_speed() << '\n';
+			test_output << "Cpu vendor: " << xml_parser.get_cpu_vendor() << '\n';
+			for (size_t i = 0; i < xml_parser.get_hard_disk_free().size(); ++i)
 			{
-				test_output << xml_parser.get_harddisk_type_list()[i] << '\n';
-				test_output << "Hard disk free: " << xml_parser.get_harddisk_free()[i] << '\n';
-				test_output << "Hard disk total size: " << xml_parser.get_harddisk_totalsize()[i] << '\n';
-				test_output << "Hard disk used: " << xml_parser.get_harddisk_used()[i] << '\n';
+				test_output << xml_parser.get_hard_disk_type_list()[i] << '\n';
+				test_output << "Hard disk free: " << xml_parser.get_hard_disk_free()[i] << '\n';
+				test_output << "Hard disk total size: " << xml_parser.get_hard_disk_total_size()[i] << '\n';
+				test_output << "Hard disk used: " << xml_parser.get_hard_disk_used()[i] << '\n';
 			}
-			test_output << "Ip: " << xml_parser.get_ipaddress() << '\n';
-			test_output << "Mac: " << xml_parser.get_macaddress() << '\n';
-			test_output << "Ram: " << xml_parser.get_totalram() << '\n';
+			test_output << "Ip: " << xml_parser.get_ip_address() << '\n';
+			test_output << "Mac: " << xml_parser.get_mac_address() << '\n';
+			test_output << "Ram: " << xml_parser.get_total_ram() << '\n';
 
 			test_output.close();
 
@@ -166,13 +167,13 @@ bool StartConnection::InitThreadPool(std::shared_ptr<ThreadPool> main_pool)
 	return true;
 }
 
-bool Command::InitConfiguration(CXMLParser::OutDocument* server_configuration)
+bool Command::InitConfiguration(XMLServer* server_configuration)
 {
-	m_server_configuration = std::shared_ptr<CXMLParser::OutDocument>(server_configuration);
+	m_server_configuration = std::shared_ptr<XMLServer>(server_configuration);
 	return true;
 }
 
-bool Command::InitConfiguration(std::shared_ptr<CXMLParser::OutDocument> server_configuration)
+bool Command::InitConfiguration(std::shared_ptr<XMLServer> server_configuration)
 {
 	m_server_configuration = server_configuration;
 	return true;
