@@ -6,7 +6,8 @@
 
 SocketHandler::SocketHandler()
 {		
-	WSAData wsaData;//config sockets
+	//configurate sockets
+	WSAData wsaData;
 	if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
 	{		
 		//LOG_T << "Server: Error at WSAStartup()";
@@ -15,7 +16,7 @@ SocketHandler::SocketHandler()
 
 SocketHandler::~SocketHandler()
 {
-	//closing connections and Winsock.
+	//closing connections setings
 	LOG_T << "Server: Closing Connection";
 	WSACleanup();
 	m_socket_logger->join();
@@ -39,9 +40,9 @@ bool SocketHandler::Run()
 	for (auto iter : m_commands)
 	{
 		iter->InitConfiguration(m_server_configuration);
-		if(iter->Execute(m_socket_state) == false)
+		if(iter->Execute(m_server_socket) == false)
 		{
-			LOG_T << m_socket_state->log_msg.c_str();
+			LOG_T << m_server_socket->log_msg.c_str();
 			return false;
 		}
 	}

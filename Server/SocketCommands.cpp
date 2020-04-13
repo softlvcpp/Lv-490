@@ -16,9 +16,19 @@ bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 	sockaddr_in serverService;
 	serverService.sin_family = AF_INET;
 	//set IP
-	serverService.sin_addr.s_addr = inet_addr(m_server_configuration->get_ipadress().c_str());
+	serverService.sin_addr.s_addr = inet_addr((INADDR_NONE == inet_addr(m_server_configuration->get_ipadress().c_str()))?
+																DEFAULT_IP: m_server_configuration->get_ipadress().c_str());
 	//set port
-	serverService.sin_port = htons(std::stoi(m_server_configuration->get_listenport().c_str()));
+	int port = 0;
+	try
+	{
+		port = std::stoi(m_server_configuration->get_listenport().c_str());
+	}
+	catch (const std::exception&)
+	{
+		port = DEFAULT_PORT;
+	}
+	serverService.sin_port = htons(port);
 	
 	//bind the socket for client's requests
 	if (SOCKET_ERROR == ::bind(socket_state->id, (SOCKADDR*)&serverService, sizeof(serverService)))

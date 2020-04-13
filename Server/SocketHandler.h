@@ -29,6 +29,6 @@ private:
 	std::shared_ptr<XMLServer> m_server_configuration;
 
 	vector<shared_ptr<Command>> m_commands;
-	SOCKET_shared_ptr m_socket_state;
+	SOCKET_shared_ptr m_server_socket;
 };
 
