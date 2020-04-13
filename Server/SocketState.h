@@ -3,6 +3,8 @@
 #include "pch.h"
 
 constexpr int BUFFER_SIZE = 512;//default buffer size
+constexpr char DEFAULT_IP[] = "127.0.0.1";//default ip address
+constexpr int DEFAULT_PORT = 8080;//default port number
 
 enum State
 {
