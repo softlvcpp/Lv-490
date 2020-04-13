@@ -15,7 +15,7 @@
 
 #include "..\Utility\Logger\LoggerDLL.h"
 #include "..\Utility\XML_Parser\XML_Parser.h"
-
+#include "..\Utility\DatabaseManager\DatabaseManager.h"
 #pragma comment(lib, "Ws2_32.lib")
 
 //using namespace std;
@@ -48,10 +48,11 @@ public:
 
 	bool InitConfiguration(CXMLParser::OutDocument* server_configuration);
 	bool InitConfiguration(std::shared_ptr<CXMLParser::OutDocument> server_configuration);
-
+	void InitDatabase(DatabaseManager* db);
 protected:
 	std::shared_ptr<ThreadPool> m_thread_pool;
 	std::shared_ptr<CXMLParser::OutDocument> m_server_configuration;
+	std::shared_ptr<DatabaseManager> m_data_base;
 };
 
 class AddSocketConnection : public Command
@@ -80,8 +81,11 @@ private:
 class ReceiveMessage : public Command
 {
 public:
-	ReceiveMessage() {};
+	ReceiveMessage() {};// give database
+	
 	bool Execute(SocketState& socket_state);
+	 
+	
 };
 
 class StartConnection : public Command

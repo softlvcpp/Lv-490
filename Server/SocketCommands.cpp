@@ -1,5 +1,5 @@
 #include "SocketCommands.h"
-
+#include <iostream>
 bool AddSocketConnection::Execute(SocketState& socket_state)//return bool
 {
 	// create new socket, use the Internet address family (AF_INET), streaming sockets (SOCK_STREAM), and the TCP/IP protocol (IPPROTO_TCP).
@@ -114,29 +114,32 @@ bool ReceiveMessage::Execute(SocketState& socket_state)
 		else
 		{
 			std::ofstream test_output("C:/Lv-490_Files/output.txt", std::ios::app);
-
-			//потім потрібно буде парсити цю стрічку, але на даному етапі просто вивід в консоль є
-			test_output << "Server: Recieved: " << bytes_received << " bytes of \"" << socket_state.buffer << "\" message.\n";
+			test_output << "Server: Received: " << bytes_received << " bytes of \"" << socket_state.buffer << "\" message.\n";
 
 			std::string xml_string = socket_state.buffer;
-
+			//os disk_type media_type
 			CXMLParser::XMLParser xml_parser;
 			xml_parser.PrepareToDBManager(xml_string);
-
 			test_output << "Cpu numbers: " << xml_parser.get_cpunumbers() << '\n';
 			test_output << "Cpu speed: " << xml_parser.get_cpuspeed() << '\n';
 			test_output << "Cpu vendor: " << xml_parser.get_cpuvendor() << '\n';
+			
+			
+			m_data_base->setClient(xml_parser.get_macaddress(), xml_parser.get_ipaddress(), xml_parser.get_totalram(), xml_parser.get_cpunumbers(), 6, xml_parser.get_cpuspeed(), "Windows");
+			time_t timer;
+			time(&timer);
 			for (int i = 0; i < xml_parser.get_harddisk_free().size(); ++i)
 			{
 				test_output << xml_parser.get_harddisk_type_list()[i] << '\n';
 				test_output << "Hard disk free: " << xml_parser.get_harddisk_free()[i] << '\n';
 				test_output << "Hard disk total size: " << xml_parser.get_harddisk_totalsize()[i] << '\n';
 				test_output << "Hard disk used: " << xml_parser.get_harddisk_used()[i] << '\n';
+				m_data_base->setDisk(xml_parser.get_macaddress(), "Windows", xml_parser.get_harddisk_totalsize()[i], "bla", "bla", xml_parser.get_harddisk_totalsize()[i], xml_parser.get_harddisk_used()[i], xml_parser.get_harddisk_free()[i], timer);
 			}
 			test_output << "Ip: " << xml_parser.get_ipaddress() << '\n';
 			test_output << "Mac: " << xml_parser.get_macaddress() << '\n';
 			test_output << "Ram: " << xml_parser.get_totalram() << '\n';
-
+			
 			test_output.close();
 
 			if (socket_state.buffer == "exit")
@@ -178,7 +181,11 @@ bool Command::InitThreadPool(ThreadPool* main_pool)
 	m_thread_pool = std::shared_ptr<ThreadPool>(main_pool); 
 	return true;
 }
-
+void Command::InitDatabase(DatabaseManager *t) 
+{
+	m_data_base = std::shared_ptr<DatabaseManager>(t);
+	
+}
 bool Command::InitThreadPool(std::shared_ptr<ThreadPool> main_pool)
 {
 	m_thread_pool = main_pool;

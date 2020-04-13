@@ -7,10 +7,12 @@
 SocketHandler::SocketHandler()
 {		
 	WSAData wsaData;//config sockets
+	InitDatabase(false);//ToDO: check mistakes
 	if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
 	{		
 		//LOG_T << "Server: Error at WSAStartup()";
 	}	
+	
 }
 
 SocketHandler::~SocketHandler()
@@ -21,6 +23,7 @@ SocketHandler::~SocketHandler()
 	WSACleanup();
 	LOG_T << "logger end";
 	m_socket_logger->join();
+	
 }
 
 bool SocketHandler::AddCommand(Command* command)
@@ -35,13 +38,27 @@ bool SocketHandler::AddCommand(shared_ptr<Command> command)
 	m_commands.push_back(command);
 	return true;
 }
+bool SocketHandler::InitDatabase(bool is_tables)
+{
+	std::shared_ptr<DatabaseManager> m_data_base = shared_ptr<DatabaseManager>(new DatabaseManager());
+	if (!m_data_base->Connect())
+		return false;
+	if (is_tables) 
+	{
+		if (!m_data_base->CreateTables())
+			return false;
+	}
+	return true;
+}
 
 bool SocketHandler::Run(ThreadPool* thread_pool)
 {
+	
 	for (auto iter : m_commands)
 	{
 		iter->InitThreadPool(thread_pool);
 		iter->InitConfiguration(m_server_configuration);
+		iter->InitDatabase(m_data_base.get());
 		if(iter->Execute(m_socket_state) == false)
 		{
 			LOG_T << m_socket_state.log_msg.c_str();
@@ -51,12 +68,13 @@ bool SocketHandler::Run(ThreadPool* thread_pool)
 	return true;
 }
 
-bool SocketHandler::Run(std::shared_ptr<ThreadPool> thread_pool)
+bool SocketHandler::Run(std::shared_ptr<ThreadPool> thread_pool)// database
 {
 	for (auto iter : m_commands)
 	{
 		iter->InitThreadPool(thread_pool);
 		iter->InitConfiguration(m_server_configuration);
+		iter->InitDatabase(m_data_base.get());
 		if (iter->Execute(m_socket_state) == false)
 		{
 			LOG_T << m_socket_state.log_msg.c_str();

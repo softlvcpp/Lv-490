@@ -23,7 +23,7 @@
     <ProjectGuid>{CAF17F41-7F9D-4FA1-96B8-951A365E979E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>LoggerLibrary</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

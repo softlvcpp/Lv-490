@@ -35,7 +35,7 @@ bool ServerService::Run(int argc, char** argv)
 		return false;
 	}
 	if (!s_instance->InitLogger())
-	{
+{
 		s_instance->m_file_output << "Can not init logger " << s_instance->m_log_file_name << "\n";
 		return false;
 	}

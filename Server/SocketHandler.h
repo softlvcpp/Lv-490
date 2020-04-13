@@ -23,13 +23,13 @@ public:
 	bool set_configuration(std::shared_ptr<CXMLParser::OutDocument> server_configuration);
 
 	bool InitLoger(const std::string& directory_name);
+	bool InitDatabase(bool is_needed_tables);
 
 private:
 	std::string m_log_directory_name{ "Lv-490_logs" };
 	std::shared_ptr<filelog::FileLogger> m_socket_logger;
-
 	std::shared_ptr<CXMLParser::OutDocument> m_server_configuration;
-
+	std::shared_ptr<DatabaseManager> m_data_base;
 	vector<shared_ptr<Command>> m_commands;
 	SocketState m_socket_state;
 };

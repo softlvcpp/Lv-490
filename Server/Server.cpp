@@ -1,8 +1,9 @@
 #include "Server.h"
-
+#include "..\Utility\DatabaseManager\DatabaseManager.h"
 Server::Server(const CXMLParser::OutDocument& config, std::string log_dir_name) :
 	m_thread_pool{ std::stoi(config.maxworkingthreads) }
 {
+	
 	m_socket_handler.set_configuration(std::make_shared<CXMLParser::OutDocument>(config));
 	m_socket_handler.InitLoger(log_dir_name);
 	m_socket_handler.AddCommand(new AddSocketConnection);
@@ -13,5 +14,8 @@ Server::Server(const CXMLParser::OutDocument& config, std::string log_dir_name) 
 
 void Server::Run()
 {
+
+	DatabaseManager a;
+	time_t timer;
 	m_socket_handler.Run(&m_thread_pool);
 }
