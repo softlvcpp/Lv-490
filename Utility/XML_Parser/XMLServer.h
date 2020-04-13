@@ -26,7 +26,7 @@ public:
     string get_serverdisplayname()const { return m_serverdisplayname; }
     string get_servername()const { return m_servername; }
     string get_listenport()const { return m_listenport; }
-    string get_ipadress()const { return m_listenport; }
+    string get_ipadress()const { return m_ipadress; }
     string get_blocking()const { return m_blocking; }
     string get_socket_timeout()const { return m_socket_timeout; }
     string get_filename()const { return m_filename; }
