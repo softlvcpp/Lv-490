@@ -2,7 +2,7 @@
 #include"pch.h"
 #include"Defines.h"
 
-class IXMLClient
+class XMLPARSER_API IXMLClient
 {
 public:
     virtual void WriteSystemInformation(string& xml_str) const noexcept = 0;//write client's information in external string
