@@ -20,57 +20,139 @@ ClientSysInfo::ClientSysInfo() {
 
 void  ClientSysInfo::Update() {
 
-	m_client_info.OS = CalculateOS();
+	m_client_info.set_os(CalculateOS());
 	SYSTEM_INFO systemInfo;
 	GetSystemInfo(&systemInfo);
-	qDebug() << systemInfo.dwNumberOfProcessors;;
-	if (m_client_info.OS == "windows") {
-		m_client_info.TotalRAM = CalculateTotalRAM();
-		m_client_info.CPUNumbers = CalculateCPUNumbers();
-		m_client_info.CPUVendor = CalculateCPUVendor();
-		m_client_info.CPUSpeed = CalculateCPUSpeed();
-		m_client_info.HardDisk_type_list = CalculatevectorLogicDick();
-		m_client_info.HardDisk_TotalSize.clear();
+	//qDebug() << systemInfo.dwNumberOfProcessors;
+	string os_name = QSysInfo::productType().toStdString();
+
+	if (os_name == "windows") {
+		m_client_info.set_total_ram(CalculateTotalRAM());
+		m_client_info.set_cpu_numbers(CalculateCPUNumbers());
+		m_client_info.set_cpu_vendor(CalculateCPUVendor());
+		m_client_info.set_cpu_speed(CalculateCPUSpeed());
+		vector<string> hard_disk_type_list = CalculatevectorLogicDick();
+		m_client_info.set_hard_disk_type_list(hard_disk_type_list);
+		/*m_client_info.HardDisk_TotalSize.clear();
 		m_client_info.HardDisk_Free.clear();
 		m_client_info.HardDisk_Used.clear();
-		m_client_info.HardDisk_MediaType.clear();
-		if (m_client_info.HardDisk_type_list.size() != 0) {
-			for (int i = 0; i < m_client_info.HardDisk_type_list.size(); i++) {
-				m_client_info.HardDisk_TotalSize.push_back(CalculateCapacity(m_client_info.HardDisk_type_list[i]));
-				m_client_info.HardDisk_Free.push_back(CalculateFreeSpace(m_client_info.HardDisk_type_list[i]));
-				m_client_info.HardDisk_Used.push_back(m_client_info.HardDisk_TotalSize[i] - m_client_info.HardDisk_Free[i]);
-				m_client_info.HardDisk_MediaType.push_back(CalculateHardDisk_MediaType(m_client_info.HardDisk_type_list[i]));
+		m_client_info.HardDisk_MediaType.clear();*/
+		vector<string>  hard_disk_media_type;
+		vector<int>     hard_disk_total_size;
+		vector<int>     hard_disk_used;
+		vector<int>     hard_disk_free;
+
+		if (hard_disk_type_list.size() != 0) {
+			for (int i = 0; i < hard_disk_type_list.size(); i++) {
+				hard_disk_total_size.push_back(CalculateCapacity(hard_disk_type_list[i]));
+				hard_disk_free.push_back(CalculateFreeSpace(hard_disk_type_list[i]));
+				hard_disk_used.push_back(hard_disk_total_size[i] - hard_disk_free[i]);
+				hard_disk_media_type.push_back(CalculateHardDisk_MediaType(hard_disk_type_list[i]));
+				qDebug() << i;
 			}
 		}
-		m_client_info.MacAddress = CalculateMacAddress().toStdString();
-		m_client_info.IPAddress = CalculateIPAddress().toStdString();
+		m_client_info.set_hard_disk_total_size(hard_disk_total_size);
+		m_client_info.set_hard_disk_free(hard_disk_free);
+		m_client_info.set_hard_disk_used(hard_disk_used);
+		m_client_info.set_hard_disk_media_type(hard_disk_media_type);
+		m_client_info.set_mac_address(CalculateMacAddress());
+		m_client_info.set_ip_address(CalculateIPAddress());
 	}
-	else if (m_client_info.OS == "linux") {} // For the future :)
+	else if (os_name == "linux") {} // For the future :)
 	else {
 		//undefined m_client_info.OS;
 		//TODO logger error
 	}
 }
 
-int ClientSysInfo::get_TotalRAM() { return m_client_info.TotalRAM; }
-string  ClientSysInfo::get_CPUVendor() { return m_client_info.CPUVendor; }
-int  ClientSysInfo::get_CPUSpeed() { return m_client_info.CPUSpeed; }
-vector<string>  ClientSysInfo::get_HardDisk_MediaType() { return m_client_info.HardDisk_MediaType; }
-vector<int>  ClientSysInfo::get_HardDisk_TotalSize() { return m_client_info.HardDisk_TotalSize; }
-vector<int>  ClientSysInfo::get_HardDisk_Used() { return m_client_info.HardDisk_Used; }
-vector<int>  ClientSysInfo::get_HardDisk_Free() { return m_client_info.HardDisk_Free; }
-//bodya
+void ClientSysInfo::Parse(string& xml_str) const noexcept
+{
+	//m_client_info.WriteSystemInformation(xml_str);
+}
 
-string ClientSysInfo::get_OS() { return m_client_info.OS; }
-string ClientSysInfo::get_MacAddress() { return m_client_info.MacAddress; }
-string ClientSysInfo::get_IPAddress() { return m_client_info.IPAddress; }
-vector<string>  ClientSysInfo::get_HardDisk_type_list() { return m_client_info.HardDisk_type_list; }
-int ClientSysInfo::get_CPUNumbers() { return m_client_info.CPUNumbers; }
+
+
+string ClientSysInfo::get_os() const
+{
+	return m_client_info.get_os();
+}
+
+string ClientSysInfo::get_mac_address() const
+{
+	return m_client_info.get_mac_address();
+}
+
+string ClientSysInfo::get_ip_address() const
+{
+	return m_client_info.get_ip_address();
+}
+
+int ClientSysInfo::get_total_ram() const
+{
+	return m_client_info.get_total_ram();
+}
+
+int ClientSysInfo::get_cpu_numbers() const
+{
+	return m_client_info.get_cpu_numbers();
+}
+
+int ClientSysInfo::get_cpu_speed() const
+{
+	return m_client_info.get_cpu_speed();
+}
+
+string ClientSysInfo::get_cpu_vendor() const
+{
+	return m_client_info.get_cpu_vendor();
+}
+
+vector<string> ClientSysInfo::get_hard_disk_type_list() const
+{
+	return m_client_info.get_hard_disk_type_list();
+}
+
+vector<string> ClientSysInfo::get_hard_disk_media_type() const
+{
+	return m_client_info.get_hard_disk_media_type();
+}
+
+vector<int> ClientSysInfo::get_hard_disk_total_size() const
+{
+	return m_client_info.get_hard_disk_total_size();
+}
+
+vector<int> ClientSysInfo::get_hard_disk_used() const
+{
+	return m_client_info.get_hard_disk_used();
+}
+
+vector<int> ClientSysInfo::get_hard_disk_free() const
+{
+	return m_client_info.get_hard_disk_free();
+}
+
+
+
+//int ClientSysInfo::get_TotalRAM() { return m_client_info.TotalRAM; }
+//string  ClientSysInfo::get_CPUVendor() { return m_client_info.CPUVendor; }
+//int  ClientSysInfo::get_CPUSpeed() { return m_client_info.CPUSpeed; }
+//vector<string>  ClientSysInfo::get_HardDisk_MediaType() { return m_client_info.HardDisk_MediaType; }
+//vector<int>  ClientSysInfo::get_HardDisk_TotalSize() { return m_client_info.HardDisk_TotalSize; }
+//vector<int>  ClientSysInfo::get_HardDisk_Used() { return m_client_info.HardDisk_Used; }
+//vector<int>  ClientSysInfo::get_HardDisk_Free() { return m_client_info.HardDisk_Free; }
+////bodya
+//
+//string ClientSysInfo::get_OS() { return m_client_info.OS; }
+//string ClientSysInfo::get_MacAddress() { return m_client_info.MacAddress; }
+//string ClientSysInfo::get_IPAddress() { return m_client_info.IPAddress; }
+//vector<string>  ClientSysInfo::get_HardDisk_type_list() { return m_client_info.HardDisk_type_list; }
+//int ClientSysInfo::get_CPUNumbers() { return m_client_info.CPUNumbers; }
 //soketu
 
 
 string ClientSysInfo::CalculateOS() {
-	QString OSName = QSysInfo::productType();
+	QString OSName = QSysInfo::prettyProductName();
 	return OSName.toStdString();
 }
 
@@ -142,7 +224,7 @@ std::vector<std::string> ClientSysInfo::CalculatevectorLogicDick() {
 
 
 
-QString ClientSysInfo::CalculateMacAddress()
+std::string ClientSysInfo::CalculateMacAddress()
 {
 	QNetworkInterface res;
 	QList<QNetworkInterface> list = QNetworkInterface::allInterfaces();
@@ -160,12 +242,12 @@ QString ClientSysInfo::CalculateMacAddress()
 			}
 		}
 	}
-	return res.hardwareAddress();
+	return res.hardwareAddress().toStdString();
 }
 
-QString ClientSysInfo::CalculateIPAddress()
+std::string ClientSysInfo::CalculateIPAddress()
 {
-	QNetworkInterface mac_interface = QNetworkInterface::interfaceFromName(CalculateMacAddress());
+	QNetworkInterface mac_interface = QNetworkInterface::interfaceFromName(CalculateMacAddress().c_str());
 	QList<QHostAddress> list_ip = mac_interface.allAddresses();
 	QString res;
 	for (size_t i = 0; i < list_ip.size(); i++)
@@ -174,7 +256,7 @@ QString ClientSysInfo::CalculateIPAddress()
 			res = list_ip[i].toString();
 		}
 	}
-	return res;
+	return res.toStdString();
 }
 
 
@@ -236,6 +318,12 @@ string ClientSysInfo::CalculateHardDisk_MediaType(string LogicalDisk) { // "C:/"
 	CloseHandle(hDevice);
 	return string_res;
 }
+
+
+
+
+//std::map <int, string> m_processes;
+
 
 typedef BOOL(WINAPI* LPFN_GLPI)(
 	PSYSTEM_LOGICAL_PROCESSOR_INFORMATION,
@@ -350,14 +438,14 @@ void ClientSysInfo::CalculateProcesses() {
 			m_processes.insert(pair<int, string>(proc.th32ProcessID, str));
 		}
 	}
-	
+
 	CloseHandle(Snapshot_handle);
 }
 
-ClientSysInfo::~ClientSysInfo()
-{
-
-}
+//ClientSysInfo::~ClientSysInfo()
+//{
+//
+//}
 
 
 

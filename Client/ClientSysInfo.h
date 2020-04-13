@@ -1,6 +1,4 @@
 #pragma once
-
-
 #include <iostream>
 
 #include <thread>
@@ -22,9 +20,11 @@
 #include<thread>
 
 #include "../Utility/XML_Parser/XMLClient.h"
-
-
 using namespace std;
+
+
+
+
 namespace fs = std::filesystem;
 class ClientSysInfo
 {
@@ -44,8 +44,29 @@ class ClientSysInfo
 	std::map <int,string> m_processes;
 public:
 	ClientSysInfo();
-	void Update();
-	string get_OS();
+	void Update(); 
+	void Parse(string& xml_str) const noexcept;
+	
+	string  get_os()const;
+	string  get_mac_address()const;
+	string  get_ip_address()const;
+
+	int  get_total_ram()const;
+	int  get_cpu_numbers()const;
+	int  get_cpu_speed()const;
+
+	string  get_cpu_vendor()const;
+
+	vector<string>   get_hard_disk_type_list()const;
+	vector<string>   get_hard_disk_media_type()const;
+	vector<int>      get_hard_disk_total_size()const;
+	vector<int>      get_hard_disk_used()const;
+	vector<int>      get_hard_disk_free()const;
+
+	//map <int, string> get_processes()const;
+	
+
+	/*string get_OS();
 	string get_MacAddress();
 	string get_IPAddress();
 	int get_TotalRAM();
@@ -56,7 +77,7 @@ public:
 	vector<string>  get_HardDisk_MediaType();
 	vector<int>  get_HardDisk_TotalSize();
 	vector<int>  get_HardDisk_Used();
-	vector<int>  get_HardDisk_Free();
+	vector<int>  get_HardDisk_Free();*/
 	map<int, string> get_Processes();
 
 	string CalculateOS();
@@ -75,8 +96,8 @@ public:
 	void CalculateProcesses();
 	//ui
 	//socket
-	~ClientSysInfo();
-public: 
+	//~ClientSysInfo();
+
 
 };
 

@@ -25,8 +25,9 @@ private:
 	Dialog settings;
 	QTimer *tmr;//timer for timecycle connection to server
 	QTimer* timer;//for processes
-	CXMLParser::XMLParser parser;
+	
 	std::thread* m_th;
+	//std::thread* m_th2;
 	//std::thread m_th2;
 public slots:
 	void closeEvent(QCloseEvent* event);//performed by pressing the red cross button
