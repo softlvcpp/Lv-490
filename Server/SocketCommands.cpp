@@ -104,21 +104,22 @@ bool ReceiveMessage::Execute(SOCKET_shared_ptr& socket_state)
 			std::string xml_string = socket_state->buffer;
 
 			XMLServer xml_parser;
-			xml_parser.PrepareToDBManager(xml_string);
-			
-			test_output << "Cpu numbers: " << xml_parser.get_cpunumbers() << '\n';
-			test_output << "Cpu speed: " << xml_parser.get_cpuspeed() << '\n';
-			test_output << "Cpu vendor: " << xml_parser.get_cpuvendor() << '\n';
-			for (size_t i = 0; i < xml_parser.get_harddisk_free().size(); ++i)
+			xml_parser.PrepareToDBManager(xml_string);		
+					
+
+			test_output << "Cpu numbers: " << xml_parser.get_cpu_numbers() << '\n';
+			test_output << "Cpu speed: " << xml_parser.get_cpu_speed() << '\n';
+			test_output << "Cpu vendor: " << xml_parser.get_cpu_vendor() << '\n';
+			for (size_t i = 0; i < xml_parser.get_hard_disk_free().size(); ++i)
 			{
-				test_output << xml_parser.get_harddisk_type_list()[i] << '\n';
-				test_output << "Hard disk free: " << xml_parser.get_harddisk_free()[i] << '\n';
-				test_output << "Hard disk total size: " << xml_parser.get_harddisk_totalsize()[i] << '\n';
-				test_output << "Hard disk used: " << xml_parser.get_harddisk_used()[i] << '\n';
+				test_output << xml_parser.get_hard_disk_type_list()[i] << '\n';
+				test_output << "Hard disk free: " << xml_parser.get_hard_disk_free()[i] << '\n';
+				test_output << "Hard disk total size: " << xml_parser.get_hard_disk_total_size()[i] << '\n';
+				test_output << "Hard disk used: " << xml_parser.get_hard_disk_used()[i] << '\n';
 			}
-			test_output << "Ip: " << xml_parser.get_ipaddress() << '\n';
-			test_output << "Mac: " << xml_parser.get_macaddress() << '\n';
-			test_output << "Ram: " << xml_parser.get_totalram() << '\n';
+			test_output << "Ip: " << xml_parser.get_ip_address() << '\n';
+			test_output << "Mac: " << xml_parser.get_mac_address() << '\n';
+			test_output << "Ram: " << xml_parser.get_total_ram() << '\n';
 
 			test_output.close();
 
