@@ -1,6 +1,5 @@
 #include "ClientSysInfo.h"
 #include "DefineLogger.h"
-#include<qthread.h>
 #include <tlhelp32.h> // for snapshot
 
 //qt libs
@@ -67,7 +66,8 @@ void  ClientSysInfo::Update() {
 
 void ClientSysInfo::Parse(string& xml_str) const noexcept
 {
-	//m_client_info.WriteSystemInformation(xml_str);
+	m_client_info.WriteSystemInformation(xml_str);
+	
 }
 
 
@@ -131,6 +131,13 @@ vector<int> ClientSysInfo::get_hard_disk_free() const
 {
 	return m_client_info.get_hard_disk_free();
 }
+
+map<int, string> ClientSysInfo::get_processes() const
+{
+	return m_client_info.get_processes();
+}
+
+
 
 
 
@@ -412,9 +419,7 @@ int ClientSysInfo::CalculateCapacity(const std::string& logic_drive) {
 	int size_in_GB = tmpi.capacity / 1024 / 1024 / 1024;
 	return size_in_GB;
 }
-map<int, string>  ClientSysInfo::get_Processes() {
-	return m_processes;
-}
+
 void ClientSysInfo::CalculateProcesses() {
 	HANDLE Snapshot_handle;
 	Snapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -424,28 +429,30 @@ void ClientSysInfo::CalculateProcesses() {
 	}
 	PROCESSENTRY32 proc;
 	proc.dwSize = sizeof(PROCESSENTRY32);
-	m_processes.clear();
+	//m_processes.clear();
+	map<int, string> processes;
 	if (Process32First(Snapshot_handle, &proc))//Returns TRUE if the first entry of the process list has been copied to the buffer or FALSE otherwise.
 	{
 		wstring ws(proc.szExeFile);
 		string str(ws.begin(), ws.end());
-		m_processes.insert(pair<int, string>(proc.th32ProcessID, str));
+		processes.insert(pair<int, string>(proc.th32ProcessID, str));
 		while (Process32Next(Snapshot_handle, &proc)) {
 			wstring ws(proc.szExeFile);
 			string str(ws.begin(), ws.end());
 			//cout << str << endl;
 			//qDebug() << "NAME:" + QString(str.c_str()) + "  ID: " + QString::number(proc.th32ProcessID);
-			m_processes.insert(pair<int, string>(proc.th32ProcessID, str));
+			processes.insert(pair<int, string>(proc.th32ProcessID, str));
 		}
 	}
 
+	
 	CloseHandle(Snapshot_handle);
+	m_client_info.set_processes(processes);
 }
 
 //ClientSysInfo::~ClientSysInfo()
 //{
 //
 //}
-
 
 

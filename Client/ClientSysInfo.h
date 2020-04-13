@@ -20,7 +20,10 @@
 #include<thread>
 
 #include "../Utility/XML_Parser/XMLClient.h"
+
 using namespace std;
+
+
 
 
 
@@ -63,7 +66,7 @@ public:
 	vector<int>      get_hard_disk_used()const;
 	vector<int>      get_hard_disk_free()const;
 
-	//map <int, string> get_processes()const;
+	map <int, string> get_processes()const;
 	
 
 	/*string get_OS();
@@ -78,8 +81,8 @@ public:
 	vector<int>  get_HardDisk_TotalSize();
 	vector<int>  get_HardDisk_Used();
 	vector<int>  get_HardDisk_Free();*/
-	map<int, string> get_Processes();
-
+	void CalculateProcesses();
+private:
 	string CalculateOS();
 	int CalculateTotalRAM();
 	string CalculateCPUVendor();
@@ -93,7 +96,6 @@ public:
 	int CalculateCapacity(const std::string &logic_drive);
 	string CalculateMacAddress();
 	string CalculateIPAddress();
-	void CalculateProcesses();
 	//ui
 	//socket
 	//~ClientSysInfo();

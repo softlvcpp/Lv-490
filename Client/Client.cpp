@@ -165,7 +165,7 @@ void Client::UpdateProcesses() {
 	ui.textEdit->hide();
 	ui.tableWidget->show();
 	client_info2.CalculateProcesses(); //update data 
-	map<int, string> processes_map = client_info2.get_Processes();
+	map<int, string> processes_map = client_info2.get_processes();
 
 	ui.tableWidget->setColumnCount(PROCESS_COLUMN_COUNT);//2
 	ui.tableWidget->setRowCount(processes_map.size());
@@ -212,7 +212,6 @@ QString DisplayHardDiskInformation(ClientSysInfo client_info2) {
 		str += " capacity: " + QString::number(total_size[i]) + QString("GB \n");
 		str += " used: " + QString::number(used_size[i]) + QString("GB \n");
 		str += " free: " + QString::number(free_size[i]) + QString("GB \n");
-		qDebug() << i;
 	}
 	return str;
 }
