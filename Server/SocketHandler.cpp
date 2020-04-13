@@ -6,7 +6,8 @@
 
 SocketHandler::SocketHandler()
 {		
-	WSAData wsaData;//config sockets
+	//configurate sockets
+	WSAData wsaData;
 	if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
 	{		
 		//LOG_T << "Server: Error at WSAStartup()";
@@ -15,7 +16,7 @@ SocketHandler::SocketHandler()
 
 SocketHandler::~SocketHandler()
 {
-	//closing connections and Winsock.
+	//closing connections setings
 	LOG_T << "Server: Closing Connection";
 	WSACleanup();
 	m_socket_logger->join();
@@ -39,22 +40,22 @@ bool SocketHandler::Run()
 	for (auto iter : m_commands)
 	{
 		iter->InitConfiguration(m_server_configuration);
-		if(iter->Execute(m_socket_state) == false)
+		if(iter->Execute(m_server_socket) == false)
 		{
-			LOG_T << m_socket_state->log_msg.c_str();
+			LOG_T << m_server_socket->log_msg.c_str();
 			return false;
 		}
 	}
 	return true;
 }
 
-bool SocketHandler::set_configuration(CXMLParser::OutDocument* server_configuration)
+bool SocketHandler::set_configuration(XMLServer* server_configuration)
 {
-	m_server_configuration = std::shared_ptr<CXMLParser::OutDocument>(server_configuration);
+	m_server_configuration = std::shared_ptr<XMLServer>(server_configuration);
 	return true;
 }
 
-bool SocketHandler::set_configuration(std::shared_ptr<CXMLParser::OutDocument> server_configuration)
+bool SocketHandler::set_configuration(std::shared_ptr<XMLServer> server_configuration)
 {
 	m_server_configuration = server_configuration;
 	return true;
@@ -70,9 +71,9 @@ bool SocketHandler::InitLoger(const std::string& directory_name)
 			return false;
 		}
 	}
-	log_file_path += m_server_configuration->filename;
+	log_file_path += m_server_configuration->get_filename();
 	filelog::LogLevel log_level = filelog::LogLevel::NoLogs;
-	int level = std::stoi(m_server_configuration->loglevel);
+	int level = std::stoi(m_server_configuration->get_loglevel());
 	switch (level)
 	{
 	case 0:

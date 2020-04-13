@@ -5,11 +5,30 @@ extern "C" UINT __stdcall GetPortNumberCustomAction(
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
-	//TODO:delete when done
+	XMLServer parser;
+
+	// Should use constexpr std::string_view, but interfaces don't allow
+	const std::string server_displayname  { "Unused" };
+	const std::string ip                  { "127.0.0.1" };
+	const std::string blocking            { "0" };
+	const std::string socket_timeout      { "5" };
+	const std::string filename            { "serverlog.txt" };
+	const std::string loglevel            { "3" };
+	const std::string flush               { "0" };
+	const std::string period_time         { "30" };
+	const std::string max_working_threads { "127.0.0.1" };
 	std::string port_number = "8080";
 	std::string server_name = "TCPServer_Lv-490";
 
-	std::ofstream ofs{ "D:\\dev\\Lv-490\\ServerInstaller\\bin\\Debug/out.txt" };
+	parser.set_serverdisplayname(server_displayname);
+	parser.set_ipadress(ip);
+	parser.set_blocking(blocking);
+	parser.set_socket_timeout(socket_timeout);
+	parser.set_filename(filename);
+	parser.set_loglevel(loglevel);
+	parser.set_flush(flush);
+	parser.set_period_time(period_time);
+	parser.set_maxworkingthreads(max_working_threads);
 
 	hr = WcaInitialize(hInstall, "GetPortNumberCustomAction");
 	ExitOnFailure(hr, "Failed to initialize");
@@ -36,8 +55,8 @@ extern "C" UINT __stdcall GetPortNumberCustomAction(
 		server_name = std::string(server_name_view.begin(), server_name_view.end());
 	}
 	
-	//For debug only
-	ofs << port_number << "\n" << server_name;
+	
+	
 
 LExit:
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;

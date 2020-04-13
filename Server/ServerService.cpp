@@ -14,11 +14,10 @@ bool ServerService::ReadConfig()
 	{
 		return false;
 	}
-	auto server_data = m_parser.get_data();
-	m_log_file_name = server_data.filename;
-	m_log_level = static_cast<filelog::LogLevel>(server_data.loglevel[0] - '0');
+	m_log_file_name = m_parser.get_filename();
+	m_log_level = static_cast<filelog::LogLevel>(m_parser.get_loglevel()[0] - '0');
 
-	std::wstring name(server_data.servername.begin(), server_data.servername.end());
+	std::wstring name(m_parser.get_servername().begin(), m_parser.get_servername().end());
 	m_name.reset(_wcsdup(name.c_str()));
 	return true;
 }
@@ -482,7 +481,7 @@ ServerService::~ServerService()
 
 void ServerService::Main()
 {
-	s_instance->m_server = std::make_unique<Server>(s_instance->m_parser.get_data(), s_instance->m_log_directory_name);
+	s_instance->m_server = std::make_unique<Server>(s_instance->m_parser, s_instance->m_log_directory_name);
 	s_instance->m_server->Run();
 }
 

@@ -3,6 +3,7 @@
     <Product Id="*" Name="TCPServer_Lv490" Language="1033" Version="1.0.0.0" Manufacturer="Lv-490_C++" UpgradeCode="cfa5704b-b0c5-4455-a870-bfa712751793">
         <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
         <WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)\License\License.rtf" />
+
         <MajorUpgrade DowngradeErrorMessage="A newer version of the product is already installed." />
         <MediaTemplate />
         <UIRef Id="WixUI_MyInstallDir" />
@@ -17,7 +18,7 @@
         </InstallExecuteSequence>
         <Binary Id="CustomActionBinary" SourceFile="$(var.GetPortNumberCustomAction.TargetDir)$(var.GetPortNumberCustomAction.TargetName).dll" />
         <Binary Id="ServerIcon" SourceFile="images/Server_icon.png" />
-        <CustomAction Id="GetPortNumberCustomAction" BinaryKey="CustomActionBinary" DllEntry="GetPortNumberCustomAction" Execute="immediate" />
+        <CustomAction Id="GetPortNumberCustomAction" BinaryKey="CustomActionBinary"  DllEntry="GetPortNumberCustomAction" Execute="immediate" />
         <UI Id="WixUI_MyInstallDir">
             <Dialog Id="SetPortDialog" Width="370" Height="270" Title="[ProductName] setup">
                 <Control Type="Text" Id="portLabel" Width="77" Height="10" X="49" Y="116" Text="Port number:" />

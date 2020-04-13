@@ -1,9 +1,9 @@
 #include "Server.h"
 
-Server::Server(const CXMLParser::OutDocument& config, std::string log_dir_name) :
-	m_thread_pool{ std::stoi(config.maxworkingthreads) }
+Server::Server(const XMLServer& config, std::string log_dir_name) :
+	m_thread_pool{ std::stoi(config.get_maxworkingthreads()) }
 {
-	m_socket_handler.set_configuration(std::make_shared<CXMLParser::OutDocument>(config));
+	m_socket_handler.set_configuration(std::make_shared<XMLServer>(config));
 	m_socket_handler.InitLoger(log_dir_name);
 	AddSocketConnection* add_socket_connection = new AddSocketConnection;
 	m_socket_handler.AddCommand(add_socket_connection);

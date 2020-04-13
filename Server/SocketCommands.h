@@ -13,11 +13,11 @@ public:
 	Command() {};
 	virtual bool Execute(SOCKET_shared_ptr& socket_state) = 0;
 	
-	bool InitConfiguration(CXMLParser::OutDocument* server_configuration);
-	bool InitConfiguration(std::shared_ptr<CXMLParser::OutDocument> server_configuration);
+	bool InitConfiguration(XMLServer* server_configuration);
+	bool InitConfiguration(std::shared_ptr<XMLServer> server_configuration);
 
 protected:
-	std::shared_ptr<CXMLParser::OutDocument> m_server_configuration;
+	std::shared_ptr<XMLServer> m_server_configuration;
 	SocketWrapper socket_wrapper;
 };
 
