@@ -161,10 +161,12 @@
     <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Defines.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="tinyxml2.h" />
-    <ClInclude Include="XML_Parser.h" />
+    <ClInclude Include="XMLClient.h" />
+    <ClInclude Include="XMLServer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
@@ -175,7 +177,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="tinyxml2.cpp" />
-    <ClCompile Include="XML_Parser.cpp" />
+    <ClCompile Include="XMLClient.cpp" />
+    <ClCompile Include="XMLServer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

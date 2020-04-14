@@ -1,21 +1,24 @@
 #pragma once
+#define _WINSOCKAPI_
 #include <string>
+#include <string_view>
 #include <iostream>
+
 #include <memory>
 #include <fstream>
 #include <mutex>
 #include <condition_variable>
 
-#include "Server.h"
-
 #include <Windows.h>
 
+#include "Server.h"
 
 
 
 
 
-#define USERNAME_LEN 20
+
+
 /*
  * This class is implemented as singletone
  * The class functions don`t throw exceptions
@@ -25,12 +28,13 @@ class ServerService
 
 // File IO members and service commands
 private:
-	std::string m_install_command  { "install" };
-	std::string m_uninstall_command{ "uninstall" };
-	std::string m_start_command    { "start" };
-	std::string m_stop_command     { "stop" };
-	std::string m_restart_command  { "restart" };
+	std::string_view m_install_command  { "install" };
+	std::string_view m_uninstall_command{ "uninstall" };
+	std::string_view m_start_command    { "start" };
+	std::string_view m_stop_command     { "stop" };
+	std::string_view m_restart_command  { "restart" };
 
+	//REDO Logger
 	std::string m_log_file_name{ "serverlog.log" };
 	std::string m_log_directory_name{ "Lv-490_logs" };
 	filelog::LogLevel m_log_level;
@@ -55,7 +59,7 @@ private:
 
 // Parser members
 private:
-	CXMLParser::XMLParser m_parser;
+	XMLServer m_parser;
 	std::string m_config_file_name{ "C:/Lv-490_Files/config.xml" };
  
 	bool ReadConfig();
@@ -63,12 +67,12 @@ private:
 public:
 	static bool Run(int argc, char** argv);
 	static ServerService& get_instance();
-	void set_log_dir_name(std::string log_dir_name);
-	void set_config_file_name(std::string file_name);
+	void set_log_dir_name(std::string_view log_dir_name);
+	void set_config_file_name(std::string_view file_name);
 
 	~ServerService();
 
-	//This is, basicly, the "main" function of the service
+	//This is the "main" function of the service
 	virtual void Main();
 
 	ServerService(const ServerService&) = delete;

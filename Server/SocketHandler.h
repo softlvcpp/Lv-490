@@ -1,8 +1,7 @@
 #pragma once
 
-#include <memory>
 #include "SocketCommands.h"
-
+#include "../Utility/DatabaseManager/DatabaseManager.h"
 using namespace std;
 
 constexpr int USERNAME_LEN = 20;
@@ -16,21 +15,21 @@ public:
 	bool AddCommand(Command* command);
 	bool AddCommand(shared_ptr<Command> command);
 
-	bool Run(ThreadPool* thread_pool);
-	bool Run(std::shared_ptr<ThreadPool> thread_pool);
-
-	bool set_configuration(CXMLParser::OutDocument* server_configuration);
-	bool set_configuration(std::shared_ptr<CXMLParser::OutDocument> server_configuration);
+	bool Run();
+	bool set_configuration(XMLServer* server_configuration);
+	bool set_configuration(std::shared_ptr<XMLServer> server_configuration);
 
 	bool InitLoger(const std::string& directory_name);
-	bool InitDatabase(bool is_needed_tables);
+	bool set_Database(DatabaseManager* d);
 
 private:
 	std::string m_log_directory_name{ "Lv-490_logs" };
 	std::shared_ptr<filelog::FileLogger> m_socket_logger;
-	std::shared_ptr<CXMLParser::OutDocument> m_server_configuration;
-	std::shared_ptr<DatabaseManager> m_data_base;
+
+	std::shared_ptr<DatabaseManager> m_database;
+	std::shared_ptr<XMLServer> m_server_configuration;
+
 	vector<shared_ptr<Command>> m_commands;
-	SocketState m_socket_state;
+	SOCKET_shared_ptr m_server_socket;
 };
 

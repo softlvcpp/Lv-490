@@ -9,5 +9,15 @@
 
 // add headers that you want to pre-compile here
 #include "framework.h"
+#include <iostream>
+#include<filesystem>//is_regular_file
+#include<string>
+#include<vector>
+#include<fstream>
+#include"tinyxml2.h"
+#include<map>
+using namespace std;
+using namespace filesystem;
+using namespace tinyxml2;
 
 #endif //PCH_H

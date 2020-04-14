@@ -6,8 +6,10 @@
 
 SocketHandler::SocketHandler()
 {		
-	WSAData wsaData;//config sockets
-	InitDatabase(false);//ToDO: check mistakes
+	//db
+	//configurate sockets
+	WSAData wsaData;
+
 	if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
 	{		
 		//LOG_T << "Server: Error at WSAStartup()";
@@ -17,11 +19,9 @@ SocketHandler::SocketHandler()
 
 SocketHandler::~SocketHandler()
 {
-	//closing connections and Winsock.
+	//closing connections setings
 	LOG_T << "Server: Closing Connection";
-	closesocket(m_socket_state.id);
 	WSACleanup();
-	LOG_T << "logger end";
 	m_socket_logger->join();
 	
 }
@@ -38,63 +38,42 @@ bool SocketHandler::AddCommand(shared_ptr<Command> command)
 	m_commands.push_back(command);
 	return true;
 }
-bool SocketHandler::InitDatabase(bool is_tables)
-{
-	std::shared_ptr<DatabaseManager> m_data_base = shared_ptr<DatabaseManager>(new DatabaseManager());
-	if (!m_data_base->Connect())
-		return false;
-	if (is_tables) 
-	{
-		if (!m_data_base->CreateTables())
-			return false;
-	}
-	return true;
-}
 
-bool SocketHandler::Run(ThreadPool* thread_pool)
+
+bool SocketHandler::Run()
 {
-	
+	Sleep(20000);
 	for (auto iter : m_commands)
 	{
-		iter->InitThreadPool(thread_pool);
 		iter->InitConfiguration(m_server_configuration);
-		iter->InitDatabase(m_data_base.get());
-		if(iter->Execute(m_socket_state) == false)
+		//iter->InitDatabase(m_database);
+
+		if(iter->Execute(m_server_socket) == false)
 		{
-			LOG_T << m_socket_state.log_msg.c_str();
+			LOG_T << m_server_socket->log_msg.c_str();
 			return false;
 		}
 	}
 	return true;
 }
 
-bool SocketHandler::Run(std::shared_ptr<ThreadPool> thread_pool)// database
+
+bool SocketHandler::set_configuration(XMLServer* server_configuration)
 {
-	for (auto iter : m_commands)
-	{
-		iter->InitThreadPool(thread_pool);
-		iter->InitConfiguration(m_server_configuration);
-		iter->InitDatabase(m_data_base.get());
-		if (iter->Execute(m_socket_state) == false)
-		{
-			LOG_T << m_socket_state.log_msg.c_str();
-		}
-	}
+	m_server_configuration = std::shared_ptr<XMLServer>(server_configuration);
 	return true;
 }
 
-bool SocketHandler::set_configuration(CXMLParser::OutDocument* server_configuration)
-{
-	m_server_configuration = std::shared_ptr<CXMLParser::OutDocument>(server_configuration);
-	return true;
-}
-
-bool SocketHandler::set_configuration(std::shared_ptr<CXMLParser::OutDocument> server_configuration)
+bool SocketHandler::set_configuration(std::shared_ptr<XMLServer> server_configuration)
 {
 	m_server_configuration = server_configuration;
 	return true;
 }
-
+bool SocketHandler::set_Database(DatabaseManager* d)
+{
+	m_database = std::shared_ptr<DatabaseManager>(d);
+	return true;
+}
 bool SocketHandler::InitLoger(const std::string& directory_name)
 {
 	std::string log_file_path = "C:/Lv-490_Files/serv_LOGS/";
@@ -105,9 +84,9 @@ bool SocketHandler::InitLoger(const std::string& directory_name)
 			return false;
 		}
 	}
-	log_file_path += m_server_configuration->filename;
+	log_file_path += m_server_configuration->get_filename();
 	filelog::LogLevel log_level = filelog::LogLevel::NoLogs;
-	int level = std::stoi(m_server_configuration->loglevel);
+	int level = std::stoi(m_server_configuration->get_loglevel());
 	switch (level)
 	{
 	case 0:

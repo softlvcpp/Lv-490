@@ -1,10 +1,6 @@
 #pragma once
-
-#include <QApplication>
 #include <iostream>
-#include <QStorageInfo>
-#include <qdebug.h>
-#include <QList>
+
 #include <thread>
 #include <array>
 #include <vector>
@@ -13,9 +9,9 @@
 #include <comutil.h>
 #include <wbemidl.h>
 #include <string>
-#include<qnetworkinterface.h>
-#include<qhostaddress.h>
+
 #include<filesystem>
+#include<map>
 
 #include <windows.h>
 #include <malloc.h>    
@@ -23,9 +19,15 @@
 #include <tchar.h>
 #include<thread>
 
-#include "../Utility/XML_Parser/XML_Parser.h"
+#include "../Utility/XML_Parser/XMLClient.h"
 
 using namespace std;
+
+
+
+
+
+
 namespace fs = std::filesystem;
 class ClientSysInfo
 {
@@ -41,11 +43,33 @@ class ClientSysInfo
 	vector<int> HardDisk_TotalSize;
 	vector<int> HardDisk_Used;
 	vector<int> HardDisk_Free;*/
-	CXMLParser::ClientInfo m_client_info;
+	XMLClient m_client_info;
+	std::map <int,string> m_processes;
 public:
 	ClientSysInfo();
-	void Update();
-	string get_OS();
+	void Update(); 
+	void Parse(string& xml_str) const noexcept;
+	
+	string  get_os()const;
+	string  get_mac_address()const;
+	string  get_ip_address()const;
+
+	int  get_total_ram()const;
+	int  get_cpu_numbers()const;
+	int  get_cpu_speed()const;
+
+	string  get_cpu_vendor()const;
+
+	vector<string>   get_hard_disk_type_list()const;
+	vector<string>   get_hard_disk_media_type()const;
+	vector<int>      get_hard_disk_total_size()const;
+	vector<int>      get_hard_disk_used()const;
+	vector<int>      get_hard_disk_free()const;
+
+	map <int, string> get_processes()const;
+	
+
+	/*string get_OS();
 	string get_MacAddress();
 	string get_IPAddress();
 	int get_TotalRAM();
@@ -56,9 +80,9 @@ public:
 	vector<string>  get_HardDisk_MediaType();
 	vector<int>  get_HardDisk_TotalSize();
 	vector<int>  get_HardDisk_Used();
-	vector<int>  get_HardDisk_Free();
-
-
+	vector<int>  get_HardDisk_Free();*/
+	void CalculateProcesses();
+private:
 	string CalculateOS();
 	int CalculateTotalRAM();
 	string CalculateCPUVendor();
@@ -70,12 +94,12 @@ public:
 	string CalculateHardDisk_MediaType(string LogicalDisk);
 	int CalculateFreeSpace(const std::string &logic_drive);
 	int CalculateCapacity(const std::string &logic_drive);
-	QString CalculateMacAddress();
-	QString CalculateIPAddress();
+	string CalculateMacAddress();
+	string CalculateIPAddress();
 	//ui
 	//socket
-	~ClientSysInfo();
-public: 
-	CXMLParser::ClientInfo get_client_info() const;
+	//~ClientSysInfo();
+
+
 };
 
