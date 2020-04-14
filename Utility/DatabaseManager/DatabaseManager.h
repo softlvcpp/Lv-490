@@ -10,6 +10,7 @@
 #else
 #define DATABASEMANAGER_API __declspec(dllimport)
 #endif
+#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #include <string>
 #include <iostream>
 #include <windows.h>

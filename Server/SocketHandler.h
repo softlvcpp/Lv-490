@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SocketCommands.h"
-#include "../Utility/DatabaseManager/DatabaseManager.h"
 using namespace std;
 
 constexpr int USERNAME_LEN = 20;
@@ -20,7 +19,6 @@ public:
 	bool set_configuration(std::shared_ptr<XMLServer> server_configuration);
 
 	bool InitLoger(const std::string& directory_name);
-	bool set_Database(DatabaseManager* d);
 
 private:
 	std::string m_log_directory_name{ "Lv-490_logs" };

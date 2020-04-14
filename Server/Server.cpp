@@ -6,10 +6,6 @@ Server::Server(const XMLServer& config, std::string log_dir_name) :
 {
 	m_socket_handler.set_configuration(std::make_shared<XMLServer>(config));
 	m_socket_handler.InitLoger(log_dir_name);
-	DatabaseManager* db = new DatabaseManager();//поле класу
-	db->Connect();
-
-	m_socket_handler.set_Database(db);
 	AddSocketConnection* add_socket_connection = new AddSocketConnection;
 	m_socket_handler.AddCommand(add_socket_connection);
 	StartConnection* start_connection = new StartConnection;

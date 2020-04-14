@@ -5,11 +5,9 @@
 #define LOG_P SLOG_PROD(*m_socket_logger)
 
 SocketHandler::SocketHandler()
-{		
-	//db
+{	
 	//configurate sockets
 	WSAData wsaData;
-
 	if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
 	{		
 		//LOG_T << "Server: Error at WSAStartup()";
@@ -22,12 +20,12 @@ SocketHandler::~SocketHandler()
 	//closing connections setings
 	LOG_T << "Server: Closing Connection";
 	WSACleanup();
-	m_socket_logger->join();
-	
+	m_socket_logger->join();	
 }
 
 bool SocketHandler::AddCommand(Command* command)
 {
+	if (command == nullptr) return false;
 	shared_ptr<Command> new_command(command);
 	m_commands.push_back(new_command);
 	return true;
@@ -35,6 +33,7 @@ bool SocketHandler::AddCommand(Command* command)
 
 bool SocketHandler::AddCommand(shared_ptr<Command> command)
 {
+	if (command == nullptr) return false;
 	m_commands.push_back(command);
 	return true;
 }
@@ -42,11 +41,9 @@ bool SocketHandler::AddCommand(shared_ptr<Command> command)
 
 bool SocketHandler::Run()
 {
-	Sleep(20000);
 	for (auto iter : m_commands)
 	{
 		iter->InitConfiguration(m_server_configuration);
-		//iter->InitDatabase(m_database);
 
 		if(iter->Execute(m_server_socket) == false)
 		{
@@ -60,20 +57,18 @@ bool SocketHandler::Run()
 
 bool SocketHandler::set_configuration(XMLServer* server_configuration)
 {
+	if (server_configuration == nullptr) return false;
 	m_server_configuration = std::shared_ptr<XMLServer>(server_configuration);
 	return true;
 }
 
 bool SocketHandler::set_configuration(std::shared_ptr<XMLServer> server_configuration)
 {
+	if (server_configuration == nullptr) return false;
 	m_server_configuration = server_configuration;
 	return true;
 }
-bool SocketHandler::set_Database(DatabaseManager* d)
-{
-	m_database = std::shared_ptr<DatabaseManager>(d);
-	return true;
-}
+
 bool SocketHandler::InitLoger(const std::string& directory_name)
 {
 	std::string log_file_path = "C:/Lv-490_Files/serv_LOGS/";

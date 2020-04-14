@@ -67,22 +67,20 @@ bool AcceptConnection::Execute(SOCKET_shared_ptr& socket_state)
 bool ReceiveMessage::Execute(SOCKET_shared_ptr& socket_state)
 {	
 	SOCKET current_socket = socket_state->id;
-
 	while (true)
 	{
 		//get message size from client
 		socket_state->buffer.clear();
 		std::string incomming_buffer;
+		int msg_size;
 		incomming_buffer.resize(BUFFER_SIZE);
-		int bytes_received = recv(current_socket, const_cast<char*>(incomming_buffer.c_str()), sizeof(int), 0);
+		int bytes_received = recv(current_socket, reinterpret_cast<char*>(&msg_size), sizeof(int), 0);
 
 		if (SOCKET_ERROR == bytes_received || bytes_received == 0)
 		{
 			return false;
 		}
-
-		int msg_size = std::stoi(incomming_buffer);
-
+		
 		if (msg_size == 0)
 		{
 			return false;
@@ -99,45 +97,29 @@ bool ReceiveMessage::Execute(SOCKET_shared_ptr& socket_state)
 		{
 			socket_state->buffer.erase(socket_state->buffer.begin() + msg_size, socket_state->buffer.end());
 		}
-				
+		
 		if (SOCKET_ERROR == bytes_received || bytes_received == 0)
 		{
 			return false;
 		}
 		else
-		{
-			std::ofstream test_output("C:/Lv-490_Files/output.txt", std::ios::app);
-
-            
-			//this information must be write into data base, when it will be implemented, please delete file output 
-			test_output << "Server: Recieved: " << bytes_received << " bytes of \"" << socket_state->buffer << "\" message.\n";
-
+		{			
+			//write information in database
 			std::string xml_string = socket_state->buffer;
-
 			XMLServer xml_parser;
 			xml_parser.PrepareToDBManager(xml_string);		
-			//m_data_base->setClient(xml_parser.get_mac_address(), xml_parser.get_ip_address(), xml_parser.get_total_ram(), xml_parser.get_cpu_numbers(), 6, xml_parser.get_cpu_speed(),xml_parser.get_os());
-		
-
-			test_output << "Cpu numbers: " << xml_parser.get_cpu_numbers() << '\n';
-			test_output << "Cpu speed: " << xml_parser.get_cpu_speed() << '\n';
-			test_output << "Cpu vendor: " << xml_parser.get_cpu_vendor() << '\n';
+			m_data_base->setClient(xml_parser.get_mac_address(), xml_parser.get_ip_address(), xml_parser.get_total_ram(), 
+				xml_parser.get_cpu_numbers(), 6, xml_parser.get_cpu_speed(),xml_parser.get_os());
+								
 			time_t timer;
 			time(&timer);
 			for (size_t i = 0; i < xml_parser.get_hard_disk_free().size(); ++i)
-			{
-				test_output << xml_parser.get_hard_disk_type_list()[i] << '\n';
-				test_output << "Hard disk free: " << xml_parser.get_hard_disk_free()[i] << '\n';
-				test_output << "Hard disk total size: " << xml_parser.get_hard_disk_total_size()[i] << '\n';
-				test_output << "Hard disk used: " << xml_parser.get_hard_disk_used()[i] << '\n';
-				//m_data_base->setDisk(xml_parser.get_mac_address(), xml_parser.get_os(), xml_parser.get_hard_disk_total_size()[i], xml_parser.get_hard_disk_type_list()[i], xml_parser.get_hard_disk_media_type()[i], xml_parser.get_hard_disk_total_size()[i], xml_parser.get_hard_disk_used()[i], xml_parser.get_hard_disk_free()[i], timer);
+			{				
+				m_data_base->setDisk(xml_parser.get_mac_address(), xml_parser.get_os(), xml_parser.get_hard_disk_total_size()[i], 
+					xml_parser.get_hard_disk_type_list()[i], xml_parser.get_hard_disk_media_type()[i], xml_parser.get_hard_disk_total_size()[i], 
+					xml_parser.get_hard_disk_used()[i], xml_parser.get_hard_disk_free()[i], timer);
 			}
-			test_output << "Ip: " << xml_parser.get_ip_address() << '\n';
-			test_output << "Mac: " << xml_parser.get_mac_address() << '\n';
-			test_output << "Ram: " << xml_parser.get_total_ram() << '\n';
-
-			test_output.close();
-
+			
 			if (socket_state->buffer == "exit")
 			{	
 				return true;
@@ -147,18 +129,33 @@ bool ReceiveMessage::Execute(SOCKET_shared_ptr& socket_state)
 	return true;
 }
 
-void StartConnection::DoRecv(SOCKET_shared_ptr& new_conection)
+bool ReceiveMessage::InitDatabase(std::shared_ptr<DatabaseManager> m)
 {
+	if (m == nullptr) return false;
+	m_data_base = std::shared_ptr<DatabaseManager>(m);
+	return true;
+}
+
+void StartConnection::DoRecv(SOCKET_shared_ptr& new_conection)
+{	
 	ReceiveMessage receive_message;	
+	receive_message.InitDatabase(db);
 	receive_message.Execute(new_conection);
 }
 
+StartConnection::StartConnection()
+{
+	//set database connection
+	db = std::shared_ptr<DatabaseManager>(new DatabaseManager());	
+	db->Connect();
+}
+
 bool StartConnection::Execute(SOCKET_shared_ptr& socket_state)
-{	
+{		
 	while (true)
 	{
-		AcceptConnection accept_connection(socket_state);
-		SOCKET_shared_ptr new_conection;		
+		SOCKET_shared_ptr new_conection;
+		AcceptConnection accept_connection(socket_state);		
 		accept_connection.Execute(new_conection);
 		if(new_conection->state == ACCEPTED)
 		{
@@ -172,6 +169,7 @@ bool StartConnection::Execute(SOCKET_shared_ptr& socket_state)
 
 bool StartConnection::InitThreadPool(ThreadPool* main_pool)
 {
+	if (main_pool == nullptr) return false;
 	m_thread_pool = std::shared_ptr<ThreadPool>(main_pool); 
 	return true;
 }
@@ -179,22 +177,21 @@ bool StartConnection::InitThreadPool(ThreadPool* main_pool)
 
 bool StartConnection::InitThreadPool(std::shared_ptr<ThreadPool> main_pool) 
 {
+	if (main_pool == nullptr) return false;
 	m_thread_pool = main_pool;
 	return true;
 }
-bool Command::InitDatabase(std::shared_ptr<DatabaseManager> m)
-{
-	m_data_base = m;
-	return true;
-}
+
 bool Command::InitConfiguration(XMLServer* server_configuration)
 {
+	if (server_configuration == nullptr) return false;
 	m_server_configuration = std::shared_ptr<XMLServer>(server_configuration);
 	return true;
 }
 
 bool Command::InitConfiguration(std::shared_ptr<XMLServer> server_configuration)
 {
+	if (server_configuration == nullptr) return false;
 	m_server_configuration = server_configuration;
 	return true;
 }

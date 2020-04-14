@@ -4,7 +4,6 @@
 #include "ThreadPool.h"
 #include "SocketHandler.h"
 #include "../Utility/XML_Parser/XMLServer.h"
-#include "../Utility/DatabaseManager/DatabaseManager.h"
 class Server
 {
 	ThreadPool m_thread_pool;
