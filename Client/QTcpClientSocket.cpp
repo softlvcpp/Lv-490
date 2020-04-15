@@ -38,12 +38,13 @@ bool QTcpClientSocket::Disconnect()
 	return false;
 }
 
-bool QTcpClientSocket::Send(const std::string &message) 
+bool QTcpClientSocket::Send(const std::string& message)
 {
 	if (m_qtcp_socket->state() == QAbstractSocket::ConnectedState) {
-		const size_t message_size = message.size();
-		m_qtcp_socket->write(std::to_string(message_size).c_str(),sizeof(int));
+		size_t message_size = message.size();
+		m_qtcp_socket->write(reinterpret_cast<char*>(&message_size), sizeof(int));
 		m_qtcp_socket->write(message.c_str(), message_size);
+		m_qtcp_socket->flush();
 		return true;
 	}
 	return false;
