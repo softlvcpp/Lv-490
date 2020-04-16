@@ -1,102 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Id="*" Name="TCPServer_Lv490" Language="1033" Version="1.0.0.0" Manufacturer="Lv-490_C++" UpgradeCode="cfa5704b-b0c5-4455-a870-bfa712751793">
-        <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
-        <WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)\License\License.rtf" />
+  <Product Id="*" Name="TCPServer_Lv490" Language="1033" Version="1.0.0.0" Manufacturer="Lv-490_C++" UpgradeCode="cfa5704b-b0c5-4455-a870-bfa712751793">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)\License\License.rtf" />
 
-        <MajorUpgrade DowngradeErrorMessage="A newer version of the product is already installed." />
-        <MediaTemplate />
-        <UIRef Id="WixUI_MyInstallDir" />
-        <Feature Id="ProductFeature" Title="TCPServer_Lv490" Level="1">
-            <ComponentGroupRef Id="ProductComponents" />
-        </Feature>
-        <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
-    </Product>
-    <Fragment>
-        <InstallExecuteSequence>
-            <Custom Action="GetPortNumberCustomAction" Before="InstallFiles">NOT Installed</Custom>
-        </InstallExecuteSequence>
-        <Binary Id="CustomActionBinary" SourceFile="$(var.GetPortNumberCustomAction.TargetDir)$(var.GetPortNumberCustomAction.TargetName).dll" />
-        <Binary Id="ServerIcon" SourceFile="images/Server_icon.png" />
-        <CustomAction Id="GetPortNumberCustomAction" BinaryKey="CustomActionBinary"  DllEntry="GetPortNumberCustomAction" Execute="immediate" />
-        <UI Id="WixUI_MyInstallDir">
-            <Dialog Id="SetPortDialog" Width="370" Height="270" Title="[ProductName] setup">
-                <Control Type="Text" Id="portLabel" Width="77" Height="10" X="49" Y="116" Text="Port number:" />
-                <Control Type="PushButton" Id="Next" Width="56" Height="17" X="292" Y="236" Text="Next" />
-                <Control Type="PushButton" Id="Back" Width="56" Height="17" X="225" Y="236" Text="Back" />
-                <Control Type="Text" Id="InfoText" Width="179" Height="70" X="128" Y="22" Text="Before we start the installation, you can choose the port number your server will be listening to and the server name which will be displayed in the Task Manager. If you don`t choose any port, the default value 8080 will be assigned to it. The default Server name value is TCPServer_Lv-490." />
-                <Control Type="Text" Id="serverNameLabel" Width="62" Height="9" X="49" Y="139" Text="Server name:" />
-                <Control Type="Edit" Id="serverName" Width="176" Height="15" X="131" Y="135" Property="SERVERNAMEProperty" />
-                <Control Type="Bitmap" Id="server_bmp" Width="76" Height="51" X="38" Y="38" Text="ServerIcon" />
-                <Control Type="MaskedEdit" Id="port" Width="178" Height="15" X="131" Y="112" Property="PORTNUMBERProperty" Text="########################################" />
-            </Dialog>
-            <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
-            <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
-            <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
-            <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
-            <Property Id="WixUI_Mode" Value="InstallDir" />
-            <DialogRef Id="BrowseDlg" />
-            <DialogRef Id="DiskCostDlg" />
-            <DialogRef Id="ErrorDlg" />
-            <DialogRef Id="FatalError" />
-            <DialogRef Id="FilesInUse" />
-            <DialogRef Id="MsiRMFilesInUse" />
-            <DialogRef Id="PrepareDlg" />
-            <DialogRef Id="ProgressDlg" />
-            <DialogRef Id="ResumeDlg" />
-            <DialogRef Id="UserExit" />
-            <Publish Dialog="SetPortDialog" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="2">1</Publish>
-            <Publish Dialog="SetPortDialog" Control="Back" Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
-            <Publish Dialog="SetPortDialog" Control="Next" Event="DoAction" Value="GetPortNumberCustomAction" Order="1">1</Publish>
-            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
-            <Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
-            <!--<Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath" Order="3">1</Publish>
+    <MajorUpgrade DowngradeErrorMessage="A newer version of the product is already installed." />
+    <MediaTemplate />
+    <UIRef Id="WixUI_MyInstallDir" />
+    <Feature Id="ProductFeature" Title="TCPServer_Lv490" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+  </Product>
+  <Fragment>
+    <InstallExecuteSequence>
+      <Custom Action="SetProperty" Before="CostFinalize">NOT Installed</Custom>
+      <Custom Action="GetPortNumberCustomAction" After="InstallFiles">NOT Installed</Custom>
+    </InstallExecuteSequence>
+
+    <CustomAction Id="SetProperty" Return="check"
+    Property="GetPortNumberCustomAction" Value="[INSTALLFOLDER]">
+    </CustomAction>
+
+    <Binary Id="CustomActionBinary" SourceFile="$(var.GetPortNumberCustomAction.TargetDir)$(var.GetPortNumberCustomAction.TargetName).dll" />
+    <Binary Id="ServerIcon" SourceFile="images/Server_icon.png" />
+    <CustomAction Id="GetPortNumberCustomAction" BinaryKey="CustomActionBinary" DllEntry="GetPortNumberCustomAction" Execute="deferred" Impersonate="no"/>
+    <UI Id="WixUI_MyInstallDir">
+      <Dialog Id="SetPortDialog" Width="370" Height="270" Title="[ProductName] setup">
+        <Control Type="Text" Id="portLabel" Width="77" Height="10" X="49" Y="116" Text="Port number:" />
+        <Control Type="PushButton" Id="Next" Width="56" Height="17" X="292" Y="236" Text="Next" />
+        <Control Type="PushButton" Id="Back" Width="56" Height="17" X="225" Y="236" Text="Back" />
+        <Control Type="Text" Id="InfoText" Width="179" Height="70" X="128" Y="22" Text="Before we start the installation, you can choose the port number your server will be listening to and the server name which will be displayed in the Task Manager. If you don`t choose any port, the default value 8080 will be assigned to it. The default Server name value is TCPServer_Lv-490." />
+        <Control Type="Text" Id="serverNameLabel" Width="62" Height="9" X="49" Y="139" Text="Server name:" />
+        <Control Type="Edit" Id="serverName" Width="176" Height="15" X="131" Y="135" Property="SERVERNAMEProperty" />
+        <Control Type="Bitmap" Id="server_bmp" Width="76" Height="51" X="38" Y="38" Text="ServerIcon" />
+        <Control Type="MaskedEdit" Id="port" Width="178" Height="15" X="131" Y="112" Property="PORTNUMBERProperty" Text="########################################" />
+      </Dialog>
+      <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+      <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+      <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+      <Property Id="WixUI_Mode" Value="InstallDir" />
+      <DialogRef Id="BrowseDlg" />
+      <DialogRef Id="DiskCostDlg" />
+      <DialogRef Id="ErrorDlg" />
+      <DialogRef Id="FatalError" />
+      <DialogRef Id="FilesInUse" />
+      <DialogRef Id="MsiRMFilesInUse" />
+      <DialogRef Id="PrepareDlg" />
+      <DialogRef Id="ProgressDlg" />
+      <DialogRef Id="ResumeDlg" />
+      <DialogRef Id="UserExit" />
+      <Publish Dialog="SetPortDialog" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="2">1</Publish>
+      <Publish Dialog="SetPortDialog" Control="Back" Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
+      <!--<Publish Dialog="SetPortDialog" Control="Next" Event="DoAction" Value="GetPortNumberCustomAction" Order="1">1</Publish>-->
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
+      <Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
+      <!--<Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath" Order="3">1</Publish>
             <Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4"><![CDATA[WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>-->
-            <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
-            <!--<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">Installed AND PATCH</Publish>-->
-            <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="SetPortDialog">LicenseAccepted = "1"</Publish>
-            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="SetPortDialog" Order="1">NOT Installed</Publish>
-            <!--<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg">NOT Installed</Publish>-->
-            <!--<Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>-->
-            <!--<Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
+      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+      <!--<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">Installed AND PATCH</Publish>-->
+      <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="SetPortDialog">LicenseAccepted = "1"</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="SetPortDialog" Order="1">NOT Installed</Publish>
+      <!--<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg">NOT Installed</Publish>-->
+      <!--<Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>-->
+      <!--<Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
             <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>-->
-            <!--<Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath" Order="2">NOT WIXUI_DONTVALIDATEPATH</Publish>-->
-            <!--<Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3"><![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>-->
-            <!--<Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="4">WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"</Publish>-->
-            <!--<Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+      <!--<Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath" Order="2">NOT WIXUI_DONTVALIDATEPATH</Publish>-->
+      <!--<Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3"><![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>-->
+      <!--<Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="4">WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"</Publish>-->
+      <!--<Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
             <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>-->
-            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed AND NOT PATCH</Publish>
-            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">Installed AND PATCH</Publish>
-            <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
-            <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-            <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-            <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
-            <Property Id="ARPNOMODIFY" Value="1" />
-        </UI>
-        <UIRef Id="WixUI_Common" />
-    </Fragment>
-    <Fragment>
-        <Directory Id="TARGETDIR" Name="SourceDir">
-            <Directory Id="ProgramFilesFolder">
-                <Directory Id="INSTALLFOLDER" Name="Lv-490_server" />
-            </Directory>
-        </Directory>
-    </Fragment>
-    <Fragment>
-        <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-            <Component Id="ProductComponent">
-                <File Id="EXE" Source="$(var.Server.TargetPath)" />
-            </Component>
-            <Component Id="ProductLoggerComponent">
-                <File Source="$(var.LoggerLibrary.TargetPath)" />
-            </Component>
-            <Component Id="ProductParserComponent">
-                <File Source="$(var.XML_Parser.TargetPath)" />
-            </Component>
-        </ComponentGroup>
-        <CustomAction Id="EXECUTE_AFTER_FINALIZE" Execute="deferred" Impersonate="no" Return="asyncNoWait" FileKey="EXE" ExeCommand="install" />
-        <InstallExecuteSequence>
-            <Custom Action="EXECUTE_AFTER_FINALIZE" After="InstallFiles">NOT Installed</Custom>
-        </InstallExecuteSequence>
-    </Fragment>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed AND NOT PATCH</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">Installed AND PATCH</Publish>
+      <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+      <Property Id="ARPNOMODIFY" Value="1" />
+    </UI>
+    <UIRef Id="WixUI_Common" />
+  </Fragment>
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir" >
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="Lv-490_server"/>
+      </Directory>
+    </Directory>
+  </Fragment>
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="ProductComponent">
+        <File Id="EXE" Source="$(var.Server.TargetPath)" />
+      </Component>
+      <Component Id="ProductLoggerComponent">
+        <File Source="$(var.LoggerLibrary.TargetPath)" />
+      </Component>
+      <Component Id="ProductParserComponent">
+        <File Source="$(var.XML_Parser.TargetPath)" />
+      </Component>
+    </ComponentGroup>
+    <CustomAction Id="EXECUTE_AFTER_FINALIZE" Execute="deferred" Impersonate="no" Return="asyncNoWait" FileKey="EXE" ExeCommand="install" />
+    <InstallExecuteSequence>
+      <Custom Action="EXECUTE_AFTER_FINALIZE" Before="InstallFinalize" >NOT Installed</Custom>
+    </InstallExecuteSequence>
+  </Fragment>
 </Wix>

@@ -10,16 +10,24 @@
 #include "CppUnitTest.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+using ::testing::_;
 
 namespace ServerUnitTests
 {
 	TEST_CLASS(ServerUnitTests)
 	{
 	public:
-		
+
+
+
+		//Danylo's tests
+		BEGIN_TEST_METHOD_ATTRIBUTE(LoginTestSuccess)
+			TEST_OWNER(L"dan_sad")
+		END_TEST_METHOD_ATTRIBUTE()
 		TEST_METHOD(TestMethod1)
 		{
-			
+
 		}
+
 	};
 }

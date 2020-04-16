@@ -11,7 +11,7 @@ void XMLClient::WriteSystemInformation(string& xml_str) const noexcept
 
     xml_doc.InsertFirstChild(root);
     //client
-    XMLElement* client = xml_doc.NewElement(CLIENT_CLIENT);//root->client
+    XMLElement* client = xml_doc.NewElement( CLIENT_CLIENT);//root->client
     //MAC
     XMLElement* mac = xml_doc.NewElement(CLIENT_MACADRESS);//root->client->MacAddress
 
