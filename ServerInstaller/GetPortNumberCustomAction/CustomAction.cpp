@@ -38,7 +38,6 @@ extern "C" UINT __stdcall GetPortNumberCustomAction(
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
-
 	std::ofstream a{ "D:\\dev\\Lv-490\\ServerInstaller\\bin\\Debug\\out.txt" };
 
 
@@ -105,7 +104,7 @@ extern "C" UINT __stdcall GetPortNumberCustomAction(
 
 	target_dir += "config.xml";
 
-	a << IsProcessElevated() << "\n" << target_dir;
+	//a << IsProcessElevated() << "\n" << target_dir <<"\n"<< *port_str << "\n" << *server_name_str;
 
 	if (!parser.WriteConfig(/*"C:\\Program Files (x86)\\Lv-490_server\\config.xml"*/target_dir))
 	{
