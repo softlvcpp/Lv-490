@@ -77,6 +77,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -92,7 +93,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;$(SolutionDir)Utility\gtest</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;$(SolutionDir)Utility\gtest;D:\programing\softserve\LVCPP\Lv-490\Utility\XMLServer</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -100,8 +101,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;$(SolutionDir)Utility\gtest\libs</AdditionalLibraryDirectories>
-      <AdditionalDependencies>gmock.lib;gtest.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;$(SolutionDir)Utility\gtest\libs;D:\programing\softserve\LVCPP\Lv-490\x64\Release</AdditionalLibraryDirectories>
+      <AdditionalDependencies>gmock.lib;gtest.lib;LoggerLibrary.lib;XMLPARSER.lib;DatabaseManager.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

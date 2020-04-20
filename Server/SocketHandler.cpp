@@ -42,7 +42,6 @@ bool SocketHandler::AddCommand(shared_ptr<Command> command)
 
 bool SocketHandler::Run()
 {
-	Sleep(10000);
 	for (auto iter : m_commands)
 	{
 		iter->InitConfiguration(m_server_configuration);

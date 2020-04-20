@@ -1,5 +1,10 @@
-#pragma once
+#ifndef PCH_H
+#define PCH_H
+
 #pragma comment(lib, "Ws2_32.lib")
+
+#include <winsock2.h>
+#include <Windows.h>
 
 #include <memory>
 #include <string_view>
@@ -17,13 +22,8 @@
 #include <codecvt>
 #include <ctime>
 
-#include <winsock2.h>
-#include <Windows.h>
-
 #include "../Utility/XML_Parser/XMLServer.h"
 #include "../Utility/Logger/LoggerDLL.h"
 #include "../Utility/DatabaseManager/DatabaseManager.h"
 
-#include "ThreadPool.h"
-#include "SocketCommands.h"
-
+#endif //PCH_H

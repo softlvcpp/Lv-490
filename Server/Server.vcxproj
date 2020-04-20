@@ -74,8 +74,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+<<<<<<< HEAD
     <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+=======
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+>>>>>>> Bugs fixing
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -104,8 +109,12 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_WINSOCK_DEPRECATED_NO_WARNINGS;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <FunctionLevelLinking>
+      </FunctionLevelLinking>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -174,6 +183,9 @@
     <ClInclude Include="ServerService.h" />
   </ItemGroup>
   <ItemGroup>
+    <ResourceCompile Include="Server.rc" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Utility\DatabaseManager\DatabaseManager.vcxproj">
       <Project>{30909198-530e-4aa8-be6f-7f63cd455d6c}</Project>
     </ProjectReference>
@@ -183,9 +195,6 @@
     <ProjectReference Include="..\Utility\XML_Parser\XML_Parser.vcxproj">
       <Project>{6eec450d-3371-4426-99d0-d04495a9056d}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Server.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

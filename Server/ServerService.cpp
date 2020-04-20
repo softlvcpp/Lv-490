@@ -54,7 +54,7 @@ bool ServerService::Run(int argc, char** argv)
 		{
 			if (!s_instance->Install())
 			{
-				LOG_T << "Unable to install windows service"; 
+				LOG_T << "Unable to install windows service";
 				return false;
 			}
 		}
@@ -243,16 +243,16 @@ bool ServerService::Install()
 
 	SmartServiceHandle service = HandleManager::MakeSmart(
 		CreateService(
-		SCManager.get(),
-		s_instance->m_name.get(),
-		s_instance->m_name.get(),
-		SERVICE_ALL_ACCESS,
-		SERVICE_WIN32_OWN_PROCESS,
-		SERVICE_DEMAND_START,
-		SERVICE_ERROR_NORMAL,
-		exe_file_path,
-		NULL, NULL, NULL, NULL, NULL
-	));
+			SCManager.get(),
+			s_instance->m_name.get(),
+			s_instance->m_name.get(),
+			SERVICE_ALL_ACCESS,
+			SERVICE_WIN32_OWN_PROCESS,
+			SERVICE_DEMAND_START,
+			SERVICE_ERROR_NORMAL,
+			exe_file_path,
+			NULL, NULL, NULL, NULL, NULL
+		));
 
 
 	if (!service) {
@@ -474,7 +474,7 @@ bool ServerService::InitLogger()
 		}
 	}
 	log_file_path += m_log_file_name;
-	m_logger = std::unique_ptr<filelog::FileLogger>(new filelog::FileLogger(log_file_path.c_str(), true,filelog::LogLevel::Trace));
+	m_logger = std::unique_ptr<filelog::FileLogger>(new filelog::FileLogger(log_file_path.c_str(), true, filelog::LogLevel::Trace));
 	return true;
 }
 

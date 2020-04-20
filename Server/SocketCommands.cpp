@@ -1,8 +1,14 @@
 #include "pch.h"
 
+#include "ThreadPool.h"
+#include "SocketCommands.h"
 
 
-bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
+constexpr int BUFFER_SIZE = 512;//default buffer size
+constexpr char DEFAULT_IP[] = "127.0.0.1";//default ip address
+constexpr int DEFAULT_PORT = 8080;//default port number
+
+bool AddSocketConnection::Execute(SOCKET_shared_ptr socket_state)//return bool
 {
 	//create socket wrapper with autodeleter
 	socket_state = socket_wrapper.MakeSharedSocket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -10,7 +16,7 @@ bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 	//check for errors to ensure that the new_socket is a valid socket.	
 	if (INVALID_SOCKET == socket_state->id)
 	{
-		socket_state->log_msg = "Server: Error at socket(): " + WSAGetLastError();
+		socket_state->log_msg = "Server: Error at socket(): ";
 		return false;
 	}
 
@@ -37,20 +43,20 @@ bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 
 	if (SOCKET_ERROR == ::bind(socket_state->id, (SOCKADDR*)&serverService, sizeof(serverService)))
 	{
-		socket_state->log_msg = "Server: Error at bind(): " + WSAGetLastError();
+		socket_state->log_msg = "Server: Error at bind(): ";
 		return false;
 	}
 
 	//listen on the socket for incoming connections.
 	if (SOCKET_ERROR == listen(socket_state->id, SOMAXCONN))
 	{
-		socket_state->log_msg = "Server: Error at listen(): " + WSAGetLastError();
+		socket_state->log_msg = "Server: Error at listen(): ";
 		return false;
 	}
 	return true;
 }
 
-bool AcceptConnection::Execute(SOCKET_shared_ptr& socket_state)
+bool AcceptConnection::Execute(SOCKET_shared_ptr socket_state)
 {	
 	//address of sending partner
 	struct sockaddr_in client;		
@@ -61,14 +67,14 @@ bool AcceptConnection::Execute(SOCKET_shared_ptr& socket_state)
 
 	if (INVALID_SOCKET == socket_state->id)
 	{
-		socket_state->log_msg = "Server: Error at socket(): " + WSAGetLastError();
+		socket_state->log_msg = "Server: Error at socket(): ";
 		return false;
 	}
 
 	return true;
 }
 
-bool ReceiveMessage::Execute(SOCKET_shared_ptr& socket_state)
+bool ReceiveMessage::Execute(SOCKET_shared_ptr socket_state)
 {	
 	SOCKET current_socket = socket_state->id;
 	while (true)
@@ -140,7 +146,7 @@ bool ReceiveMessage::InitDatabase(std::shared_ptr<DatabaseManager> m)
 	return true;
 }
 
-void StartConnection::DoRecv(SOCKET_shared_ptr& new_conection)
+void StartConnection::DoRecv(SOCKET_shared_ptr new_conection)
 {	
 	ReceiveMessage receive_message;	
 	receive_message.InitDatabase(db);
@@ -154,7 +160,7 @@ StartConnection::StartConnection()
 	db->Connect();
 }
 
-bool StartConnection::Execute(SOCKET_shared_ptr& socket_state)
+bool StartConnection::Execute(SOCKET_shared_ptr socket_state)
 {		
 	while (true)
 	{

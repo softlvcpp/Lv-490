@@ -2,6 +2,8 @@
 #include"pch.h"
 #include"Defines.h"
 
+using namespace std;
+
 class XMLPARSER_API IXMLServer
 {
 public:

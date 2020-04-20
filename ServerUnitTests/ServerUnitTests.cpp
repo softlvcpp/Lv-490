@@ -9,6 +9,10 @@
 
 #include "CppUnitTest.h"
 
+#include "../Server/SocketState.h"
+#include "../Server/SocketCommands.h"
+#include "../Server/SocketCommands.cpp"
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using ::testing::_;
 
@@ -18,12 +22,8 @@ namespace ServerUnitTests
 	{
 	public:
 
-
-
-		
 		TEST_METHOD(TestMethod1)
 		{
-
 		}
 
 	};
