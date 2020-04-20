@@ -74,13 +74,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-<<<<<<< HEAD
     <EnableClangTidyCodeAnalysis>false</EnableClangTidyCodeAnalysis>
     <RunCodeAnalysis>true</RunCodeAnalysis>
-=======
-    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
->>>>>>> Bugs fixing
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

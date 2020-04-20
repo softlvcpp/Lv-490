@@ -9,6 +9,9 @@
 
 #include "CppUnitTest.h"
 
+#include "../Server/pch.h"
+#include "../Server/ThreadPool.h"
+#include "../Server/ThreadPool.cpp"
 #include "../Server/SocketState.h"
 #include "../Server/SocketCommands.h"
 #include "../Server/SocketCommands.cpp"
@@ -24,7 +27,12 @@ namespace ServerUnitTests
 
 		TEST_METHOD(TestMethod1)
 		{
+			Command* c;
 		}
+
+
+
+		//Danylo's tests
 
 	};
 }
