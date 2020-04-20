@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "ServerService.h"
 #include "SmartServiceHandle.h"
 
@@ -10,14 +11,24 @@ ServerService::ServerService() : m_name{ _wcsdup(L"TCPServer_Lv490") } {}
 
 bool ServerService::ReadConfig()
 {
-	if (!m_parser.ReadConfigs(m_config_file_name))
+	char exe_file_path[MAX_PATH];
+	if (GetModuleFileNameA(NULL, exe_file_path, ARRAYSIZE(exe_file_path)) == 0)
+	{
+		LOG_T << "Unable to get executable path. Error " << GetLastError();
+		return false;
+	}
+	m_config_file_path = exe_file_path;
+	m_config_file_path.erase(m_config_file_path.rfind('\\') + 1, m_config_file_path.length() - m_config_file_path.rfind('\\')- 1);
+	m_config_file_path += "config.xml";
+
+	if (!m_parser.ReadConfigs(m_config_file_path))
 	{
 		return false;
 	}
 	m_log_file_name = m_parser.get_filename();
 	m_log_level = static_cast<filelog::LogLevel>(m_parser.get_loglevel()[0] - '0');
 
-	std::wstring name(m_parser.get_servername().begin(), m_parser.get_servername().end());
+	std::wstring name = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(m_parser.get_servername());
 	m_name.reset(_wcsdup(name.c_str()));
 	return true;
 }
@@ -31,12 +42,10 @@ bool ServerService::Run(int argc, char** argv)
 	ServiceTable[1].lpServiceProc = nullptr;
 	if (s_instance->ReadConfig() == false)
 	{
-		s_instance->m_file_output << "Can not read config file\n";
 		return false;
 	}
 	if (!s_instance->InitLogger())
 	{
-		s_instance->m_file_output << "Can not init logger " << s_instance->m_log_file_name << "\n";
 		return false;
 	}
 	if (argc == 2)
@@ -87,7 +96,6 @@ bool ServerService::Run(int argc, char** argv)
 	{
 		if (!StartServiceCtrlDispatcher(ServiceTable))
 		{
-			s_instance->m_file_output << "Error occured";
 			LOG_T << "Unable to start Service Control Dispatcher.";
 			return false;
 		}
@@ -97,21 +105,24 @@ bool ServerService::Run(int argc, char** argv)
 
 void ServerService::ServiceMain(int argc, char** argv)
 {
+	//std::ofstream out{ R"(C:\Lv-490_Files\serv_LOGS\out.txt)", std::ios::app };
 	if (s_instance == nullptr)
 	{
 		s_instance = std::shared_ptr<ServerService>(new ServerService);
 		if (s_instance->ReadConfig() == false)
 		{
-			s_instance->m_file_output << "\nCan not read config in service main";
+			//out << "Cannot read config";
 			return;
 		}
 		if (!s_instance->InitLogger())
 		{
-			s_instance->m_file_output << "\nCan not init logger in service main";
+			//out << "Cannot init logger";
 			return;
 		}
 
 	}
+	//out << __LINE__ << '\n';
+
 	s_instance->m_service_status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
 	s_instance->m_service_status.dwCurrentState = SERVICE_START_PENDING;
 	s_instance->m_service_status.dwControlsAccepted = SERVICE_ACCEPT_STOP;
@@ -125,12 +136,14 @@ void ServerService::ServiceMain(int argc, char** argv)
 		LOG_T << "Unable to register Control Handler.";
 		return;
 	}
+	//out << __LINE__ << '\n';
 
 	if (SetServiceStatus(s_instance->m_service_status_handle, &s_instance->m_service_status) == FALSE)
 	{
 		LOG_T << "Unable to set service status.";
 		return;
 	}
+	//out << __LINE__ << '\n';
 
 	bool init_result = s_instance->InitService();
 	if (init_result == false)
@@ -138,6 +151,7 @@ void ServerService::ServiceMain(int argc, char** argv)
 		LOG_T << "Unable to initialize service.";
 		return;
 	}
+	//out << __LINE__ << '\n';
 
 	s_instance->m_service_status.dwControlsAccepted = SERVICE_ACCEPT_STOP;
 	s_instance->m_service_status.dwCurrentState = SERVICE_RUNNING;
@@ -149,6 +163,7 @@ void ServerService::ServiceMain(int argc, char** argv)
 		LOG_T << "Unable to set service status.";
 		return;
 	}
+	//out << __LINE__ << '\n';
 
 	std::thread main_thread(&ServerService::Main, s_instance);
 	{
@@ -157,7 +172,6 @@ void ServerService::ServiceMain(int argc, char** argv)
 		std::unique_lock<std::mutex> condition_lock(mutex);
 
 		condition_var.wait(condition_lock, []() { return s_instance->m_service_status.dwCurrentState != SERVICE_RUNNING; });
-		s_instance->m_file_output << "\n" << s_instance->m_service_status.dwCurrentState;
 	}
 
 	s_instance->m_logger->join();
@@ -483,14 +497,4 @@ void ServerService::Main()
 {
 	s_instance->m_server = std::make_unique<Server>(s_instance->m_parser, s_instance->m_log_directory_name);
 	s_instance->m_server->Run();
-}
-
-void ServerService::set_log_dir_name(std::string_view log_dir_name)
-{
-	m_log_directory_name = log_dir_name;
-}
-
-void ServerService::set_config_file_name(std::string_view file_name)
-{
-	m_config_file_name = file_name;
 }

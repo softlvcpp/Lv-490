@@ -1,22 +1,6 @@
 #pragma once
-#define _WINSOCKAPI_
-#include <string>
-#include <string_view>
-#include <iostream>
-
-#include <memory>
-#include <fstream>
-#include <mutex>
-#include <condition_variable>
-
-#include <Windows.h>
 
 #include "Server.h"
-
-
-
-
-
 
 
 /*
@@ -43,7 +27,6 @@ private:
 	std::unique_ptr<wchar_t> m_name;
 
 	std::string m_all_files_dir_name{ "Lv-490_Files" };
-	std::ofstream m_file_output{ "C:/Lv-490_Files/temp_log.txt", std::ios::app };
 
 // Server members
 private:
@@ -60,15 +43,13 @@ private:
 // Parser members
 private:
 	XMLServer m_parser;
-	std::string m_config_file_name{ "C:/Lv-490_Files/config.xml" };
- 
-	bool ReadConfig();
+	std::string m_config_file_path;
+
+	[[nodiscard]] bool ReadConfig();
 
 public:
-	static bool Run(int argc, char** argv);
+	[[nodiscard]] static bool Run(int argc, char** argv);
 	static ServerService& get_instance();
-	void set_log_dir_name(std::string_view log_dir_name);
-	void set_config_file_name(std::string_view file_name);
 
 	~ServerService();
 
@@ -81,15 +62,15 @@ private:
 	ServerService();
 	static void ServiceMain(int argc, char** argv);
 	static void ControlHandler(unsigned long request);
-	static bool InitService();
+	[[nodiscard]] static bool InitService();
 
 
-	bool Install();
-	bool Uninstall();
-	bool Start();
-	bool Stop();
-	bool Restart();
+	[[nodiscard]] bool Install();
+	[[nodiscard]] bool Uninstall();
+	[[nodiscard]] bool Start();
+	[[nodiscard]] bool Stop();
+	[[nodiscard]] bool Restart();
 
 
-	bool InitLogger();
+	[[nodiscard]] bool InitLogger();
 };

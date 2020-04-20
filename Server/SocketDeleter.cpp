@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "SocketDeleter.h"
 
 void SocketDeleter::operator()(SocketState* used_socket)
@@ -50,7 +51,9 @@ SOCKET_shared_ptr SocketWrapper::MakeSharedSocket(int af, int type, int protocol
     SocketState new_socket_state;
     new_socket_state.id = new_socket;
     new_socket_state.state = LISTEN;
-    return SOCKET_shared_ptr(&new_socket_state, SocketDeleter());
+
+    auto return_ptr = SOCKET_shared_ptr(new SocketState{ new_socket, LISTEN }, SocketDeleter());
+    return return_ptr;
 }
 
 SOCKET_shared_ptr SocketWrapper::MakeSharedSocket(SOCKET s, sockaddr* addr, int* addrlen)

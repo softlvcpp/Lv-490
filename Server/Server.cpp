@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Server.h"
 
 Server::Server(const XMLServer& config, std::string log_dir_name) :

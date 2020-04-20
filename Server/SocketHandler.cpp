@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "SocketHandler.h"
 
 #define LOG_T SLOG_TRACE(*m_socket_logger)

@@ -1,4 +1,6 @@
-#include "SocketCommands.h"
+#include "pch.h"
+
+
 
 bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 {
@@ -16,6 +18,7 @@ bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 	sockaddr_in serverService;
 	serverService.sin_family = AF_INET;
 	//set IP
+
 	serverService.sin_addr.s_addr = inet_addr((INADDR_NONE == inet_addr(m_server_configuration->get_ipadress().c_str()))?
 																DEFAULT_IP: m_server_configuration->get_ipadress().c_str());
 	//set port
@@ -31,6 +34,7 @@ bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 	serverService.sin_port = htons(port);
 	
 	//bind the socket for client's requests
+
 	if (SOCKET_ERROR == ::bind(socket_state->id, (SOCKADDR*)&serverService, sizeof(serverService)))
 	{
 		socket_state->log_msg = "Server: Error at bind(): " + WSAGetLastError();
