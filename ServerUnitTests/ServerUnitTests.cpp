@@ -20,10 +20,7 @@ namespace ServerUnitTests
 
 
 
-		//Danylo's tests
-		BEGIN_TEST_METHOD_ATTRIBUTE(LoginTestSuccess)
-			TEST_OWNER(L"dan_sad")
-		END_TEST_METHOD_ATTRIBUTE()
+		
 		TEST_METHOD(TestMethod1)
 		{
 

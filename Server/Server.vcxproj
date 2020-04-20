@@ -22,7 +22,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{140E71B5-DC41-4FB7-931B-A33E9719833B}</ProjectGuid>
     <RootNamespace>Server</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -174,6 +174,9 @@
     <ClInclude Include="ServerService.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Utility\DatabaseManager\DatabaseManager.vcxproj">
+      <Project>{30909198-530e-4aa8-be6f-7f63cd455d6c}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Utility\Logger\LoggerLibrary.vcxproj">
       <Project>{caf17f41-7f9d-4fa1-96b8-951a365e979e}</Project>
     </ProjectReference>

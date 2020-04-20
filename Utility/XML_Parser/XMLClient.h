@@ -46,6 +46,7 @@ public:
     void set_hard_disk_total_size(vector<int> other) { m_hard_disk_total_size = other; }
     void set_hard_disk_used(vector<int> other) { m_hard_disk_used = other; }
     void set_hard_disk_free(vector<int> other) { m_hard_disk_free = other; }
+    void set_processes(std::map <int, string> other) {m_processes = other; }
 
 private:
     //clients' information members
