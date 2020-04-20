@@ -44,7 +44,7 @@ class ClientSysInfo
 	vector<int> HardDisk_Used;
 	vector<int> HardDisk_Free;*/
 	XMLClient m_client_info;
-	std::map <int,string> m_processes;
+	//std::map <int,string> m_processes;
 public:
 	ClientSysInfo();
 	void Update(); 
