@@ -2,7 +2,7 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
      xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
   <Product Id="*" Name="TCPServer_Lv490" Language="1033" Version="1.0.0.0" Manufacturer="Lv-490_C++" UpgradeCode="cfa5704b-b0c5-4455-a870-bfa712751793">
-    <Package InstallerVersion="200" Compressed="yes" InstallPrivileges="elevated" AdminImage="yes" InstallScope="perMachine" />
+    <Package InstallerVersion="200" Compressed="yes" InstallPrivileges="elevated" InstallScope="perMachine" />
     <WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)\License\License.rtf" />
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of the product is already installed." />
@@ -14,9 +14,8 @@
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
   </Product>
   <Fragment>
-    <InstallExecuteSequence>
-      <Custom Action="SchedXmlFile" Before="InstallFinalize" />
-    </InstallExecuteSequence>
+
+
 
     <Binary Id="ServerIcon" SourceFile="images/Server_icon.png" />
     <UI Id="WixUI_MyInstallDir">
@@ -70,6 +69,10 @@
     </Directory>
   </Fragment>
   <Fragment>
+    <InstallExecuteSequence>
+      <Custom Action="SchedXmlFile" After ="DuplicateFiles"/>
+    </InstallExecuteSequence>
+
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="ProductComponent">
         <File Id="EXE" Source="$(var.Server.TargetPath)" />
@@ -80,28 +83,28 @@
       <Component Id="ProductParserComponent">
         <File Source="$(var.XML_Parser.TargetPath)" />
       </Component>
-      <Component Id="ConfigXMLDocument" Guid="3b367d78-64a2-4eb5-bf8d-3aa5ada56735">
-        <File Id ="Config" KeyPath="yes" DiskId="1" Vital ="yes" Source="$(var.Server.ProjectDir)config.xml"/>
+      <Component Id="ConfigXMLDocument">
+        <File Id ="Config"  Source="$(var.Server.ProjectDir)config.xml" />
         <CreateFolder Directory="INSTALLFOLDER">
           <util:PermissionEx User="Users"  GenericAll="yes"/>
         </CreateFolder>
 
-       <util:XmlFile ElementPath ="root/Server/servername" 
-                      File ="[#Config]" 
-                      Id ="SERVERNAME"
+        <util:XmlFile ElementPath ="/root/Server/servername"
+                       File ="[#Config]"
+                       Id ="SERVERNAME"
+                       Action ="setValue"
+                       Value ="[SERVERNAMEPROPERTY]" />
+        <util:XmlFile ElementPath ="/root/Server/listenport"
+                      File ="[#Config]"
+                      Id ="PORT"
                       Action ="setValue"
                       Value ="[PORTNUMBERPROPERTY]" />
-        <util:XmlFile ElementPath ="/root/Server/listenport"
-                      File ="[#Config]" 
-                      Id ="PORT"
-                      Action ="setValue" 
-                      Value ="[SERVERNAMEPROPERTY]"
-                      />
       </Component>
     </ComponentGroup>
+
     <CustomAction Id="EXECUTE_AFTER_FINALIZE" Execute="deferred" Impersonate="no" Return="asyncNoWait" FileKey="EXE" ExeCommand="install" />
     <InstallExecuteSequence>
       <Custom Action="EXECUTE_AFTER_FINALIZE" Before="InstallFinalize" >NOT Installed</Custom>
     </InstallExecuteSequence>
   </Fragment>
-</Wix>
+</Wix> 
