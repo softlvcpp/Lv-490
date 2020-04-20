@@ -15,7 +15,7 @@ bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 	//check for errors to ensure that the new_socket is a valid socket.	
 	if (INVALID_SOCKET == socket_state->id)
 	{
-		socket_state->log_msg = "Server: Error at socket(): ";
+		socket_state->log_msg = "Server: Error at socket(): " + to_string(WSAGetLastError());
 		return false;
 	}
 
@@ -42,14 +42,14 @@ bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 
 	if (SOCKET_ERROR == ::bind(socket_state->id, (SOCKADDR*)&serverService, sizeof(serverService)))
 	{
-		socket_state->log_msg = "Server: Error at bind(): ";
+		socket_state->log_msg = "Server: Error at bind(): " + to_string(WSAGetLastError());
 		return false;
 	}
 
 	//listen on the socket for incoming connections.
 	if (SOCKET_ERROR == listen(socket_state->id, SOMAXCONN))
 	{
-		socket_state->log_msg = "Server: Error at listen(): ";
+		socket_state->log_msg = "Server: Error at listen(): " + to_string(WSAGetLastError());
 		return false;
 	}
 	return true;
@@ -66,7 +66,7 @@ bool AcceptConnection::Execute(SOCKET_shared_ptr& socket_state)
 
 	if (INVALID_SOCKET == socket_state->id)
 	{
-		socket_state->log_msg = "Server: Error at socket(): ";
+		socket_state->log_msg = "Server: Error at socket(): " + to_string(WSAGetLastError());
 		return false;
 	}
 
@@ -165,7 +165,7 @@ bool StartConnection::Execute(SOCKET_shared_ptr& socket_state)
 	{
 		SOCKET_shared_ptr new_conection;
 		AcceptConnection accept_connection(socket_state);		
-		accept_connection.Execute(new_conection);
+		if (accept_connection.Execute(new_conection) == false) return false;
 		if(new_conection->state == ACCEPTED)
 		{
 			new_conection->state = RECEIVE;

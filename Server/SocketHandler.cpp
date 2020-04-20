@@ -5,15 +5,17 @@
 #define LOG_D SLOG_DEBUG(*m_socket_logger)
 #define LOG_P SLOG_PROD(*m_socket_logger)
 
+constexpr int LOW_BYTE = 2;
+constexpr int HIGH_BYTE = 2;
+
 SocketHandler::SocketHandler()
 {	
 	//configurate sockets
 	WSAData wsaData;
-	if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
+	if (NO_ERROR != WSAStartup(MAKEWORD(LOW_BYTE, HIGH_BYTE), &wsaData))
 	{		
 		//LOG_T << "Server: Error at WSAStartup()";
-	}	
-	
+	}		
 }
 
 SocketHandler::~SocketHandler()
