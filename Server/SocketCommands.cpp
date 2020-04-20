@@ -166,9 +166,9 @@ bool StartConnection::Execute(SOCKET_shared_ptr& socket_state)
 		SOCKET_shared_ptr new_conection;
 		AcceptConnection accept_connection(socket_state);		
 		if (accept_connection.Execute(new_conection) == false) return false;
-		if(new_conection->state == ACCEPTED)
+		if(new_conection->state == State::ACCEPTED)
 		{
-			new_conection->state = RECEIVE;
+			new_conection->state = State::RECEIVE;
 			//add message receiving in thread pool
 			m_thread_pool->ExecuteTask(&StartConnection::DoRecv, this, new_conection);
 		}
