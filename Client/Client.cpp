@@ -197,7 +197,7 @@ void Client::open_settings() {
 }
 
 
-QString DisplayHardDiskInformation(ClientSysInfo client_info2) {
+QString DisplayHardDiskInformation(ClientSysInfo& client_info2) {
 	QString str;
 	std::vector<int> free_size = client_info2.get_hard_disk_free();
 	std::vector<int> total_size = client_info2.get_hard_disk_total_size();
@@ -216,7 +216,7 @@ QString DisplayHardDiskInformation(ClientSysInfo client_info2) {
 	return str;
 }
 
-QString DisplayCPUInformation(ClientSysInfo client_info2) {
+QString DisplayCPUInformation(ClientSysInfo& client_info2) {
 	QString str;
 	str += "CPU vendor: " + QString(client_info2.get_cpu_vendor().c_str()) + "\n";
 	str += "CPU core number: " + QString::number(client_info2.get_cpu_numbers()) + "\n";
@@ -224,13 +224,13 @@ QString DisplayCPUInformation(ClientSysInfo client_info2) {
 	return str;
 }
 
-QString DisplayRamInformation(ClientSysInfo client_info2) {
+QString DisplayRamInformation(ClientSysInfo& client_info2) {
 	QString str;
 	str += "Total RAM: " + QString::number(client_info2.get_total_ram()) + "\n";
 	return str;
 }
 
-QString DisplayNetworkInformation(ClientSysInfo client_info2) {
+QString DisplayNetworkInformation(ClientSysInfo& client_info2) {
 	QString str;
 	str += "MAC address: " + QString(client_info2.get_mac_address().c_str()) + "\n";
 	str += "IP address: " + QString(client_info2.get_ip_address().c_str()) + "\n";
@@ -238,7 +238,7 @@ QString DisplayNetworkInformation(ClientSysInfo client_info2) {
 }
 
 
-QString DisplayAllInformationString(ClientSysInfo client_info2) {
+QString DisplayAllInformationString(ClientSysInfo& client_info2) {
 	QString str = "OS: " + QString(client_info2.get_os().c_str()) + '\n';
 	str += DisplayCPUInformation(client_info2);
 	str += DisplayRamInformation(client_info2);
