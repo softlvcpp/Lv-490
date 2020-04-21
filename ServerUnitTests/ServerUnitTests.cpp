@@ -2,10 +2,6 @@
 
 #include "CppUnitTest.h"
 
-#include "../Utility/XML_Parser/XMLServer.h"
-#include "../Utility/Logger/LoggerDLL.h"
-#include "../Utility/DatabaseManager/DatabaseManager.h"
-
 #include "../Server/SocketState.h"
 #include "../Server/ThreadPool.h"
 #include "../Server/ThreadPool.cpp"
@@ -17,12 +13,17 @@
 #include "../Server/SocketHandler.cpp"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+using ::testing::AtLeast;
+using ::testing::Return;
 using ::testing::_;
+using ::testing::Invoke;
+using ::testing::InvokeWithoutArgs;
 
-class MockSocketWrapper : public XMLServer
+class MockParser : public XMLServer
 {	
 public:
 	MOCK_METHOD0(get_ipadress, string());
+	MOCK_METHOD0(get_listenport, int());
 };
 
 namespace ServerUnitTests
@@ -37,9 +38,15 @@ namespace ServerUnitTests
 
 		TEST_METHOD(TestMethod1)
 		{
-			//MockSocketWrapper mock_socket_wrapper;
+			MockParser mock_parser;
 			AddSocketConnection add_socket_connection;
-
+			SocketWrapper sock_wrapper;			
+			auto socket = sock_wrapper.MakeSharedSocket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+			EXPECT_CALL(mock_parser, get_ipadress()).Times(1).WillOnce(Return("127.0.0.1"));
+			EXPECT_CALL(mock_parser, get_listenport()).Times(1).WillOnce(Return(8080));
+			add_socket_connection.InitConfiguration(&mock_parser);
+			bool is_connected = add_socket_connection.Execute(socket);
+			Assert::IsTrue(is_connected == true, L"Initialize should return 1");
 		}
 
 
