@@ -90,7 +90,6 @@
     <ClCompile Include="ClientSysInfo.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SettingsWindow.cpp" />
-    <ClCompile Include="UnitTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Client.h" />

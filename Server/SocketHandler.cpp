@@ -84,7 +84,7 @@ bool SocketHandler::InitLoger(const std::string& directory_name)
 	}
 	log_file_path += m_server_configuration->get_filename();
 	filelog::LogLevel log_level = filelog::LogLevel::NoLogs;
-	int level = std::stoi(m_server_configuration->get_loglevel());
+	int level = m_server_configuration->get_loglevel();
 	switch (level)
 	{
 	case 0:

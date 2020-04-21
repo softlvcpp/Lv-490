@@ -162,7 +162,7 @@
     <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Defines.h" />
+    <ClInclude Include="Consts.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="tinyxml2.h" />
@@ -170,6 +170,7 @@
     <ClInclude Include="XMLServer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Consts.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

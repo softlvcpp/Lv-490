@@ -1,23 +1,25 @@
 #include "pch.h"
-#define _HAS_TR1_NAMESPACE 1
-#define _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-#include "gmock-global/gmock-global.h"
-
-//#include "gtest/gtest.h"
 
 #include "CppUnitTest.h"
 
-#include "../Server/pch.h"
+#include "../Server/SocketState.h"
 #include "../Server/ThreadPool.h"
 #include "../Server/ThreadPool.cpp"
-#include "../Server/SocketState.h"
+#include "../Server/SocketDeleter.h"
+#include "../Server/SocketDeleter.cpp"
 #include "../Server/SocketCommands.h"
 #include "../Server/SocketCommands.cpp"
+#include "../Server/SocketHandler.h"
+#include "../Server/SocketHandler.cpp"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using ::testing::_;
+
+class MockSocketWrapper : public XMLServer
+{	
+public:
+	MOCK_METHOD0(get_ipadress, string());
+};
 
 namespace ServerUnitTests
 {
@@ -25,11 +27,16 @@ namespace ServerUnitTests
 	{
 	public:
 
+		BEGIN_TEST_METHOD_ATTRIBUTE(TestMethod1)
+			TEST_OWNER(L"Oleh_Dmytrash")
+		END_TEST_METHOD_ATTRIBUTE()
+
 		TEST_METHOD(TestMethod1)
 		{
-			Command* c;
-		}
+			//MockSocketWrapper mock_socket_wrapper;
+			AddSocketConnection add_socket_connection;
 
+		}
 
 
 		//Danylo's tests
