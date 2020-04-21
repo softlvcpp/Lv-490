@@ -10,7 +10,7 @@
 //some constants 
 const int PROCESS_UPDATE_DURATION = 5000;
 const int PROCESS_COLUMN_COUNT = 2;
-
+const unsigned int TimeMeasurement = 1000; // 1000- seconds, 1 = milliseconds, 60000 - minuts...;
 
 
 class Client : public QMainWindow
@@ -19,14 +19,15 @@ class Client : public QMainWindow
 
 public:
 	Client(QWidget *parent = Q_NULLPTR);
-	ClientSysInfo client_info2;
+	ClientSysInfo client_info;
 private:
 	Ui::Client ui;
 	Dialog settings;
 	QTimer *tmr;//timer for timecycle connection to server
 	QTimer* timer;//for processes
-	CXMLParser::XMLParser parser;
-	std::thread* m_th;
+	
+	std::thread* m_th=nullptr;
+	//std::thread* m_th2;
 	//std::thread m_th2;
 public slots:
 	void closeEvent(QCloseEvent* event);//performed by pressing the red cross button

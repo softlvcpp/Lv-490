@@ -52,7 +52,8 @@ public:
     void set_hard_disk_total_size(const vector<int>& other) { m_hard_disk_total_size = other; }
     void set_hard_disk_used(const vector<int>& other) { m_hard_disk_used = other; }
     void set_hard_disk_free(const vector<int>& other) { m_hard_disk_free = other; }
-   
+    void set_processes(const map <int, string>& other) { m_processes = other; }
+
 private:
     //clients' information members
     string m_os;

@@ -7,7 +7,7 @@
 #include<qgraphicsview.h>
 #include<qlayout.h>
 #include"DefineLogger.h"
-#include "../Utility/XML_Parser/XML_Parser.h"
+//#include "../Utility/XML_Parser/XML_Parser.h"
 #include<thread>
 int numff = 0;
 
@@ -39,7 +39,7 @@ Client::Client(QWidget* parent)
 	view.setFrameStyle(QFrame::NoFrame);
 
 	timer = new QTimer(this);//for processes
-	client_info2.CalculateProcesses();
+	client_info.CalculateProcesses();
 
 	tmr = new QTimer(this); //for socket conection
 	//connect(tmr, SIGNAL(timeout()), this, SLOT(updateTime())); 
@@ -61,11 +61,12 @@ void Client::closeEvent(QCloseEvent* event) {
 		m_th->join();
 	}
 	delete m_th;
+	
 };
 
 void Client::runUpdateTime()
 {
-	const unsigned int TimeMeasurement = 1000; // 1000- seconds, 1 = milliseconds, 60000 - minuts...;
+	
 
 	tmr->setInterval(settings.get_TimeInterval() * TimeMeasurement); // set time interval
 	if (m_th != nullptr)
@@ -110,9 +111,9 @@ void Client::updateTime()
 		return;
 	}
 
-	client_info2.Update();
+	client_info.Update();
 	string send_XML_string;
-	parser.WriteSystemInformation(send_XML_string, client_info2.get_client_info());// parse in XML string
+	client_info.Parse(send_XML_string);// parse in XML string
 	L_TRACE << "XML string: ";
 	L_TRACE << send_XML_string.c_str();
 	qDebug() << send_XML_string.c_str();
@@ -163,8 +164,8 @@ void Client::UpdateProcesses() {
 	qDebug() << "______________update_processes______________";
 	ui.textEdit->hide();
 	ui.tableWidget->show();
-	client_info2.CalculateProcesses(); //update data 
-	map<int, string> processes_map = client_info2.get_Processes();
+	client_info.CalculateProcesses(); //update data 
+	map<int, string> processes_map = client_info.get_processes();
 
 	ui.tableWidget->setColumnCount(PROCESS_COLUMN_COUNT);//2
 	ui.tableWidget->setRowCount(processes_map.size());
@@ -198,14 +199,16 @@ void Client::open_settings() {
 
 QString DisplayHardDiskInformation(ClientSysInfo client_info2) {
 	QString str;
-	std::vector<int> free_size = client_info2.get_HardDisk_Free();
-	std::vector<int> total_size = client_info2.get_HardDisk_TotalSize();
-	std::vector<int> used_size = client_info2.get_HardDisk_Used();
-	std::vector<std::string> volume_vector = client_info2.CalculatevectorLogicDick();//= {"C:\\","D:\\","E:\\" };
-	std::vector<std::string> volume_media_type = client_info2.get_HardDisk_MediaType();// ={"ssd","hdd","hdd"};
+	std::vector<int> free_size = client_info2.get_hard_disk_free();
+	std::vector<int> total_size = client_info2.get_hard_disk_total_size();
+	std::vector<int> used_size = client_info2.get_hard_disk_used();
+	std::vector<std::string> volume_vector = client_info2.get_hard_disk_type_list();//= {"C:\\","D:\\","E:\\" };
+	std::vector<std::string> volume_media_type = client_info2.get_hard_disk_media_type();// ={"ssd","hdd","hdd"};
 
 	for (int i = 0; i < volume_vector.size(); i++) {
-		str += "Hard Disk (" + QString(volume_vector[i].c_str()) + ") " + QString(client_info2.CalculateHardDisk_MediaType(volume_vector[i]).c_str()) + "\n";
+		str += "Hard Disk (" + QString(volume_vector[i].c_str()) + ") " 
+			+ QString(volume_media_type[i].c_str()) + "\n";
+		//+ QString(client_info2.CalculateHardDisk_MediaType(volume_vector[i]).c_str()) + "\n";
 		str += " capacity: " + QString::number(total_size[i]) + QString("GB \n");
 		str += " used: " + QString::number(used_size[i]) + QString("GB \n");
 		str += " free: " + QString::number(free_size[i]) + QString("GB \n");
@@ -215,28 +218,28 @@ QString DisplayHardDiskInformation(ClientSysInfo client_info2) {
 
 QString DisplayCPUInformation(ClientSysInfo client_info2) {
 	QString str;
-	str += "CPU vendor: " + QString(client_info2.get_CPUVendor().c_str()) + "\n";
-	str += "CPU core number: " + QString::number(client_info2.get_CPUNumbers()) + "\n";
-	str += "CPU speed: " + QString::number(client_info2.get_CPUSpeed()) + "MHz\n";
+	str += "CPU vendor: " + QString(client_info2.get_cpu_vendor().c_str()) + "\n";
+	str += "CPU core number: " + QString::number(client_info2.get_cpu_numbers()) + "\n";
+	str += "CPU speed: " + QString::number(client_info2.get_cpu_speed()) + "MHz\n";
 	return str;
 }
 
 QString DisplayRamInformation(ClientSysInfo client_info2) {
 	QString str;
-	str += "Total RAM: " + QString::number(client_info2.get_TotalRAM()) + "\n";
+	str += "Total RAM: " + QString::number(client_info2.get_total_ram()) + "\n";
 	return str;
 }
 
 QString DisplayNetworkInformation(ClientSysInfo client_info2) {
 	QString str;
-	str += "MAC address: " + QString(client_info2.get_MacAddress().c_str()) + "\n";
-	str += "IP address: " + QString(client_info2.get_IPAddress().c_str()) + "\n";
+	str += "MAC address: " + QString(client_info2.get_mac_address().c_str()) + "\n";
+	str += "IP address: " + QString(client_info2.get_ip_address().c_str()) + "\n";
 	return str;
 }
 
 
 QString DisplayAllInformationString(ClientSysInfo client_info2) {
-	QString str = "OS: " + QString(client_info2.get_OS().c_str()) + '\n';
+	QString str = "OS: " + QString(client_info2.get_os().c_str()) + '\n';
 	str += DisplayCPUInformation(client_info2);
 	str += DisplayRamInformation(client_info2);
 	str += DisplayHardDiskInformation(client_info2);
@@ -249,7 +252,7 @@ void Client::indexComboChanged(int index)
 		timer->stop();
 	}
 
-	client_info2.Update();
+	client_info.Update();
 	ui.tableWidget->hide();
 	ui.textEdit->show();
 	int num = ui.comboBox->currentIndex();
@@ -257,19 +260,19 @@ void Client::indexComboChanged(int index)
 	switch (num)
 	{
 	case ComboBoxOptions::AllSystemInformation:
-		ui.textEdit->setText(DisplayAllInformationString(client_info2));
+		ui.textEdit->setText(DisplayAllInformationString(client_info));
 		break;
 	case ComboBoxOptions::CPUInformation:
-		ui.textEdit->setText(DisplayCPUInformation(client_info2));
+		ui.textEdit->setText(DisplayCPUInformation(client_info));
 		break;
 	case ComboBoxOptions::HardDiskInformation:
-		ui.textEdit->setText(DisplayHardDiskInformation(client_info2));
+		ui.textEdit->setText(DisplayHardDiskInformation(client_info));
 		break;	
 	case ComboBoxOptions::RamInformation:
-		ui.textEdit->setText(DisplayRamInformation(client_info2));
+		ui.textEdit->setText(DisplayRamInformation(client_info));
 		break;
 	case ComboBoxOptions::NetworkInformation:
-		ui.textEdit->setText(DisplayNetworkInformation(client_info2));
+		ui.textEdit->setText(DisplayNetworkInformation(client_info));
 		break;
 	case ComboBoxOptions::ProcessInformation:
 		UpdateProcesses(); //display data at first

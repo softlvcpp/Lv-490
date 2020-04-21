@@ -2,7 +2,6 @@
 #include"pch.h"
 #include"Consts.h"
 
-
 class XMLPARSER_API IXMLServer
 {
 public:

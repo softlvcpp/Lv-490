@@ -1,8 +1,6 @@
 #pragma once
 
-#include "pch.h"
-
-constexpr int BUFFER_SIZE = 512;//default buffer size
+#include <winsock2.h>
 
 enum State
 {

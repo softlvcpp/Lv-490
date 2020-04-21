@@ -1,4 +1,6 @@
+#include "pch.h"
 #include "Server.h"
+
 
 Server::Server(const XMLServer& config, std::string log_dir_name) :
 	m_thread_pool{ std::stoi(config.get_maxworkingthreads()) }

@@ -1,11 +1,7 @@
-#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #pragma once
-#define _CRT_SECURE_NO_WARNINGS
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-
-#include "ThreadPool.h"
 #include "SocketState.h"
 #include "SocketDeleter.h"
+#include "ThreadPool.h"
 
 class Command
 {
@@ -13,11 +9,10 @@ public:
 	Command() {};
 	virtual bool Execute(SOCKET_shared_ptr& socket_state) = 0;
 	
-	bool InitConfiguration(CXMLParser::OutDocument* server_configuration);
-	bool InitConfiguration(std::shared_ptr<CXMLParser::OutDocument> server_configuration);
-
+	bool InitConfiguration(XMLServer* server_configuration);
+	bool InitConfiguration(std::shared_ptr<XMLServer> server_configuration);
 protected:
-	std::shared_ptr<CXMLParser::OutDocument> m_server_configuration;
+	std::shared_ptr<XMLServer> m_server_configuration;
 	SocketWrapper socket_wrapper;
 };
 
@@ -42,12 +37,15 @@ class ReceiveMessage : public Command
 public:
 	ReceiveMessage() {};
 	bool Execute(SOCKET_shared_ptr& socket_state) override;
+	bool InitDatabase(std::shared_ptr<DatabaseManager> m);
+private:
+	std::shared_ptr<DatabaseManager> m_data_base;
 };
 
 class StartConnection : public Command
 {
 public:
-	StartConnection() {};
+	StartConnection();
 	bool Execute(SOCKET_shared_ptr& socket_state) override;
 
 	bool InitThreadPool(ThreadPool* main_pool);
@@ -56,4 +54,5 @@ public:
 private:
 	std::shared_ptr<ThreadPool> m_thread_pool;
 	void DoRecv(SOCKET_shared_ptr& new_conection);
+	std::shared_ptr<DatabaseManager> db;	
 };
