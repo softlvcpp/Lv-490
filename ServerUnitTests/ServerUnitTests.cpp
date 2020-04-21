@@ -2,7 +2,6 @@
 
 #include "CppUnitTest.h"
 
-
 #include "../Server/SocketState.h"
 #include "../Server/ThreadPool.h"
 #include "../Server/ThreadPool.cpp"
@@ -16,9 +15,10 @@
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using ::testing::_;
 
-class MockSocketWrapper : public SocketWrapper
+class MockSocketWrapper : public XMLServer
 {	
-	MOCK_METHOD0(MakeSharedSocket, SOCKET_shared_ptr());
+public:
+	MOCK_METHOD0(get_ipadress, string());
 };
 
 namespace ServerUnitTests
@@ -33,7 +33,7 @@ namespace ServerUnitTests
 
 		TEST_METHOD(TestMethod1)
 		{
-			MockSocketWrapper mock_socket_wrapper;
+			//MockSocketWrapper mock_socket_wrapper;
 			AddSocketConnection add_socket_connection;
 
 		}

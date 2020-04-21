@@ -1,6 +1,9 @@
 #pragma once
 #include"pch.h"
 #include"Consts.h"
+#include <map>
+
+using namespace std;
 
 class XMLPARSER_API IXMLServer
 {
@@ -13,7 +16,7 @@ public:
     virtual ~IXMLServer() {};
 };
 
-class XMLPARSER_API XMLServer final :public IXMLServer
+class XMLPARSER_API XMLServer :public IXMLServer
 {
 public:
    

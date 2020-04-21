@@ -26,7 +26,7 @@ bool ServerService::ReadConfig()
 		return false;
 	}
 	m_log_file_name = m_parser.get_filename();
-	m_log_level = static_cast<filelog::LogLevel>(m_parser.get_loglevel()[0] - '0');
+	m_log_level = static_cast<filelog::LogLevel>(m_parser.get_loglevel());
 
 	std::wstring name = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(m_parser.get_servername());
 	m_name.reset(_wcsdup(name.c_str()));

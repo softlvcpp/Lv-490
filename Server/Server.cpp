@@ -2,10 +2,10 @@
 #include "Server.h"
 
 
-Server::Server(const XMLServer& config, std::string log_dir_name) :
-	m_thread_pool{ std::stoi(config.get_maxworkingthreads()) }
+Server::Server(XMLServer& config, const std::string& log_dir_name) :
+	m_thread_pool{ config.get_maxworkingthreads() }
 {
-	m_socket_handler.set_configuration(std::make_shared<XMLServer>(config));
+	m_socket_handler.set_configuration(&config);
 	m_socket_handler.InitLoger(log_dir_name);
 	AddSocketConnection* add_socket_connection = new AddSocketConnection;
 	m_socket_handler.AddCommand(add_socket_connection);

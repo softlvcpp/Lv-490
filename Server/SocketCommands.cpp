@@ -27,15 +27,12 @@ bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 	serverService.sin_addr.s_addr = inet_addr((INADDR_NONE == inet_addr(m_server_configuration->get_ipadress().c_str()))?
 																DEFAULT_IP: m_server_configuration->get_ipadress().c_str());
 	//set port
-	int port = 0;
-	try
-	{
-		port = std::stoi(m_server_configuration->get_listenport().c_str());
-	}
-	catch (const std::exception&)
+	int port = m_server_configuration->get_listenport();
+	if(port == 0)
 	{
 		port = DEFAULT_PORT;
 	}
+
 	serverService.sin_port = htons(port);
 	
 	//bind the socket for client's requests
