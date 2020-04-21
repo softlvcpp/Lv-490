@@ -28,7 +28,7 @@ bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 																DEFAULT_IP: m_server_configuration->get_ipadress().c_str());
 	//set port
 	int port = m_server_configuration->get_listenport();
-	if(port == 0)
+	if(port <= 0)
 	{
 		port = DEFAULT_PORT;
 	}

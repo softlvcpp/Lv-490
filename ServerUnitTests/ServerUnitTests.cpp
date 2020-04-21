@@ -52,7 +52,24 @@ namespace ServerUnitTests
 			add_socket_connection.InitConfiguration(mock_parser);
 			bool is_connected = add_socket_connection.Execute(socket);
 
-			Assert::IsTrue(is_connected == true, L"Initialize should return 1");
+			Assert::IsTrue(is_connected == true, L"Execute should return true");
+		}
+
+		BEGIN_TEST_METHOD_ATTRIBUTE(TestAddConnection2)
+			TEST_OWNER(L"Oleh_Dmytrash")
+		END_TEST_METHOD_ATTRIBUTE()
+
+		TEST_METHOD(TestAddConnection2)
+		{
+			std::shared_ptr<MockParser> mock_parser(new MockParser());
+			AddSocketConnection add_socket_connection;
+			SocketWrapper sock_wrapper;
+			auto socket = sock_wrapper.MakeSharedSocket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+			
+			add_socket_connection.InitConfiguration(mock_parser);
+			bool is_connected = add_socket_connection.Execute(socket);
+
+			Assert::IsTrue(is_connected == true, L"Execute should return true");
 		}
 
 
