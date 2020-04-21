@@ -146,7 +146,7 @@ void StartConnection::DoRecv(SOCKET_shared_ptr& new_conection)
 StartConnection::StartConnection()
 {
 	//set database connection
-	db = std::shared_ptr<DatabaseManager>(new DatabaseManager());	
+	db = std::shared_ptr<DatabaseManager>(new DatabaseMicrosoftSQLServer());
 	db->Connect();
 }
 
