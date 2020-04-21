@@ -102,7 +102,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;$(SolutionDir)Utility\gtest\libs;D:\programing\softserve\LVCPP\Lv-490\x64\Release</AdditionalLibraryDirectories>
-      <AdditionalDependencies>gmock.lib;gtest.lib;LoggerLibrary.lib;XMLPARSER.lib;DatabaseManager.lib</AdditionalDependencies>
+      <AdditionalDependencies>gmock.lib;gtest.lib;XMLPARSER.lib;DatabaseManager.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -175,6 +175,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Utility\DatabaseManager\DatabaseManager.vcxproj">
+      <Project>{30909198-530e-4aa8-be6f-7f63cd455d6c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Utility\Logger\LoggerLibrary.vcxproj">
+      <Project>{caf17f41-7f9d-4fa1-96b8-951a365e979e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Utility\XML_Parser\XML_Parser.vcxproj">
+      <Project>{6eec450d-3371-4426-99d0-d04495a9056d}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
