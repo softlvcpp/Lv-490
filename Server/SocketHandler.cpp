@@ -1,18 +1,21 @@
+#include "pch.h"
 #include "SocketHandler.h"
 
 #define LOG_T SLOG_TRACE(*m_socket_logger)
 #define LOG_D SLOG_DEBUG(*m_socket_logger)
 #define LOG_P SLOG_PROD(*m_socket_logger)
 
+constexpr int LOW_BYTE = 2;
+constexpr int HIGH_BYTE = 2;
+
 SocketHandler::SocketHandler()
 {	
 	//configurate sockets
 	WSAData wsaData;
-	if (NO_ERROR != WSAStartup(MAKEWORD(2, 2), &wsaData))
+	if (NO_ERROR != WSAStartup(MAKEWORD(LOW_BYTE, HIGH_BYTE), &wsaData))
 	{		
 		//LOG_T << "Server: Error at WSAStartup()";
-	}	
-	
+	}		
 }
 
 SocketHandler::~SocketHandler()
@@ -81,7 +84,7 @@ bool SocketHandler::InitLoger(const std::string& directory_name)
 	}
 	log_file_path += m_server_configuration->get_filename();
 	filelog::LogLevel log_level = filelog::LogLevel::NoLogs;
-	int level = std::stoi(m_server_configuration->get_loglevel());
+	int level = m_server_configuration->get_loglevel();
 	switch (level)
 	{
 	case 0:

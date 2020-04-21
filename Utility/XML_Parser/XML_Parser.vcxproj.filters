@@ -33,7 +33,7 @@
     <ClInclude Include="XMLServer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Defines.h">
+    <ClInclude Include="Consts.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -51,6 +51,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="XMLClient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Consts.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

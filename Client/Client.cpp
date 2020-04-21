@@ -39,7 +39,7 @@ Client::Client(QWidget* parent)
 	view.setFrameStyle(QFrame::NoFrame);
 
 	timer = new QTimer(this);//for processes
-	client_info2.CalculateProcesses();
+	client_info.CalculateProcesses();
 
 	tmr = new QTimer(this); //for socket conection
 	//connect(tmr, SIGNAL(timeout()), this, SLOT(updateTime())); 
@@ -66,7 +66,7 @@ void Client::closeEvent(QCloseEvent* event) {
 
 void Client::runUpdateTime()
 {
-	const unsigned int TimeMeasurement = 1000; // 1000- seconds, 1 = milliseconds, 60000 - minuts...;
+	
 
 	tmr->setInterval(settings.get_TimeInterval() * TimeMeasurement); // set time interval
 	if (m_th != nullptr)
@@ -111,9 +111,9 @@ void Client::updateTime()
 		return;
 	}
 
-	client_info2.Update();
+	client_info.Update();
 	string send_XML_string;
-	client_info2.Parse(send_XML_string);// parse in XML string
+	client_info.Parse(send_XML_string);// parse in XML string
 	L_TRACE << "XML string: ";
 	L_TRACE << send_XML_string.c_str();
 	qDebug() << send_XML_string.c_str();
@@ -164,8 +164,8 @@ void Client::UpdateProcesses() {
 	qDebug() << "______________update_processes______________";
 	ui.textEdit->hide();
 	ui.tableWidget->show();
-	client_info2.CalculateProcesses(); //update data 
-	map<int, string> processes_map = client_info2.get_processes();
+	client_info.CalculateProcesses(); //update data 
+	map<int, string> processes_map = client_info.get_processes();
 
 	ui.tableWidget->setColumnCount(PROCESS_COLUMN_COUNT);//2
 	ui.tableWidget->setRowCount(processes_map.size());
@@ -252,7 +252,7 @@ void Client::indexComboChanged(int index)
 		timer->stop();
 	}
 
-	client_info2.Update();
+	client_info.Update();
 	ui.tableWidget->hide();
 	ui.textEdit->show();
 	int num = ui.comboBox->currentIndex();
@@ -260,19 +260,19 @@ void Client::indexComboChanged(int index)
 	switch (num)
 	{
 	case ComboBoxOptions::AllSystemInformation:
-		ui.textEdit->setText(DisplayAllInformationString(client_info2));
+		ui.textEdit->setText(DisplayAllInformationString(client_info));
 		break;
 	case ComboBoxOptions::CPUInformation:
-		ui.textEdit->setText(DisplayCPUInformation(client_info2));
+		ui.textEdit->setText(DisplayCPUInformation(client_info));
 		break;
 	case ComboBoxOptions::HardDiskInformation:
-		ui.textEdit->setText(DisplayHardDiskInformation(client_info2));
+		ui.textEdit->setText(DisplayHardDiskInformation(client_info));
 		break;	
 	case ComboBoxOptions::RamInformation:
-		ui.textEdit->setText(DisplayRamInformation(client_info2));
+		ui.textEdit->setText(DisplayRamInformation(client_info));
 		break;
 	case ComboBoxOptions::NetworkInformation:
-		ui.textEdit->setText(DisplayNetworkInformation(client_info2));
+		ui.textEdit->setText(DisplayNetworkInformation(client_info));
 		break;
 	case ComboBoxOptions::ProcessInformation:
 		UpdateProcesses(); //display data at first

@@ -1,11 +1,7 @@
-#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #pragma once
-#define _CRT_SECURE_NO_WARNINGS
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-
-#include "ThreadPool.h"
 #include "SocketState.h"
 #include "SocketDeleter.h"
+#include "ThreadPool.h"
 
 class Command
 {

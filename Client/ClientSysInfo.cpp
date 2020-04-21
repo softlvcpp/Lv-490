@@ -47,7 +47,6 @@ void  ClientSysInfo::Update() {
 				hard_disk_free.push_back(CalculateFreeSpace(hard_disk_type_list[i]));
 				hard_disk_used.push_back(hard_disk_total_size[i] - hard_disk_free[i]);
 				hard_disk_media_type.push_back(CalculateHardDisk_MediaType(hard_disk_type_list[i]));
-				qDebug() << i;
 			}
 		}
 		m_client_info.set_hard_disk_total_size(hard_disk_total_size);
@@ -136,27 +135,6 @@ map<int, string> ClientSysInfo::get_processes() const
 {
 	return m_client_info.get_processes();
 }
-
-
-
-
-
-//int ClientSysInfo::get_TotalRAM() { return m_client_info.TotalRAM; }
-//string  ClientSysInfo::get_CPUVendor() { return m_client_info.CPUVendor; }
-//int  ClientSysInfo::get_CPUSpeed() { return m_client_info.CPUSpeed; }
-//vector<string>  ClientSysInfo::get_HardDisk_MediaType() { return m_client_info.HardDisk_MediaType; }
-//vector<int>  ClientSysInfo::get_HardDisk_TotalSize() { return m_client_info.HardDisk_TotalSize; }
-//vector<int>  ClientSysInfo::get_HardDisk_Used() { return m_client_info.HardDisk_Used; }
-//vector<int>  ClientSysInfo::get_HardDisk_Free() { return m_client_info.HardDisk_Free; }
-////bodya
-//
-//string ClientSysInfo::get_OS() { return m_client_info.OS; }
-//string ClientSysInfo::get_MacAddress() { return m_client_info.MacAddress; }
-//string ClientSysInfo::get_IPAddress() { return m_client_info.IPAddress; }
-//vector<string>  ClientSysInfo::get_HardDisk_type_list() { return m_client_info.HardDisk_type_list; }
-//int ClientSysInfo::get_CPUNumbers() { return m_client_info.CPUNumbers; }
-//soketu
-
 
 string ClientSysInfo::CalculateOS() {
 	QString OSName = QSysInfo::prettyProductName();
@@ -325,11 +303,6 @@ string ClientSysInfo::CalculateHardDisk_MediaType(string LogicalDisk) { // "C:/"
 	CloseHandle(hDevice);
 	return string_res;
 }
-
-
-
-
-//std::map <int, string> m_processes;
 
 
 typedef BOOL(WINAPI* LPFN_GLPI)(

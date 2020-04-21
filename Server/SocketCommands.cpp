@@ -1,4 +1,11 @@
+#include "pch.h"
+
+#include "ThreadPool.h"
 #include "SocketCommands.h"
+
+constexpr int BUFFER_SIZE = 512;//default buffer size
+constexpr char DEFAULT_IP[] = "127.0.0.1";//default ip address
+constexpr int DEFAULT_PORT = 8080;//default port number
 
 bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 {
@@ -8,7 +15,7 @@ bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 	//check for errors to ensure that the new_socket is a valid socket.	
 	if (INVALID_SOCKET == socket_state->id)
 	{
-		socket_state->log_msg = "Server: Error at socket(): " + WSAGetLastError();
+		socket_state->log_msg = "Server: Error at socket(): " + to_string(WSAGetLastError());
 		return false;
 	}
 
@@ -16,31 +23,30 @@ bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 	sockaddr_in serverService;
 	serverService.sin_family = AF_INET;
 	//set IP
+
 	serverService.sin_addr.s_addr = inet_addr((INADDR_NONE == inet_addr(m_server_configuration->get_ipadress().c_str()))?
 																DEFAULT_IP: m_server_configuration->get_ipadress().c_str());
 	//set port
-	int port = 0;
-	try
-	{
-		port = std::stoi(m_server_configuration->get_listenport().c_str());
-	}
-	catch (const std::exception&)
+	int port = m_server_configuration->get_listenport();
+	if(port == 0)
 	{
 		port = DEFAULT_PORT;
 	}
+
 	serverService.sin_port = htons(port);
 	
 	//bind the socket for client's requests
+
 	if (SOCKET_ERROR == ::bind(socket_state->id, (SOCKADDR*)&serverService, sizeof(serverService)))
 	{
-		socket_state->log_msg = "Server: Error at bind(): " + WSAGetLastError();
+		socket_state->log_msg = "Server: Error at bind(): " + to_string(WSAGetLastError());
 		return false;
 	}
 
 	//listen on the socket for incoming connections.
 	if (SOCKET_ERROR == listen(socket_state->id, SOMAXCONN))
 	{
-		socket_state->log_msg = "Server: Error at listen(): " + WSAGetLastError();
+		socket_state->log_msg = "Server: Error at listen(): " + to_string(WSAGetLastError());
 		return false;
 	}
 	return true;
@@ -57,7 +63,7 @@ bool AcceptConnection::Execute(SOCKET_shared_ptr& socket_state)
 
 	if (INVALID_SOCKET == socket_state->id)
 	{
-		socket_state->log_msg = "Server: Error at socket(): " + WSAGetLastError();
+		socket_state->log_msg = "Server: Error at socket(): " + to_string(WSAGetLastError());
 		return false;
 	}
 
@@ -156,10 +162,10 @@ bool StartConnection::Execute(SOCKET_shared_ptr& socket_state)
 	{
 		SOCKET_shared_ptr new_conection;
 		AcceptConnection accept_connection(socket_state);		
-		accept_connection.Execute(new_conection);
-		if(new_conection->state == ACCEPTED)
+		if (accept_connection.Execute(new_conection) == false) return false;
+		if(new_conection->state == State::ACCEPTED)
 		{
-			new_conection->state = RECEIVE;
+			new_conection->state = State::RECEIVE;
 			//add message receiving in thread pool
 			m_thread_pool->ExecuteTask(&StartConnection::DoRecv, this, new_conection);
 		}

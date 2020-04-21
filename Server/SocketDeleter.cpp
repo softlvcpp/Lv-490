@@ -1,14 +1,18 @@
+#include "pch.h"
 #include "SocketDeleter.h"
 
 void SocketDeleter::operator()(SocketState* used_socket)
 {
     if (SOCKET_ERROR != used_socket->id)
     {
-        closesocket(used_socket->id);        
+        if (SOCKET_ERROR == closesocket(used_socket->id))
+        {
+            //LOG_T << "Eroor at closesocket()" + to_string(WSAGetLastError());
+        }
     }
 }
 
-SOCKET_unique_ptr SocketWrapper::MakeUniqueSocket(int af, int type, int protocol)
+SOCKET_unique_ptr SocketWrapper::MakeUniqueSocket(const int af, const int type, const int protocol)
 {
     SOCKET new_socket = socket(af, type, protocol);
 
@@ -16,11 +20,8 @@ SOCKET_unique_ptr SocketWrapper::MakeUniqueSocket(int af, int type, int protocol
     {
         return nullptr;
     }
-
-    SocketState new_socket_state;
-    new_socket_state.id = new_socket;
-    new_socket_state.state = LISTEN;
-    return SOCKET_unique_ptr(&new_socket_state);
+    
+    return SOCKET_unique_ptr(new SocketState{ new_socket, State::LISTEN }, SocketDeleter());
 }
 
 SOCKET_unique_ptr SocketWrapper::MakeUniqueSocket(SOCKET s, sockaddr* addr, int* addrlen)
@@ -32,13 +33,10 @@ SOCKET_unique_ptr SocketWrapper::MakeUniqueSocket(SOCKET s, sockaddr* addr, int*
         return nullptr;
     }
 
-    SocketState new_socket_state;
-    new_socket_state.id = accepted_socket;
-    new_socket_state.state = ACCEPTED;
-    return SOCKET_unique_ptr(&new_socket_state);
+    return SOCKET_unique_ptr(new SocketState{ accepted_socket, State::ACCEPTED }, SocketDeleter());
 }
 
-SOCKET_shared_ptr SocketWrapper::MakeSharedSocket(int af, int type, int protocol)
+SOCKET_shared_ptr SocketWrapper::MakeSharedSocket(const int af, const int type, const int protocol)
 {
     SOCKET new_socket = socket(af, type, protocol);
 
@@ -47,10 +45,7 @@ SOCKET_shared_ptr SocketWrapper::MakeSharedSocket(int af, int type, int protocol
         return nullptr;
     }
 
-    SocketState new_socket_state;
-    new_socket_state.id = new_socket;
-    new_socket_state.state = LISTEN;
-    return SOCKET_shared_ptr(&new_socket_state, SocketDeleter());
+    return SOCKET_shared_ptr(new SocketState{ new_socket, State::LISTEN }, SocketDeleter());
 }
 
 SOCKET_shared_ptr SocketWrapper::MakeSharedSocket(SOCKET s, sockaddr* addr, int* addrlen)
@@ -60,10 +55,7 @@ SOCKET_shared_ptr SocketWrapper::MakeSharedSocket(SOCKET s, sockaddr* addr, int*
     if (INVALID_SOCKET == accepted_socket)
     {
         return nullptr;
-    }
+    }    
 
-    SocketState new_socket_state;
-    new_socket_state.id = accepted_socket;
-    new_socket_state.state = ACCEPTED;
-    return SOCKET_shared_ptr(&new_socket_state, SocketDeleter());
+    return SOCKET_shared_ptr(new SocketState{ accepted_socket, State::ACCEPTED }, SocketDeleter());
 }
