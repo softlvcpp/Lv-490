@@ -30,6 +30,14 @@
       <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
       <RefTargetDir>INSTALLFOLDER</RefTargetDir>
     </ProjectReference>
+    <ProjectReference Include="..\Utility\DatabaseManager\DatabaseManager.vcxproj">
+      <Name>DatabaseManager</Name>
+      <Project>{30909198-530e-4aa8-be6f-7f63cd455d6c}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
     <ProjectReference Include="..\Utility\Logger\LoggerLibrary.vcxproj">
       <Name>LoggerLibrary</Name>
       <Project>{caf17f41-7f9d-4fa1-96b8-951a365e979e}</Project>

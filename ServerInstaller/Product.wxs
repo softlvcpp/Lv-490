@@ -83,6 +83,9 @@
       <Component Id="ProductParserComponent">
         <File Source="$(var.XML_Parser.TargetPath)" />
       </Component>
+      <Component Id="ProductDBComponent">
+        <File Source="$(var.DatabaseManager.TargetPath)" />
+      </Component>
       <Component Id="ConfigXMLDocument">
         <File Id ="Config"  Source="$(var.Server.ProjectDir)config.xml" />
         <CreateFolder Directory="INSTALLFOLDER">
