@@ -2,6 +2,10 @@
 
 #include "CppUnitTest.h"
 
+#include "../Utility/XML_Parser/XMLServer.h"
+#include "../Utility/Logger/LoggerDLL.h"
+#include "../Utility/DatabaseManager/DatabaseManager.h"
+
 #include "../Server/SocketState.h"
 #include "../Server/ThreadPool.h"
 #include "../Server/ThreadPool.cpp"

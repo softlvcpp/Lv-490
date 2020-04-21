@@ -37,9 +37,5 @@
 #include <codecvt>
 #include <ctime>
 
-#include "../Utility/XML_Parser/XMLServer.h"
-#include "../Utility/Logger/LoggerDLL.h"
-#include "../Utility/DatabaseManager/DatabaseManager.h"
-
 
 #endif //PCH_H
