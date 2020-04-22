@@ -10,7 +10,7 @@ constexpr int DEFAULT_PORT = 8080;//default port number
 bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 {
 	//create socket wrapper with autodeleter
-	socket_state = socket_wrapper.MakeSharedSocket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	socket_state = m_socket_wrapper.MakeSharedSocket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	//check for errors to ensure that the new_socket is a valid socket.	
 	if (INVALID_SOCKET == socket_state->id)
@@ -59,7 +59,7 @@ bool AcceptConnection::Execute(SOCKET_shared_ptr& socket_state)
 	int client_length = sizeof(client);
 
 	//create socket wrapper with autodeleter for accepted client
-	socket_state = socket_wrapper.MakeSharedSocket(m_server_socket->id, (struct sockaddr*) & client, &client_length);
+	socket_state = m_socket_wrapper.MakeSharedSocket(m_server_socket->id, (struct sockaddr*) & client, &client_length);
 
 	if (INVALID_SOCKET == socket_state->id)
 	{

@@ -24,7 +24,6 @@ private:
 	std::string m_log_directory_name{ "Lv-490_logs" };
 	std::shared_ptr<filelog::FileLogger> m_socket_logger;
 
-	std::shared_ptr<DatabaseManager> m_database;
 	std::shared_ptr<XMLServer> m_server_configuration;
 
 	vector<shared_ptr<Command>> m_commands;

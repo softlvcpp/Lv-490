@@ -13,7 +13,7 @@ public:
 	bool InitConfiguration(std::shared_ptr<XMLServer> server_configuration);
 protected:
 	std::shared_ptr<XMLServer> m_server_configuration;
-	SocketWrapper socket_wrapper;
+	SocketWrapper m_socket_wrapper;
 };
 
 class AddSocketConnection : public Command
