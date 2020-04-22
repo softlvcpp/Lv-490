@@ -140,7 +140,7 @@ bool XMLServer::WriteConfig(const string& file_path) noexcept
 
 bool XMLServer::PrepareToDBManager(string& xml_str)noexcept
 {
-    if (xml_str == "")
+    if (xml_str.empty())
         return false;
 
     XMLDocument doc;
@@ -212,7 +212,8 @@ bool XMLServer::PrepareToDBManager(string& xml_str)noexcept
     XMLElement* process_info = sys_info->FirstChildElement(g_CLIENT_PROCESSINFORMATION);
     if (process_info == nullptr) return false;//no sense to continue;
 
-    for (XMLElement* e = sys_info->FirstChildElement(g_CLIENT_PROCESSINFORMATION); e != nullptr; e = e->NextSiblingElement(g_CLIENT_PROCESSINFORMATION))
+    m_processes.clear();
+    for (XMLElement* e = process_info->FirstChildElement(g_CLIENT_PROCESS); e != nullptr; e = e->NextSiblingElement(g_CLIENT_PROCESS))
         m_processes.emplace(stoi(e->Attribute(g_CLIENT_PROCESS_ATTRIBUTE_PID)), string(e->Attribute(g_CLIENT_PROCESS_ATTRIBUTE_NAME)));
 
     return true;//all is good

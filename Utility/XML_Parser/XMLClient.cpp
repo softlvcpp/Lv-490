@@ -13,7 +13,7 @@ void XMLClient::WriteSystemInformation(string& xml_str) const noexcept
     //client
     XMLElement* client = xml_doc.NewElement(g_CLIENT_CLIENT);//root->client
     //OS
-    XMLElement* os = xml_doc.NewElement(g_CLIENT_MACADRESS);//root->client->MacAddress
+    XMLElement* os = xml_doc.NewElement(g_CLIENT_OPERATION_SYSTEM);//root->client->OS
     os->SetText(m_os.c_str());
     client->InsertEndChild(os);
     //IP
