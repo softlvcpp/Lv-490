@@ -15,6 +15,7 @@
 #include<vector>
 #include<fstream>
 #include"tinyxml2.h"
+#include"../Logger/LoggerDLL.h"
 #include<map>
 using namespace std;
 using namespace filesystem;

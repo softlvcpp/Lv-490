@@ -183,6 +183,11 @@
     <ClCompile Include="XMLClient.cpp" />
     <ClCompile Include="XMLServer.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Logger\LoggerLibrary.vcxproj">
+      <Project>{caf17f41-7f9d-4fa1-96b8-951a365e979e}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

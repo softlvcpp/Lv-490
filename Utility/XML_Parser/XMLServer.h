@@ -5,6 +5,7 @@
 
 using namespace std;
 
+
 class XMLPARSER_API IXMLServer
 {
 public:
@@ -110,5 +111,7 @@ private:
     vector<int>     m_hard_disk_free;
 
     map <int, string> m_processes;
+
+    
 };
 

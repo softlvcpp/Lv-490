@@ -36,7 +36,7 @@ void XMLClient::WriteSystemInformation(string& xml_str) const noexcept
 
         hard_disk->SetAttribute(g_CLIENT_TYPE, m_hard_disk_type_list[i].c_str());
 
-        hard_disk->SetAttribute(g_CLIENT_DRIVE, m_hard_disk_type_list[i].c_str());
+        hard_disk->SetAttribute(g_CLIENT_DRIVE, m_hard_disk_media_type[i].c_str());
 
         XMLElement* pHardDisk_TotalSize = xml_doc.NewElement(g_CLIENT_HARDDISK_TOTALSIZE);//root->client->SystemInformation->HardDisk
         pHardDisk_TotalSize->SetText(m_hard_disk_total_size[i]);
