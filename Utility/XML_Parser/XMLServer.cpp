@@ -5,24 +5,37 @@
 
 bool XMLServer::ReadConfigs(const string& file_path) noexcept
 {
-    if (!is_regular_file(file_path)) //logger return throw exception("wrong file path");
+    if (!is_regular_file(file_path))
+    {
+        GLOG_T << "Cannot open config file. Wrong file path";
         return false;
+    }
 
     XMLDocument doc;
 
-    if (doc.LoadFile(file_path.c_str()) != 0) //logger return throw exception("can't load xml file");
+    if (doc.LoadFile(file_path.c_str()) != 0)
+    {
+        GLOG_T << "Cannot load config file";
         return false;
+    }
     XMLElement* root;
 
     root = doc.FirstChildElement(g_CONFIG_ROOT);
     if (root == nullptr)
+    {
+        GLOG_T << "Cannot find " << g_CONFIG_ROOT << " tag";
         return false;//file is empty or another format
+    }
 
     /*All checks below forced to avoid abort()*/
 
     //<Server>
     XMLElement* server = root->FirstChildElement(g_CONFIG_SERVER);
-    if (server == nullptr) return false;//no sense to continue;
+    if (server == nullptr)
+    {
+        GLOG_T << "Cannot find " << g_CONFIG_SERVER << " tag";
+        return false;//no sense to continue;
+    }
 
     if (server->FirstChildElement(g_CONFIG_SERVERNAME) != nullptr)
         m_servername = server->FirstChildElement(g_CONFIG_SERVERNAME)->GetText();
@@ -38,7 +51,11 @@ bool XMLServer::ReadConfigs(const string& file_path) noexcept
 
     //<communicationsetings>
     XMLElement* settings = root->FirstChildElement(g_CONFIG_COMMUNICATIONSETTINGS);
-    if (settings == nullptr) return false;//no sense to continue;
+    if (settings == nullptr)
+    {
+        GLOG_T << "Cannot find " << g_CONFIG_SERVER << " tag";
+        return false;//no sense to continue;
+    }
 
     if (settings->FirstChildElement(g_CONFIG_BLOCKING) != nullptr)
         m_blocking = settings->FirstChildElement(g_CONFIG_BLOCKING)->IntText();
@@ -48,7 +65,11 @@ bool XMLServer::ReadConfigs(const string& file_path) noexcept
 
     //<loggin>
     XMLElement* loggin = root->FirstChildElement(g_CONFIG_LOGGIN);
-    if (loggin == nullptr) return false;//no sense to continue
+    if (loggin == nullptr) 
+    {
+        GLOG_T << "Cannot find " << g_CONFIG_LOGGIN << " tag";
+        return false;//no sense to continue;
+    }
 
     if (loggin->FirstChildElement(g_CONFIG_FILENAME) != nullptr)
         m_filename = loggin->FirstChildElement(g_CONFIG_FILENAME)->GetText();
@@ -141,23 +162,36 @@ bool XMLServer::WriteConfig(const string& file_path) noexcept
 bool XMLServer::PrepareToDBManager(string& xml_str)noexcept
 {
     if (xml_str.empty())
+    {
+        GLOG_T << "Cannot prepare data for database manager. empty string";
         return false;
+    }
 
     XMLDocument doc;
 
     if (doc.Parse(xml_str.c_str()) != 0)
+    {
+        GLOG_T << "Cannot parse XML string";
         return false;
+    }
 
     //<root>
     XMLElement* root;
 
     root = doc.FirstChildElement(g_CLIENT_ROOT);
     if (root == nullptr)
+    {
+        GLOG_T << "Cannot find " << g_CLIENT_ROOT << " tag";
         return false;
+    }
 
     //<Client>
     XMLElement* client = root->FirstChildElement(g_CLIENT_CLIENT);
-    if (client == nullptr) return false;//no sense to continue;
+    if (client == nullptr)
+    {
+        GLOG_T << "Cannot find " << g_CLIENT_CLIENT << " tag";
+        return false;//no sense to continue;
+    }
 
     if (client->FirstChildElement(g_CLIENT_OPERATION_SYSTEM) != nullptr)
         if (client->FirstChildElement(g_CLIENT_OPERATION_SYSTEM)->GetText())
@@ -173,15 +207,23 @@ bool XMLServer::PrepareToDBManager(string& xml_str)noexcept
 
     //<SystemInformation>
     XMLElement* sys_info = client->FirstChildElement(g_CLIENT_SYSTEMINFORMATION);
-    if (sys_info == nullptr) return false;//no sense to continue;
+    if (sys_info == nullptr)
+    {
+        GLOG_T << "Cannot find " << g_CLIENT_SYSTEMINFORMATION << " tag";
+        return false;//no sense to continue;
+    }
     //<HardDisk> loop
     XMLElement* hard_disk = sys_info->FirstChildElement(g_CLIENT_HARDDISK);
-    if (hard_disk == nullptr) return false;//no sense to continue;
+    if (hard_disk == nullptr)
+    {
+        GLOG_T << "Cannot find " << g_CLIENT_HARDDISK << " tag";
+        return false;//no sense to continue;
+    }
 
     for (XMLElement* e = sys_info->FirstChildElement(g_CLIENT_HARDDISK); e != nullptr; e = e->NextSiblingElement(g_CLIENT_HARDDISK))
     {
-        m_hard_disk_type_list.emplace_back(e->Attribute(g_CLIENT_DRIVE));
-        m_hard_disk_media_type.emplace_back(e->Attribute(g_CLIENT_TYPE));
+        m_hard_disk_type_list.emplace_back(e->Attribute(g_CLIENT_TYPE));
+        m_hard_disk_media_type.emplace_back(e->Attribute(g_CLIENT_DRIVE));
         m_hard_disk_total_size.emplace_back(e->FirstChildElement(g_CLIENT_HARDDISK_TOTALSIZE)->IntText());
         m_hard_disk_used.emplace_back(e->FirstChildElement(g_CLIENT_HARDDISK_USED)->IntText());
         m_hard_disk_free.emplace_back(e->FirstChildElement(g_CLIENT_HARDDISK_FREE)->IntText());
@@ -194,7 +236,12 @@ bool XMLServer::PrepareToDBManager(string& xml_str)noexcept
 
     //CPU
     XMLElement* cpu_branch = sys_info->FirstChildElement(g_CLIENT_CPU);
-    if (cpu_branch == nullptr) return false;//no sense to continue;
+    if (cpu_branch == nullptr)
+    {
+        GLOG_T << "Cannot find " << g_CLIENT_CPU << " tag";
+        return false;//no sense to continue;
+    }
+
 
     if (cpu_branch->FirstChildElement(g_CLIENT_CPU_NUMBERS) != nullptr)
         if (cpu_branch->FirstChildElement(g_CLIENT_CPU_NUMBERS)->IntText())
@@ -210,7 +257,11 @@ bool XMLServer::PrepareToDBManager(string& xml_str)noexcept
 
     //ProcessInformation
     XMLElement* process_info = sys_info->FirstChildElement(g_CLIENT_PROCESSINFORMATION);
-    if (process_info == nullptr) return false;//no sense to continue;
+    if (process_info == nullptr)
+    {
+        GLOG_T << "Cannot find " << g_CLIENT_PROCESSINFORMATION << " tag";
+        return false;//no sense to continue;
+    }
 
     m_processes.clear();
     for (XMLElement* e = process_info->FirstChildElement(g_CLIENT_PROCESS); e != nullptr; e = e->NextSiblingElement(g_CLIENT_PROCESS))
