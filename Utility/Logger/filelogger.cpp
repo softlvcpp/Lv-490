@@ -1,11 +1,31 @@
 #include "Other/pch.h"
 #include "Filelogger/filelogger.h"
+#include "filelogger_messages.h"
+#include "filelogger_StreamModes.h"
+#include <assert.h>
 
 #include <filesystem>
-#include <cassert>
-#include <iostream>
-
 namespace fs = std::filesystem;
+
+/* Constants */
+constexpr auto NOLOGS_LVL_STRING = "NOLOGS";
+constexpr auto PROD_LVL_STRING = "PROD";
+constexpr auto DEBUG_LVL_STRING = "DEBUG";
+constexpr auto TRACE_LVL_STRING = "TRACE";
+constexpr auto OUT_OF_RANGE_LVL_STRING = "INVALIDLVL";
+
+constexpr auto DEFAULT_PARAM_NAME_TEMPLATE = "logfile.txt";
+constexpr auto DEFAULT_PARAM_USE_EXACT_SAME = false;
+constexpr auto DEFAULT_PARAM_RT_LEVEL = filelog::LogLevel::Prod;
+constexpr size_t DEFAULT_PARAM_MAX_FILE_SIZE = 4 * 1024 * 1024;
+constexpr auto DEFAULT_PARAM_STREAMINGMODE = filelog::FileLogger::StreamingMode::Sync;
+constexpr auto DEFAULT_PARAM_IS_FORCE_FLUSHED = false;
+#ifdef WIN32
+constexpr auto DEFAULT_PARAM_DEFAULT_DIR = R"(C:/Lv-490_Files/serv_LOGS)";
+#else
+/* Will need to choose other location for Linux */
+constexpr auto DEFAULT_PARAM_DEFAULT_DIR = R"(.\)";
+#endif // WIN32 
 
 namespace filelog
 {
@@ -13,35 +33,45 @@ namespace filelog
 #pragma region Constructors/Destructor
     // --------------------------------------------------------------
     // Constructors/Destructor
-    FileLogger::FileLogger()
+    FileLogger::FileLogger() : mFileManager{ *this }
     {
-        setRTLevel(LogLevel::NoLogs);
-        maxFileSize = 0;
-        currentFileSize = 0;
-        forceFlush = false;
-        setJoined();
+        defaultInit();
     }
 
-    FileLogger::FileLogger(const char* filePathTemplate, LogLevel lvl, size_t fileSize)
-        : FileLogger(filePathTemplate, false, lvl, fileSize)
+    FileLogger::FileLogger(const char* filePathTemplate, LogLevel lvl, size_t fileSize, StreamingMode strmMode)
+        : FileLogger(filePathTemplate, false, lvl, fileSize, strmMode)
 	{ }
 
-    FileLogger::FileLogger(const char* fTemplate, bool useExactName, LogLevel lvl, size_t fileSize)
+    FileLogger::FileLogger(const char* fTemplate, bool useExactName, LogLevel lvl, size_t fileSize, StreamingMode strmMode) : mFileManager{ *this }
     {
         try
         {
-            init(fTemplate, useExactName, lvl, fileSize);
+            init(fTemplate, useExactName, lvl, fileSize, strmMode);
         }
         catch (std::exception & e)
         {
             interruptedException = e;
+            stop(false);
             setInterrupted();
         }
     }
 
 	FileLogger::~FileLogger()
     {
-        stop(false);
+        stopLogging();
+    }
+
+    FileLogger::FileLogger(FileLogger&& moveSource) noexcept
+        : mFileManager(*this)
+    {
+        moveToThis(std::move(moveSource));
+    }
+
+    FileLogger& FileLogger::operator=(FileLogger&& right) noexcept
+    {
+        if (this != &right)
+            moveToThis(std::move(right));
+        return (*this);
     }
 
 #pragma endregion Constructors/Destructor
@@ -49,56 +79,107 @@ namespace filelog
 #pragma region Init/Cleanup
     // --------------------------------------------------------------
     // Init/cleanup methods 
-    void FileLogger::init(const char* fTemplate, bool useExactName, LogLevel lvl, size_t fileSize)
+    void FileLogger::init(const char* fTemplate, bool useExactName, LogLevel lvl, size_t fileSize, StreamingMode fAsyncMode)
     {
         if (fileSize < (log490::Utils::FixedMessageBuffer::bufferSize + 1))
             fileSize = log490::Utils::FixedMessageBuffer::bufferSize + 1;
 
-        setRTLevel(lvl);
-        maxFileSize = fileSize;
-        currentFileSize = 0;
-        forceFlush = false;
+        setRTLevel(static_cast<log490::level_t>(lvl));
+        mFileManager.setMaxFileSize(fileSize);
 
-        // Checks if passed a proper path
-        if (!validateFilenameTemplate(fTemplate))
+        alwaysFlush = false;
+
+        // Checks if passed a proper path, and initialize deconstructed path
+        if (!mFileManager.setupFilenameTemplate(fTemplate))
         {
             setInterrupted();
             return;
         }
-
-        std::ios_base::iostate exceptionMask = outputStream.exceptions() | std::ios::failbit;
-        outputStream.exceptions(exceptionMask);
-        if (!openFile(fTemplate, useExactName))
+        // Try to open file with deconstructed path and with respect to filename template
+        if (!mFileManager.openFile(fTemplate, useExactName))
         {
             setInterrupted();
             return;
         }
-        currentFileSize += fs::file_size(currentFileName);
 
         interrupted.store(false);
-        joined.store(true);
         fLoggerStop.store(false);
-        fOnJoinWriteRemaining.store(false);
-        fileStreamThread = std::thread{ &FileLogger::threadEntry, this };
-        while (!interrupted && joined); // Spin lock with max ~10ms wait
+        // Create streaming object
+        FileLogStreamerCreatorParams strmParams{ streamingMode, *this };
+        streamer = std::move(FileLogStreamerCreator{}.create(strmParams));
+
+        auto initMessage = FilteredFileLogMessage{ *this, static_cast<filelog::LogLevel>(LogLevel::Trace), LOG_FUNCTION_MACRO, LOG_LINE_MACRO };
+        if (initMessage.getMessage().getData().message())
+        {
+            if (fs::file_size(mFileManager.getCurrentFilename()) != 0)
+                mFileManager.getStream().write(L"\n", 1);
+            initMessage << "Initialized logger!";
+        }
     }
 
-    void FileLogger::stop(bool writeRemaining)
+    void FileLogger::defaultInit()
     {
-        //fOnJoinWriteRemaining.store(writeRemaining);
-        fOnJoinWriteRemaining.store(true);
-        fLoggerStop.store(true);
+        setRTLevel(static_cast<log490::level_t>(LogLevel::NoLogs));
+        mFileManager = FileLoggerFilestreamManager{ *this };
+        mFileManager.setMaxFileSize(0);
+        alwaysFlush = false;
+        streamingMode = StreamingMode::Sync;
+        streamerHasStoped = true;
+        streamer = std::move(std::make_unique<SingleThreadedStreamer>(*this));
+    }
 
-        messageQueue.cancelWaits();
-        if (fileStreamThread.joinable())
-            this->fileStreamThread.join();
-        if (outputStream.is_open())
+    void FileLogger::moveToThis(FileLogger&& source)
+    {        
+        std::scoped_lock lck{ this->streamAccessMutex,source.streamAccessMutex };
+
+        // Move inner variables
+        this->fLoggerStop = source.fLoggerStop.load();
+        this->interrupted = source.interrupted.load();
+        this->interruptedException = std::move(source.interruptedException);
+        this->streamingMode = source.streamingMode; 
+        // Move filemanager
+        this->mFileManager = std::move(source.mFileManager);
+        // Move streamer
+        auto moveStreamer = [this, &source](auto sPtr) -> void
         {
-            outputStream.flush();
-            this->outputStream.close();
+            using ptr_type = decltype(sPtr);
+            this->streamer = std::move(std::make_unique<std::remove_pointer<ptr_type>::type>(*this));
+
+            ptr_type mStrm = static_cast<ptr_type>(streamer.get());
+            (*mStrm) = std::move(*sPtr);
+        };
+
+        switch (streamingMode)
+        {
+        case filelog::FileLogger::StreamingMode::Sync:
+            assert(typeid(source.streamer.get()) == typeid(SingleThreadedStreamer*));
+            moveStreamer(static_cast<SingleThreadedStreamer*>(source.streamer.get()));
+            break;
+        case filelog::FileLogger::StreamingMode::Async:
+            assert(typeid(source.streamer.get()) == typeid(MultiThreadedStreamer*));
+            moveStreamer(static_cast<MultiThreadedStreamer*>(source.streamer.get()));
+            break;
+        default:
+            break;
         }
 
-        setJoined();
+        this->streamerHasStoped = source.streamerHasStoped.load();   
+        source.defaultInit();
+    }
+
+    void FileLogger::stop(bool succesfulStop) // Does not use bool anymore, but is still left just in case
+    {   
+        if (succesfulStop && !isStoped())
+        {
+            auto initMessage = FilteredFileLogMessage{ *this, static_cast<filelog::LogLevel>(LogLevel::Trace), LOG_FUNCTION_MACRO, LOG_LINE_MACRO };
+            if (initMessage.getMessage().getData().message())
+                initMessage << "Succesfully stoping logger!";
+        }
+        fLoggerStop.store(true); 
+        if(streamer != nullptr)
+            streamer->cleanup();
+        streamerHasStoped = true;
+        mFileManager.closeFile();
     }
 #pragma endregion Init/Cleanup
 
@@ -106,11 +187,23 @@ namespace filelog
     // --------------------------------------------------------------
     // Public methods
 
-    bool FileLogger::restart(const char* filePathTemplate, bool useExactName, LogLevel lvl, size_t fileSize, bool fjoin)
+
+
+	bool FileLogger::restart(const char* filePathTemplate, bool useExactName, LogLevel lvl, size_t fileSize, StreamingMode strmMode)
     {
-        stop(fjoin);
-        init(filePathTemplate, useExactName, lvl, fileSize);
+        stop(true);
+        init(filePathTemplate, useExactName, lvl, fileSize, strmMode);
         return !isInterrupted();
+    }
+
+    void FileLogger::stopLogging()
+    {
+        stop(true);
+    }
+
+    void FileLogger::join()
+    {
+        stopLogging();
     }
 
     bool FileLogger::isInterrupted() const
@@ -123,31 +216,32 @@ namespace filelog
         return interruptedException;
     }
 
-    bool FileLogger::isJoined() const
+    bool FileLogger::isStoped() const
     {
-        return joined.load();
-    }
-
-    const char* FileLogger::getCurrentFilename() const
-    {
-        std::scoped_lock lock{ filenameAccessMutex };
-        return currentFileName.c_str();;
+        return streamerHasStoped || fLoggerStop;
     }
 
     bool FileLogger::flushIsForced() const
     {
-        return forceFlush.load();
+        return alwaysFlush.load();
     }
 
     void FileLogger::setForceFlush(bool value)
     {
-        forceFlush.store(value);
+        alwaysFlush.store(value);
     }
 
     void FileLogger::flushNow()
     {
         std::unique_lock lock{ streamAccessMutex };
-        outputStream.flush();
+        mFileManager.getStream() << std::flush;
+    }
+
+    bool FileLogger::sendLogMessage(LogData& data)
+    {
+        if (!isStoped())
+            return streamer->proccessData(data);
+        return false;
     }
 
 #pragma endregion Public methods
@@ -161,235 +255,100 @@ namespace filelog
         auto& buff = data.message()->messageBuffer;
 
         auto bytesToWrite = static_cast<size_t>(buff.length() * CHAR_TYPE_SIZE);
-        this->currentFileSize += bytesToWrite;
-        if (currentFileSize >= maxFileSize)
-        {     
-            outputStream.close();
-            if (!openFile(currentFileName.c_str(), false, bytesToWrite))
-                return false;
-          
-            currentFileSize = fs::file_size(currentFileName) + bytesToWrite;
-        }
+       
+        if (!mFileManager.checkedRotate(bytesToWrite))
+            return false;
 
-        outputStream.write(buff.c_str(), buff.length());
-        outputStream.write(FLOG_STR(\n), 1);
-        if (forceFlush)
-            outputStream.flush();
-        return true;
-    }
-
-    bool FileLogger::sendLogMessage(LogData &data)
-    {
-        if(interrupted && !messageQueue.empty())
-            messageQueue.clear();
-        else if(!joined)
-        {
-            messageQueue.emplace(std::move(data));
-            return true;
-        }      
-        return false;
-    }
-
-    void FileLogger::join()
-    {
-        stop(true);
-    }
-
-    void FileLogger::logWriteLoop()
-    {
-        while (!this->fLoggerStop)
-        {
-            LogData msg;
-            if (messageQueue.waitPop(msg))
-            //if (messageQueue.waitPopMove(msg))
-            {
-                if(!streamLogMessage(msg))
-                {
-                    setInterrupted();
-                    return;
-                }
-                msg.message().reset(nullptr);
-            } 
-        }
-
-        if (fOnJoinWriteRemaining)
-        {
-            auto queueSnapshot = std::move(messageQueue);
-            LogData msg;
-            while (queueSnapshot.tryPop(msg))
-            //while (queueSnapshot.tryPopMove(msg)) // will return false if empty
-            {
-                bool succesful = streamLogMessage(msg);
-                msg.message().reset(nullptr);
-                if (!succesful)
-                {
-                    setInterrupted();
-                    return;
-                }
-            }
-        }
-    
-        setJoined();
-    }
-
-	void FileLogger::threadEntry() noexcept
-	{
-        try
-        {
-            this->interrupted.store(false);
-            this->joined.store(false);
-            logWriteLoop();
-        }
-        catch (std::exception & e)          // Should not throw any errors if done right
-        {
-            interruptedException = e;
-            setInterrupted();
-            assert(false);
-        }
-	}
-
-    bool FileLogger::openFile(const char* fileName, bool useExact, size_t neccessarySpace, std::ios::openmode mode)
-    {        
-        if (useExact)
-        {
-            if (fs::exists(fileName))   
-            {
-                std::string lastModified;
-                if (getLastModifiedMatchesTemplate(lastModified))                       // Try to find last modified file
-                    setFilename((fileFull(lastModified.c_str(), neccessarySpace)) ?     // If found then continue it(path/name_DATE-TIME_COUNT.extension
-                        filenameRegexCheck().c_str() :
-                        lastModified.c_str());
-                else
-                    setFilename((fileFull(fileName, neccessarySpace)) ?                 // Else write in file of format path/name.extension
-                        filenameRegexCheck().c_str() :
-                        fileName);
-            }
-            else
-                setFilename(fileName);                                                  
-        }
+        mFileManager.getStream().write(buff.c_str(), buff.length());
+        if (alwaysFlush)
+            mFileManager.getStream() << std::flush;
         else
-            setFilename(filenameRegexCheck().c_str());                                  // Create new file
-
-        outputStream.open(currentFileName, mode);
-        return outputStream.is_open();
+            mFileManager.getStream().write(FLOG_STR(\n), 1);
+        return true;
     }
 
     void FileLogger::setInterrupted()
     {
         interrupted = true;
-        messageQueue.clear();
-        setJoined();
-    }
-
-    void FileLogger::setJoined()
-    {
-        joined.store(true);
-        currentFileName = "";
     }
 
 #pragma endregion Private methods
 
-#pragma region FileLogMessage and filtering
-
-    FileLogMessage::FileLogMessage(FileLogger& output) 
-        : log490::LogMessage(output), timePosition(0) 
-    { }
-
-    FileLogMessage::FileLogMessage(FileLogger& output, LogLevel level, log490::signature_t signature, log490::line_t line)
-        : LogMessage(output, level, signature, line)
+    const char* Utils::getLogLevelStr(LogLevel lvl)
     {
-        initPrefix();
-    }
-
-    FileLogMessage::FileLogMessage(FileLogMessage&& output) noexcept
-        : LogMessage(std::move(output))
-    {
-        timePosition = output.timePosition;
-    }
-
-    FileLogMessage& FileLogMessage::operator=(FileLogMessage&& output) noexcept
-    {
-        timePosition = output.timePosition;
-        return static_cast<FileLogMessage&>(LogMessage::operator=(std::move(output)));
-    }
-
-    FileLogMessage::~FileLogMessage()
-    {
-        if (!flushed) 
-        {         
-            updateTime();                                           // Update message time
-            mLogger.get().sendLogMessage(mLogData);                 // Enqueue message to logger
-        }
-    }
-
-    void FileLogMessage::initPrefix()
-    {                                                               // threadID-DATE TIME-[LEVEL]-[FUNCTION]
-        mLogData.message()->messageStream << mLogData.threadID()    // Thread id
-            << "-";
-        timePosition = mLogData.message()->messageBuffer.length();
-        mLogData.message()->messageStream << timeFormat             // Padding for time
-            << "-["
-            << log490::Utils::getLogLevelStr(mLogData.msgLevel)     // Log level
-            << "]-["
-            << mLogData.callerSignature                             // Caller function
-            << "] ";
-    }
-
-    void FileLogMessage::updateTime()
-    {
-        auto lastPos = mLogData.message()->messageBuffer.length();
-        mLogData.message()->messageStream.seekp(lastPos - timePosition, std::ios_base::end);
-
-        mLogData.updateTime();
-
-        mLogData.message()->messageStream << std::put_time(&mLogData.msgUTCTime(), FLOG_STR(%d/%m/%Y %T)); // Inserts time and date - 00/00/0000 00:00:00
-        constexpr size_t  timeFormatOffset = sizeof(timeFormat) / sizeof(char_type) - 1;
-        mLogData.message()->messageStream.seekp(lastPos - (timePosition + timeFormatOffset));
-
-        assert(lastPos == mLogData.message()->messageBuffer.length());
-    }
-
-    FilteredFileLogMessage::FilteredFileLogMessage(FileLogger& output, LogLevel level, log490::signature_t signature, log490::line_t line)
-        : msg(output)
-    {
-        if (output.logThisLevel(level))
+        switch (lvl)
         {
-            msg = FileLogMessage{ output, level, signature, line };
-            RuntimeLogFilter::setIndex(&msg.getData().message()->messageStream);
+        case LogLevel::NoLogs: return NOLOGS_LVL_STRING;
+        case LogLevel::Prod: return PROD_LVL_STRING;
+        case LogLevel::Debug: return DEBUG_LVL_STRING;
+        case LogLevel::Trace: return TRACE_LVL_STRING;
         }
+
+        return OUT_OF_RANGE_LVL_STRING;
     }
 
-    FilteredFileLogMessage::FilteredFileLogMessage(FilteredFileLogMessage&& source) noexcept
-        : RuntimeLogFilter(source), msg(std::move(source.msg))
-    { }
-
-    FilteredFileLogMessage& FilteredFileLogMessage::operator=(FilteredFileLogMessage&& right) noexcept
+    FileLoggerCreatorParams::FileLoggerCreatorParams()
     {
-        if (this != &right)
+        nameTemplate = DEFAULT_PARAM_NAME_TEMPLATE;
+        useExactSameName = DEFAULT_PARAM_USE_EXACT_SAME;
+        setRTLevel(DEFAULT_PARAM_RT_LEVEL);
+        maxFileSize = DEFAULT_PARAM_MAX_FILE_SIZE;
+        streamingMode = DEFAULT_PARAM_STREAMINGMODE;
+        isForceFlushed = DEFAULT_PARAM_IS_FORCE_FLUSHED;
+        logStoringDirectory = DEFAULT_PARAM_DEFAULT_DIR;
+    }
+
+    void FileLoggerCreatorParams::setRTLevel(LogLevel lvl)
+    {
+        this->minimumLevel = static_cast<log490::level_t>(this->rtLevel = lvl);
+    }
+    void FileLoggerCreatorParams::setRTLevel(log490::level_t lvl)
+    {
+        this->rtLevel = static_cast<LogLevel>(this->minimumLevel = lvl);
+    }
+    LogLevel FileLoggerCreatorParams::getRTLevel() 
+    { 
+        return this->rtLevel; 
+    }
+    log490::level_t  FileLoggerCreatorParams::getRTLevelInt() 
+    {   
+        return static_cast<log490::level_t>(this->minimumLevel);
+    }
+
+    std::unique_ptr<logbase::ILogger> FileLoggerCreator::create(logbase::LoggerCreationParamsBase& params)
+    {
+        std::unique_ptr<FileLogger> outputObject;
+        if (typeid(params) == typeid(logbase::LoggerCreationParamsBase))
         {
-            RuntimeLogFilter::operator=(std::move(right));
-            msg = std::move(right.msg);
+            outputObject = std::move(std::make_unique<FileLogger>());
+            outputObject->setRTLevel(static_cast<log490::level_t>(params.minimumLevel));
         }
-        return *this;
+        else if (typeid(params) == typeid(FileLoggerCreatorParams))
+        {
+            FileLoggerCreatorParams& fcParams = static_cast<FileLoggerCreatorParams&>(params);
+
+            std::string fTemplate;
+            if (fs::path(fcParams.nameTemplate).root_directory().c_str()[0] != 0)
+                fTemplate = fcParams.nameTemplate;
+            else
+            {
+                if(fcParams.logStoringDirectory.back() == '/')
+                    fTemplate = fcParams.logStoringDirectory + fcParams.nameTemplate;
+                else
+                    fTemplate = fcParams.logStoringDirectory + "/" + fcParams.nameTemplate;
+            }
+
+            outputObject = std::move(std::make_unique<FileLogger>(
+                fTemplate.c_str(),
+                fcParams.useExactSameName,
+                fcParams.getRTLevel(),
+                fcParams.maxFileSize,
+                fcParams.streamingMode)
+            );
+            outputObject->setForceFlush(fcParams.isForceFlushed);
+        }
+
+        return outputObject;
     }
 
-    FilteredFileLogMessage& FilteredFileLogMessage::operator<<(MsgEndl mendl)
-    {
-        mendl.flush(msg);
-        setIndex(nullptr);
-        return *this;
-    }
-
-	FileLogMessage& FilteredFileLogMessage::getMessage()
-	{
-        return msg;
-	}
-
-    bool LogDataLess::operator()(const LogData& left, const LogData& right)
-    {
-        return ((left.msgHighResTime() - right.msgHighResTime()).count() < 0ull);
-        //return difftime(left.msgTime(), right.msgTime()) > 0;  
-    }
-
-#pragma endregion FileLogMessage and filtering
 }

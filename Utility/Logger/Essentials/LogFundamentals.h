@@ -14,14 +14,6 @@
 #include <memory>
 #include <thread>
 
-#ifndef LOG_FUNCTION_MACRO
-#define LOG_FUNCTION_MACRO __FUNCTION__
-#endif 
-
-#ifndef LOG_LINE_MACRO
-#define LOG_LINE_MACRO static_cast<uint64_t>(__LINE__)
-#endif 
-
 namespace log490 {
 
     using level_t = int8_t;
@@ -36,24 +28,16 @@ namespace log490 {
     template <typename T>
     using uptr_t = std::unique_ptr<T>;
 
-    enum class LogLevel : level_t
-    {
-        NoLogs = 0,
-        Prod,
-        Debug,
-        Trace
-    };
-
     namespace Utils
     {
         void getLocaltime(logtimestruct_t& to, logtime_t& from);
         void getUTCTime(logtimestruct_t& to, logtime_t& from);
-        const char* getLogLevelStr(LogLevel lvl);
 
+        //template<typename char_type>
         class FixedMessageBuffer : public std::basic_streambuf<logchar_t, std::char_traits<logchar_t>>
         {
         public:
-            constexpr static LOGGER_API size_t bufferSize = 512 * 1 * sizeof(logchar_t);
+            constexpr static LOGGER_API size_t bufferSize = 512 * 1 * sizeof(char_type);
 
             LOGGER_API FixedMessageBuffer();
             /* Returns put pointer offset */
@@ -80,6 +64,7 @@ namespace log490 {
             logchar_t buffer[bufferSize + 1];
         };
 
+        //template <typename char_type, typename stream_type>
         struct FixedBuffStream
         {
             FixedBuffStream();
@@ -88,10 +73,11 @@ namespace log490 {
         };
     };
 
+
     struct LogData
     {   
         LOGGER_API LogData();
-        LOGGER_API LogData(LogLevel level, signature_t signature, line_t line) noexcept;
+        LOGGER_API LogData(level_t level, signature_t signature, line_t line) noexcept;
         LOGGER_API LogData(LogData&&) noexcept;
         virtual LOGGER_API ~LogData() { }
 
@@ -121,7 +107,7 @@ namespace log490 {
         /* Updates stored local and utc time */
         LOGGER_API void updateTime();
 
-        LogLevel msgLevel;                              // message level 
+        level_t msgLevel;                              // message level 
         signature_t callerSignature;                    // calling function signature
         line_t msgLine;                                 // message line
     private:
@@ -137,29 +123,19 @@ namespace log490 {
     public:
         Logger();
         virtual ~Logger() { }
-        virtual bool sendLogMessage(LogData& data) = 0;
 
+        /* Sends log data to target stream */
+        virtual bool sendLogMessage(LogData& data);
         /* Sets runtime log level(not atomic) */
-        virtual void setRTLevel(LogLevel level);
+        virtual void setRTLevel(level_t level);
         /* Returns current runtime log level(not atomic) */
-        virtual LogLevel getRTLevel() const;
+        virtual level_t getRTLevel() const;
         /* Checks if logger accepts this level value */
-        virtual bool logThisLevel(LogLevel lvl) const;
-    private:
-        LogLevel runtimeLevel;                          // runtime log level value
-    };
+        virtual bool logThisLevel(level_t lvl) const;
 
-    /* Dummy logger that used when you need to temporarily store logger reference */
-    class LOGGER_API DummyLogger : Logger
-    {
-    public:
-        bool sendLogMessage(LogData& data)  override { return false; }
-        void setRTLevel(LogLevel level) override {  }
-        LogLevel getRTLevel() const override { return LogLevel::NoLogs; }
-        bool logThisLevel(LogLevel lvl) const override { return false; }
-        static DummyLogger& instance() { return sInstance; }
+        static Logger dummyInstance;
     private:
-        static DummyLogger sInstance;
+        level_t runtimeLevel;                          // runtime log level value
     };
 
     /* Base class for messages, exists just for polymorpism */
@@ -167,6 +143,9 @@ namespace log490 {
     {
     public:
         virtual ~Message() { }
+        virtual void flush() = 0;
+        virtual void free() = 0;
+        virtual bool isFlushed() const = 0;
     };
 
     /* Special message type that does nothing to enable  */
@@ -177,6 +156,11 @@ namespace log490 {
         inline const VoidMessage& operator<<(const T& data) const { return *this; }
         template<typename T>
         inline const VoidMessage& operator<<(T&& data) const { return *this; }
+
+        void flush() override;
+        void free() override;
+        bool isFlushed() const override;
+
         LOGGER_API static const VoidMessage voidMsg;
     };
 
@@ -188,20 +172,20 @@ namespace log490 {
         virtual ~MsgEndl() {}
         virtual void flush(LogMessage&) const;
         virtual void cancel(LogMessage&) const;
-    protected:
-        void setFlushed(LogMessage&) const;
     };
 
     /* Special class stores anything that is neccessary for  */
     class LogMessage : Message
     {
     public:
-        friend struct MsgEndl;
-
         LOGGER_API LogMessage(Logger& lgr);
-        LOGGER_API LogMessage(Logger& output, LogLevel level, signature_t signature, line_t line);
+        LOGGER_API LogMessage(Logger& output, level_t level, signature_t signature, line_t line);
         LOGGER_API LogMessage(LogMessage&& source) noexcept;
         LOGGER_API virtual ~LogMessage();
+
+        LOGGER_API void flush() override;
+        LOGGER_API void free() override;
+        LOGGER_API bool isFlushed() const override;
 
         LOGGER_API bool hasMessage();
         LOGGER_API const LogData& getData() const;
@@ -221,9 +205,7 @@ namespace log490 {
 
         LOGGER_API LogMessage& operator<<(MsgEndl& mendl);
         LOGGER_API LogMessage& operator<<(MsgEndl&& mendl);
-
     protected:
-
         bool flushed;
         LogData mLogData;
         std::reference_wrapper<Logger> mLogger;

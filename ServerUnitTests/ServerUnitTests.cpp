@@ -72,22 +72,44 @@ namespace ServerUnitTests
 	{
 	public:
 
-		BEGIN_TEST_METHOD_ATTRIBUTE(TestMethod1)
+		BEGIN_TEST_METHOD_ATTRIBUTE(TestAddConnection1)
 			TEST_OWNER(L"Oleh_Dmytrash")
 			END_TEST_METHOD_ATTRIBUTE()
 
-			TEST_METHOD(TestMethod1)
+
+		TEST_METHOD(TestAddConnection1)
 		{
-			MockParser mock_parser;
+			std::shared_ptr<MockParser> mock_parser(new MockParser());			
 			AddSocketConnection add_socket_connection;
 			SocketWrapper sock_wrapper;
 			auto socket = sock_wrapper.MakeSharedSocket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-			EXPECT_CALL(mock_parser, get_ipadress()).Times(1).WillOnce(Return("127.0.0.1"));
-			EXPECT_CALL(mock_parser, get_listenport()).Times(1).WillOnce(Return(8080));
-			add_socket_connection.InitConfiguration(&mock_parser);
-			bool is_connected = add_socket_connection.Execute(socket);
-			Assert::IsTrue(is_connected == true, L"Initialize should return 1");
 
+			EXPECT_CALL(*mock_parser, get_ipadress()).Times(1).WillOnce(Return("127.0.0.1"));
+			EXPECT_CALL(*mock_parser, get_listenport()).Times(1).WillOnce(Return(8080));		
+
+			mock_parser->set_ipadress(mock_parser->get_ipadress());
+			mock_parser->set_listenport(mock_parser->get_listenport());
+
+			add_socket_connection.InitConfiguration(mock_parser);
+			bool is_connected = add_socket_connection.Execute(socket);
+
+			Assert::IsTrue(is_connected == true, L"Execute should return true");
+		}
+
+		BEGIN_TEST_METHOD_ATTRIBUTE(TestAddConnection2)
+			TEST_OWNER(L"Oleh_Dmytrash")
+		END_TEST_METHOD_ATTRIBUTE()
+
+		TEST_METHOD(TestAddConnection2)
+		{
+			std::shared_ptr<MockParser> mock_parser(new MockParser());
+			AddSocketConnection add_socket_connection;
+			SocketWrapper sock_wrapper;
+			auto socket = sock_wrapper.MakeSharedSocket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+			
+			add_socket_connection.InitConfiguration(mock_parser);
+			bool is_connected = add_socket_connection.Execute(socket);
+                        Assert::IsTrue(is_connected == true, L"Execute should return true");
 		}
 
 
