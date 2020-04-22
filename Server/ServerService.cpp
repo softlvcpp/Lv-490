@@ -2,9 +2,9 @@
 #include "ServerService.h"
 #include "SmartServiceHandle.h"
 
-#define LOG_T SLOG_TRACE(*s_instance->m_logger)
-#define LOG_D SLOG_DEBUG(*s_instance->m_logger)
-#define LOG_P SLOG_PROD(*s_instance->m_logger)
+#define LOG_T GLOG_T
+#define LOG_P GLOG_P
+#define LOG_D GLOG_D
 
 
 ServerService::ServerService() : m_name{ _wcsdup(L"TCPServer_Lv490") } {}
@@ -25,8 +25,7 @@ bool ServerService::ReadConfig()
 	{
 		return false;
 	}
-	m_log_file_name = m_parser.get_filename();
-	m_log_level = static_cast<filelog::LogLevel>(m_parser.get_loglevel());
+
 
 	std::wstring name = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(m_parser.get_servername());
 	m_name.reset(_wcsdup(name.c_str()));
@@ -174,7 +173,7 @@ void ServerService::ServiceMain(int argc, char** argv)
 		condition_var.wait(condition_lock, []() { return s_instance->m_service_status.dwCurrentState != SERVICE_RUNNING; });
 	}
 
-	s_instance->m_logger->join();
+	//s_instance->m_logger->join();
 }
 
 void ServerService::ControlHandler(unsigned long request)
@@ -465,7 +464,10 @@ bool ServerService::Restart()
 
 bool ServerService::InitLogger()
 {
-	std::string log_file_path = "C:/Lv-490_Files/serv_LOGS/";
+	auto params = filelog::GlobalLogging::configToParams(m_parser);
+	return filelog::GlobalLogging::resetInstance(params);
+
+	/*std::string log_file_path = "C:/Lv-490_Files/serv_LOGS/";
 	if (!CreateDirectoryA(log_file_path.c_str(), nullptr))
 	{
 		if (GetLastError() == ERROR_PATH_NOT_FOUND)
@@ -475,7 +477,7 @@ bool ServerService::InitLogger()
 	}
 	log_file_path += m_log_file_name;
 	m_logger = std::unique_ptr<filelog::FileLogger>(new filelog::FileLogger(log_file_path.c_str(), true, filelog::LogLevel::Trace));
-	return true;
+	return true;*/
 }
 
 ServerService& ServerService::get_instance()
@@ -495,6 +497,6 @@ ServerService::~ServerService()
 
 void ServerService::Main()
 {
-	s_instance->m_server = std::make_unique<Server>(s_instance->m_parser, s_instance->m_log_directory_name);
+	s_instance->m_server = std::make_unique<Server>(s_instance->m_parser);
 	s_instance->m_server->Run();
 }

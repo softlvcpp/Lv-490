@@ -18,12 +18,12 @@ private:
 	std::string_view m_stop_command     { "stop" };
 	std::string_view m_restart_command  { "restart" };
 
-	//REDO Logger
-	std::string m_log_file_name{ "serverlog.log" };
-	std::string m_log_directory_name{ "Lv-490_logs" };
-	filelog::LogLevel m_log_level;
+	////REDO Logger
+	//std::string m_log_file_name{ "serverlog.log" };
+	//std::string m_log_directory_name{ "Lv-490_logs" };
+	//filelog::LogLevel m_log_level;
 
-	std::unique_ptr<filelog::FileLogger> m_logger;
+	//std::unique_ptr<filelog::FileLogger m_logger;
 	std::unique_ptr<wchar_t> m_name;
 
 	std::string m_all_files_dir_name{ "Lv-490_Files" };

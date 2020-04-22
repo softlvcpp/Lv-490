@@ -23,6 +23,7 @@
 #include <ctime>
 
 #include "../Utility/XML_Parser/XMLServer.h"
+#define GLOG_NO_DEFAULT_CONGIG
 #include "../Utility/Logger/LoggerDLL.h"
 #include "../Utility/DatabaseManager/DatabaseManager.h"
 

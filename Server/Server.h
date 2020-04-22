@@ -8,6 +8,6 @@ class Server
 	ThreadPool m_thread_pool;
 	SocketHandler m_socket_handler;
 public:
-	Server(XMLServer& config, const std::string& log_dir_name);
+	Server(XMLServer& config);
 	void Run();
 };

@@ -73,7 +73,7 @@ namespace filelog
         static bool resetInstance(FileLoggerCreatorParams& params)
         {
             instance = FileLoggerCreator{}.create(params); 
-            return GLOG_CASTED_INTANCE.isInterrupted();
+            return !GLOG_CASTED_INTANCE.isInterrupted();
         }
         static void setLevel(filelog::LogLevel lvl)
         {

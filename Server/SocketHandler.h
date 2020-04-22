@@ -18,7 +18,7 @@ public:
 	bool set_configuration(XMLServer* server_configuration);
 	bool set_configuration(std::shared_ptr<XMLServer> server_configuration);
 
-	bool InitLoger(const std::string& directory_name);
+	//bool InitLoger(const std::string& directory_name);
 
 private:
 	std::string m_log_directory_name{ "Lv-490_logs" };
