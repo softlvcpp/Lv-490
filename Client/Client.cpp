@@ -3,12 +3,10 @@
 #include<qtimer.h>
 #include <QTextEdit>
 #include <QScrollBar>
-#include"ClientSysInfo.h"
 #include<qgraphicsview.h>
 #include<qlayout.h>
+#include"ClientSysInfo.h"
 #include"DefineLogger.h"
-//#include "../Utility/XML_Parser/XML_Parser.h"
-#include<thread>
 int numff = 0;
 
 enum ComboBoxOptions
@@ -42,8 +40,7 @@ Client::Client(QWidget* parent)
 	client_info.CalculateProcesses();
 
 	tmr = new QTimer(this); //for socket conection
-	//connect(tmr, SIGNAL(timeout()), this, SLOT(updateTime())); 
-	connect(tmr, SIGNAL(timeout()), this, SLOT(runUpdateTime())); 
+	connect(tmr, SIGNAL(timeout()), this, SLOT(SendToServerThread())); 
 	tmr->start();
 
 	connect(ui.comboBox, SIGNAL(currentIndexChanged(int)),	this, SLOT(indexComboChanged(int))); //signal for changed combo
@@ -64,11 +61,11 @@ void Client::closeEvent(QCloseEvent* event) {
 	
 };
 
-void Client::runUpdateTime()
+void Client::SendToServerThread()
 {
 	
 
-	tmr->setInterval(settings.get_TimeInterval() * TimeMeasurement); // set time interval
+	tmr->setInterval(settings.get_TimeInterval() * TIME_MEASUREMENT); // set time interval
 	if (m_th != nullptr)
 	{
 		if (m_th->joinable())
@@ -77,10 +74,10 @@ void Client::runUpdateTime()
 		}
 		delete m_th;
 	}
-	m_th = new std::thread(&Client::updateTime, this);
+	m_th = new std::thread(&Client::SendToServer, this);
 }
 
-void Client::updateTime()
+bool Client::SendToServer()
 {
 	QScopedPointer<ClientSocket> socket(new QTcpClientSocket());
 	if (socket->Init(settings.get_IP().toStdString(), settings.get_port()))
@@ -93,6 +90,7 @@ void Client::updateTime()
 	{
 		L_TRACE << "Client socket doesn`t inited.";
 		qDebug() << "Client socket doesn`t inited.";
+		return false;
 	}
 
 	if (socket->Connect()) //connect to host
@@ -107,8 +105,7 @@ void Client::updateTime()
 		qDebug() << socket->LastError().c_str();
 		L_TRACE << "Client doesn`t connect to server.";
 		L_TRACE << socket->LastError().c_str();
-		
-		return;
+		return false;
 	}
 
 	client_info.Update();
@@ -129,7 +126,7 @@ void Client::updateTime()
 		L_TRACE << socket->LastError().c_str();
 		L_TRACE << "Client doesn`t send information.";
 		
-		return;
+		return false;
 	}if (socket->Disconnect()) //disconnect to host, cloce socket
 	{
 		qDebug() << "Client diconnect to server.";
@@ -142,9 +139,9 @@ void Client::updateTime()
 		L_TRACE << socket->LastError().c_str();
 		qDebug() << "Client doesn`t diconnect to server.";
 		qDebug() << socket->LastError().c_str();
-		return;
+		return false;
 	}
-	
+	return true;
 }
 
 void Client::UpdateProccesThread()
