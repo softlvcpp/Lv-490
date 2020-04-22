@@ -154,15 +154,15 @@ bool ReceiveMessage::InitDatabase(std::shared_ptr<DatabaseManager> m)
 void StartConnection::DoRecv(SOCKET_shared_ptr& new_conection)
 {	
 	ReceiveMessage receive_message;	
-	receive_message.InitDatabase(db);
+	receive_message.InitDatabase(m_data_base);
 	receive_message.Execute(new_conection);
 }
 
 StartConnection::StartConnection()
 {
 	//set database connection
-	db = std::shared_ptr<DatabaseManager>(new DatabaseMicrosoftSQLServer());
-	db->Connect();
+	m_data_base = std::shared_ptr<DatabaseManager>(new DatabaseMicrosoftSQLServer());
+	m_data_base->Connect();
 }
 
 bool StartConnection::Execute(SOCKET_shared_ptr& socket_state)

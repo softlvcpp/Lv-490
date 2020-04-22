@@ -22,9 +22,11 @@ SocketHandler::SocketHandler()
 SocketHandler::~SocketHandler()
 {
 	//closing connections setings
+	if (SOCKET_ERROR == WSACleanup())
+	{
+		LOG_T << "Server: bad socket configuration cleanup";
+	}
 	LOG_T << "Server: Closing Connection";
-	WSACleanup();
-	m_socket_logger->join();	
 }
 
 bool SocketHandler::AddCommand(Command* command)

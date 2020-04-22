@@ -54,5 +54,5 @@ public:
 private:
 	std::shared_ptr<ThreadPool> m_thread_pool;
 	void DoRecv(SOCKET_shared_ptr& new_conection);
-	std::shared_ptr<DatabaseManager> db;	
+	std::shared_ptr<DatabaseManager> m_data_base;	
 };
