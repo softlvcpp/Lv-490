@@ -125,7 +125,10 @@ bool ReceiveMessage::Execute(SOCKET_shared_ptr& socket_state)
 					xml_parser.get_hard_disk_type_list()[i], xml_parser.get_hard_disk_media_type()[i], xml_parser.get_hard_disk_total_size()[i], 
 					xml_parser.get_hard_disk_used()[i], xml_parser.get_hard_disk_free()[i], timer);
 			}
-			
+			for (auto i : xml_parser.get_processes())
+			{
+				m_data_base->setProcess(xml_parser.get_mac_address(), xml_parser.get_os(), i.second, i.first, timer);
+			}
 			if (socket_state->buffer == "exit")
 			{	
 				return true;
