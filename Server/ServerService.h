@@ -33,25 +33,26 @@ private:
 	std::unique_ptr<Server> m_server;
 
 //Windows Service members
-private:
+protected:
 	SERVICE_STATUS m_service_status{};
 	SERVICE_STATUS_HANDLE m_service_status_handle{};
 	HANDLE m_service_stop_event{ INVALID_HANDLE_VALUE };
 
 	static std::shared_ptr<ServerService> s_instance;
+	ServerService();
 
 // Parser members
 private:
 	XMLServer m_parser;
 	std::string m_config_file_path;
 
-	[[nodiscard]] bool ReadConfig();
+	[[nodiscard]] virtual bool ReadConfig();
 
 public:
 	[[nodiscard]] static bool Run(int argc, char** argv);
 	static ServerService& get_instance();
 
-	~ServerService();
+	virtual ~ServerService();
 
 	//This is the "main" function of the service
 	virtual void Main();
@@ -59,18 +60,17 @@ public:
 	ServerService(const ServerService&) = delete;
 	ServerService operator=(const ServerService&) = delete;
 private:
-	ServerService();
 	static void ServiceMain(int argc, char** argv);
 	static void ControlHandler(unsigned long request);
 	[[nodiscard]] static bool InitService();
+	[[nodiscard]] virtual bool InitLogger();
+
+public:
+	[[nodiscard]] virtual bool Install();
+	[[nodiscard]] virtual bool Uninstall();
+	[[nodiscard]] virtual bool Start();
+	[[nodiscard]] virtual bool Stop();
+	[[nodiscard]] virtual bool Restart();
 
 
-	[[nodiscard]] bool Install();
-	[[nodiscard]] bool Uninstall();
-	[[nodiscard]] bool Start();
-	[[nodiscard]] bool Stop();
-	[[nodiscard]] bool Restart();
-
-
-	[[nodiscard]] bool InitLogger();
 };
