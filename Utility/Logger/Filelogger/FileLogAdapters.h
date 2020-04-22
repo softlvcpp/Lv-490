@@ -1,5 +1,6 @@
 #pragma once
 #include "filelogger.h"
+#include "filelogger_messages.h"
 
 namespace filelog
 {
@@ -14,7 +15,7 @@ namespace filelog
 	{
 	public:
 		inline StaticFileLogMessage()
-			: targetLogger{ (FileLogger&)log490::DummyLogger::instance()}, messageLevel{ filelog::LogLevel::NoLogs }
+			: targetLogger{ (FileLogger&)Logger::dummyInstance}, messageLevel{ filelog::LogLevel::NoLogs }
 		{ }
 		inline StaticFileLogMessage(FileLogger& targetLogger, filelog::LogLevel level)
 			: targetLogger{ targetLogger }, messageLevel{ level }

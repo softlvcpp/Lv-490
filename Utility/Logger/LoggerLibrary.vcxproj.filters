@@ -19,21 +19,21 @@
     <Filter Include="Source Files\BaseAndUtils">
       <UniqueIdentifier>{cfd4aae7-9bee-4fe8-8ad5-870e63409d61}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\VSSolutionFiles">
+      <UniqueIdentifier>{a05614e3-8ae6-42ca-beb2-b2f1aab0559b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\VsSolutionFiles">
+      <UniqueIdentifier>{dc0b431e-ab0c-478a-af60-14ba8d8298ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Filelogger">
+      <UniqueIdentifier>{01cd42e7-0c79-453c-afce-c71ea842e9c1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LoggerDLL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Filelogger\filelogger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Essentials\LogFundamentals.h">
-      <Filter>Header Files\BasesAndUtils</Filter>
-    </ClInclude>
-    <ClInclude Include="framework.h">
-      <Filter>Header Files\BasesAndUtils</Filter>
-    </ClInclude>
-    <ClInclude Include="Essentials\RuntimeFilter.h">
       <Filter>Header Files\BasesAndUtils</Filter>
     </ClInclude>
     <ClInclude Include="Essentials\ExportConfig.h">
@@ -42,31 +42,52 @@
     <ClInclude Include="Filelogger\FileLogAdapters.h">
       <Filter>Header Files\BasesAndUtils</Filter>
     </ClInclude>
-    <ClInclude Include="Essentials\ConcurrentMultiQueue.h">
+    <ClInclude Include="framework.h">
+      <Filter>Header Files\VSSolutionFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ILogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Filelogger\filelogger.h">
+      <Filter>Header Files\Filelogger</Filter>
+    </ClInclude>
+    <ClInclude Include="filelogger_Messages.h">
+      <Filter>Header Files\Filelogger</Filter>
+    </ClInclude>
+    <ClInclude Include="filelogger_StreamModes.h">
+      <Filter>Header Files\Filelogger</Filter>
+    </ClInclude>
+    <ClInclude Include="ConcQueue.h">
       <Filter>Header Files\BasesAndUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="StaticLogging.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="LogFundamentals.cpp">
+      <Filter>Source Files\BaseAndUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="filelogger_FileManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files\VsSolutionFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files\VsSolutionFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="filelogger_Messages.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="filelogger_StreamModes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="filelogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LogFundamentals.cpp">
-      <Filter>Source Files\BaseAndUtils</Filter>
-    </ClCompile>
-    <ClCompile Include="RuntimeFilter.cpp">
-      <Filter>Source Files\BaseAndUtils</Filter>
-    </ClCompile>
-    <ClCompile Include="pch.cpp">
-      <Filter>Source Files\BaseAndUtils</Filter>
-    </ClCompile>
-    <ClCompile Include="filelogger_UtilMethods.cpp">
-      <Filter>Source Files\BaseAndUtils</Filter>
-    </ClCompile>
-    <ClCompile Include="ConcurrentMultiQueue.cpp">
-      <Filter>Source Files\BaseAndUtils</Filter>
-    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

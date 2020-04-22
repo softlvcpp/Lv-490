@@ -5,10 +5,8 @@
 
 #define EXTERN_C extern "C"
 
-
 #ifdef _WIN32
 // define for .dll
-#define PCH_PRCHEADER #include "Other/pch.h"
 #ifdef LOGGERLIBRARY_EXPORTS
 // I use VS to create dynamic library .dll file
 #define LOGGER_API __declspec(dllexport)

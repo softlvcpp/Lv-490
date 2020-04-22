@@ -3,9 +3,8 @@
 
 namespace log490
 {
-
     const VoidMessage VoidMessage::voidMsg{};
-    DummyLogger DummyLogger::sInstance{};
+    Logger Logger::dummyInstance;
 
     // --------------- Fixed message buffer ---------------------
     Utils::FixedMessageBuffer::FixedMessageBuffer()
@@ -95,7 +94,7 @@ namespace log490
     {
     }
 
-    LogMessage::LogMessage(Logger& output, LogLevel level, signature_t signature, line_t line)
+    LogMessage::LogMessage(Logger& output, level_t level, signature_t signature, line_t line)
         : mLogger{ output }, mLogData{ level, signature, line }, flushed{ false }
     {
     }
@@ -108,6 +107,32 @@ namespace log490
 
     LogMessage::~LogMessage()
     {           
+    }
+
+    void LogMessage::flush()
+    {
+        if (!flushed)
+        {
+            this->mLogger.get().sendLogMessage(mLogData);
+            if (mLogData.message() != nullptr)
+                mLogData.message().reset(nullptr);
+            flushed = true;
+        }
+    }
+
+    void LogMessage::free()
+    {
+        if (!flushed)
+        {
+            if (mLogData.message() != nullptr)
+                mLogData.message().reset(nullptr);
+            flushed = true;
+        }
+    }
+
+    bool LogMessage::isFlushed() const
+    {
+        return flushed;
     }
 
 
@@ -191,11 +216,11 @@ namespace log490
         : _msgTime{}, _msgUTCTime{}
     {
         callerSignature = "";
-        msgLevel = LogLevel::NoLogs;
+        msgLevel = 0;
         msgLine = UINT32_MAX;
     }
 
-	LogData::LogData(LogLevel level, signature_t signature, line_t line) noexcept
+	LogData::LogData(level_t level, signature_t signature, line_t line) noexcept
         : msgLevel{level}, msgLine{ line }, callerSignature{ signature },
           _threadID{ std::this_thread::get_id() }, _msgTime(0), _msgUTCTime{}
     {
@@ -241,7 +266,7 @@ namespace log490
         return _msgTime;
     }
 
-    LOGGER_API std::chrono::time_point<highres_t>& LogData::msgHighResTime()
+    std::chrono::time_point<highres_t>& LogData::msgHighResTime()
     {
         return _msgHighResTime;
     }
@@ -289,20 +314,25 @@ namespace log490
     }
 
 
-    LogLevel Logger::getRTLevel() const
+    level_t Logger::getRTLevel() const
     {
         return runtimeLevel;
     }
 
-    bool Logger::logThisLevel(LogLevel lvl) const
+    bool Logger::logThisLevel(level_t lvl) const
 	{
-		return (runtimeLevel != LogLevel::NoLogs) && (lvl != LogLevel::NoLogs) && (lvl <= runtimeLevel);
+		return (runtimeLevel != 0) && (lvl != 0) && (lvl <= runtimeLevel);
 	}
 
-    Logger::Logger() : runtimeLevel{ LogLevel::NoLogs }
+    Logger::Logger() : runtimeLevel{ 0 }
     { }
 
-	void Logger::setRTLevel(LogLevel newLevel)
+	bool Logger::sendLogMessage(LogData& data)
+	{
+		return false;
+	}
+
+	void Logger::setRTLevel(level_t newLevel)
     {
         runtimeLevel = newLevel;
     }
@@ -328,18 +358,6 @@ namespace log490
         #endif //  _C       
     }
 
-    const char* Utils::getLogLevelStr(LogLevel lvl)
-    {
-        switch (lvl) 
-        {
-        case LogLevel::NoLogs: return "NOLOGS";
-        case LogLevel::Prod: return "PROD";
-        case LogLevel::Debug: return "DEBUG";
-        case LogLevel::Trace: return "TRACE";
-        }
-
-        return nullptr;
-    }
 
     Utils::FixedBuffStream::FixedBuffStream()
         : messageBuffer{}, messageStream{ &messageBuffer }
@@ -347,27 +365,28 @@ namespace log490
 
     void MsgEndl::flush(LogMessage& msg) const
     {
-        if (!msg.flushed)
-        {
-            msg.getDataRef().updateTime();
-            msg.getLogger().sendLogMessage(msg.getDataRef());
-            setFlushed(msg);
-        }
+        if (!msg.isFlushed())
+            msg.flush();
     }
 
     void MsgEndl::cancel(LogMessage& msg) const
     {
-        if (!msg.flushed)
-        {
-            msg.getDataRef().message().reset(nullptr);
-            setFlushed(msg);
-        }
+        if (!msg.isFlushed())
+            msg.free();
     }
 
-	void MsgEndl::setFlushed(LogMessage& msg) const
-	{
-        msg.flushed = true;
-	}
+    void VoidMessage::flush()
+    {
+    }
+
+    void VoidMessage::free()
+    {
+    }
+
+    bool VoidMessage::isFlushed() const
+    {
+        return false;
+    }
 
 }
 
