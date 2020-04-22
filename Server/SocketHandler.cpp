@@ -16,6 +16,7 @@ SocketHandler::SocketHandler()
 	{		
 		LOG_T << "Server: Error at WSAStartup()";
 	}		
+	LOG_T << "Socket configured";
 }
 
 SocketHandler::~SocketHandler()
@@ -71,37 +72,3 @@ bool SocketHandler::set_configuration(std::shared_ptr<XMLServer> server_configur
 	m_server_configuration = server_configuration;
 	return true;
 }
-
-//bool SocketHandler::InitLoger(const std::string& directory_name)
-//{
-//	std::string log_file_path = "C:/Lv-490_Files/serv_LOGS/";
-//	if (!CreateDirectoryA(log_file_path.c_str(), nullptr))
-//	{
-//		if (GetLastError() == ERROR_PATH_NOT_FOUND)
-//		{
-//			return false;
-//		}
-//	}
-//	log_file_path += m_server_configuration->get_filename();
-//	filelog::LogLevel log_level = filelog::LogLevel::NoLogs;
-//	int level = m_server_configuration->get_loglevel();
-//	switch (level)
-//	{
-//	case 0:
-//		log_level = filelog::LogLevel::NoLogs;
-//		break;
-//	case 1:
-//		log_level = filelog::LogLevel::Prod;
-//		break;
-//	case 2:
-//		log_level = filelog::LogLevel::Debug;
-//		break;
-//	case 3:
-//		log_level = filelog::LogLevel::Trace;
-//		break;
-//	default:
-//		break;
-//	}
-//	m_socket_logger = std::shared_ptr<filelog::FileLogger>(new filelog::FileLogger(log_file_path.c_str(), true, log_level));
-//	return true;
-//}

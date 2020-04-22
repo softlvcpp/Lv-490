@@ -11,11 +11,11 @@ bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 {
 	//create socket wrapper with autodeleter
 	socket_state = m_socket_wrapper.MakeSharedSocket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
+	
 	//check for errors to ensure that the new_socket is a valid socket.	
 	if (INVALID_SOCKET == socket_state->id)
 	{
-		socket_state->log_msg = "Server: Error at socket(): " + to_string(WSAGetLastError());
+		GLOG_T << "Server: Error at socket(): " + to_string(WSAGetLastError());
 		return false;
 	}
 
@@ -39,16 +39,17 @@ bool AddSocketConnection::Execute(SOCKET_shared_ptr& socket_state)//return bool
 
 	if (SOCKET_ERROR == ::bind(socket_state->id, (SOCKADDR*)&serverService, sizeof(serverService)))
 	{
-		socket_state->log_msg = "Server: Error at bind(): " + to_string(WSAGetLastError());
+		GLOG_T << "Server: Error at bind(): " + to_string(WSAGetLastError());
 		return false;
 	}
 
 	//listen on the socket for incoming connections.
 	if (SOCKET_ERROR == listen(socket_state->id, SOMAXCONN))
 	{
-		socket_state->log_msg = "Server: Error at listen(): " + to_string(WSAGetLastError());
+		GLOG_T << "Server: Error at listen(): " + to_string(WSAGetLastError());
 		return false;
 	}
+	GLOG_T << "Server socket created";
 	return true;
 }
 
@@ -63,9 +64,11 @@ bool AcceptConnection::Execute(SOCKET_shared_ptr& socket_state)
 
 	if (INVALID_SOCKET == socket_state->id)
 	{
-		socket_state->log_msg = "Server: Error at socket(): " + to_string(WSAGetLastError());
+		GLOG_T << "Server: Error at socket(): " + to_string(WSAGetLastError());
 		return false;
 	}
+
+	GLOG_T << "Client connected";
 
 	return true;
 }
@@ -106,14 +109,17 @@ bool ReceiveMessage::Execute(SOCKET_shared_ptr& socket_state)
 		
 		if (SOCKET_ERROR == bytes_received || bytes_received == 0)
 		{
+			GLOG_T << "Client disconected";
 			return false;
 		}
 		else
-		{			
+		{		
+			GLOG_T << "Message received";
+			GLOG_T << "Client sented " + to_string(bytes_received) + " bytes";
 			//write information in database
 			std::string xml_string = socket_state->buffer;
 			XMLServer xml_parser;
-			xml_parser.PrepareToDBManager(xml_string);		
+			xml_parser.PrepareToDBManager(xml_string);	
 			m_data_base->setClient(xml_parser.get_mac_address(), xml_parser.get_ip_address(), xml_parser.get_total_ram(), 
 				xml_parser.get_cpu_numbers(), 6, xml_parser.get_cpu_speed(),xml_parser.get_os());
 								
@@ -165,7 +171,11 @@ bool StartConnection::Execute(SOCKET_shared_ptr& socket_state)
 	{
 		SOCKET_shared_ptr new_conection;
 		AcceptConnection accept_connection(socket_state);		
-		if (accept_connection.Execute(new_conection) == false) return false;
+		if (accept_connection.Execute(new_conection) == false)
+		{
+			GLOG_T << "Bad cliend connection";
+			return false;
+		}
 		if(new_conection->state == State::ACCEPTED)
 		{
 			new_conection->state = State::RECEIVE;
@@ -178,7 +188,11 @@ bool StartConnection::Execute(SOCKET_shared_ptr& socket_state)
 
 bool StartConnection::InitThreadPool(ThreadPool* main_pool)
 {
-	if (main_pool == nullptr) return false;
+	if (main_pool == nullptr)
+	{
+		GLOG_T << "Bad thread pool pointer";
+		return false;
+	}
 	m_thread_pool = std::shared_ptr<ThreadPool>(main_pool); 
 	return true;
 }
@@ -186,21 +200,33 @@ bool StartConnection::InitThreadPool(ThreadPool* main_pool)
 
 bool StartConnection::InitThreadPool(std::shared_ptr<ThreadPool> main_pool) 
 {
-	if (main_pool == nullptr) return false;
+	if (main_pool == nullptr)
+	{
+		GLOG_T << "Bad thread pool pointer";
+		return false;
+	}
 	m_thread_pool = main_pool;
 	return true;
 }
 
 bool Command::InitConfiguration(XMLServer* server_configuration)
 {
-	if (server_configuration == nullptr) return false;
+	if (server_configuration == nullptr)
+	{
+		GLOG_T << "Bad XMLServer pointer";
+		return false;
+	}
 	m_server_configuration = std::shared_ptr<XMLServer>(server_configuration);
 	return true;
 }
 
 bool Command::InitConfiguration(std::shared_ptr<XMLServer> server_configuration)
-{
-	if (server_configuration == nullptr) return false;
+{	
+	if (server_configuration == nullptr)
+	{
+		GLOG_T << "Bad XMLServer pointer";
+		return false;
+	}
 	m_server_configuration = server_configuration;
 	return true;
 }
