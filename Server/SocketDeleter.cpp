@@ -7,7 +7,7 @@ void SocketDeleter::operator()(SocketState* used_socket)
     {
         if (SOCKET_ERROR == closesocket(used_socket->id))
         {
-            //LOG_T << "Eroor at closesocket()" + to_string(WSAGetLastError());
+            GLOG_T << "Eroor at closesocket()" + to_string(WSAGetLastError());
         }
     }
 }

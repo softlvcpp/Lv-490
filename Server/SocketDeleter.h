@@ -15,9 +15,9 @@ using SOCKET_shared_ptr = std::shared_ptr<SocketState>;
 class SocketWrapper
 {
 public:
-    SOCKET_unique_ptr MakeUniqueSocket(int af, int type, int protocol);
+    SOCKET_unique_ptr MakeUniqueSocket(const int af, const int type, const int protocol);
     SOCKET_unique_ptr MakeUniqueSocket(SOCKET s, sockaddr* addr, int* addrlen);
 
-    SOCKET_shared_ptr MakeSharedSocket(int af, int type, int protocol);
+    SOCKET_shared_ptr MakeSharedSocket(const int af, const int type, const int protocol);
     SOCKET_shared_ptr MakeSharedSocket(SOCKET s, sockaddr* addr, int* addrlen);
 };
