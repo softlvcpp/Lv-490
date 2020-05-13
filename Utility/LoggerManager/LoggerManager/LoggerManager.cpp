@@ -127,7 +127,7 @@ void LoggerManager::UpdateTable(std::list< LoggerLine> table)
 
 		item = new QStandardItem(i.get_data_time().c_str());
 		item->setForeground(background);
-		model->setItem(row_index, 1, item);
+		model->setItem(row_index, DATA_TIME, item);
 
 		item = new QStandardItem(i.get_log_level().c_str());
 		item->setForeground(background);
